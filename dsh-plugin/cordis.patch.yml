@@ -1,0 +1,4 @@
+- insert:
+    - id: programmer-workflow
+      name: '@local/programmer-workflow'
+      config: {}

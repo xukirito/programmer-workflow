@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Programmer Workflow">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8aa4ff"/>
+      <stop offset="1" stop-color="#6ee7b7"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#0a0f1d"/>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="none" stroke="#2a3a5c" stroke-width="2"/>
+  <path d="M38 40 64 26l26 14v34L64 88 38 74z" fill="none" stroke="url(#g)" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M64 26v62M38 40l26 14 26-14" fill="none" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="64" cy="54" r="7" fill="#0a0f1d" stroke="#6ee7b7" stroke-width="4"/>
+</svg>

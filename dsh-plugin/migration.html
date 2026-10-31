@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Programmer Workflow · 两阶段迁移</title>
+<style>
+  :root{color-scheme:light;--bg:#f5f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--primary:#4f46e5;--soft:#eef2ff;--warn:#b45309;--danger:#b91c1c;--ok:#047857}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:auto;padding:28px 20px 60px}.hero{padding:24px 0 18px;border-bottom:1px solid var(--line)}
+  .eyebrow{font:600 10px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--primary);text-transform:uppercase}
+  h1{font-size:28px;line-height:1.2;letter-spacing:-.03em;margin:8px 0 10px}h2{font-size:18px;margin:26px 0 8px}h3{font-size:14px;margin:0 0 5px}
+  p{margin:6px 0;color:var(--muted)}.lead{font-size:15px;max-width:850px;color:var(--text)}code{font:12px/1.5 ui-monospace,Consolas,monospace;background:#f1f5f9;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:#0f172a;overflow-wrap:anywhere}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px;color:var(--muted);white-space:nowrap}.badge.ok{color:var(--ok);border-color:#a7f3d0;background:#ecfdf5}.badge.warn{color:var(--warn);border-color:#fde68a;background:#fffbeb}.badge.danger{color:var(--danger);border-color:#fecaca;background:#fef2f2}
+  .stage{display:flex;gap:12px;align-items:flex-start}.num{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+  .cmd{display:flex;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;border-radius:7px;padding:9px 10px;margin:8px 0;overflow:auto}.cmd code{background:none;border:0;color:#e2e8f0;flex:1}.copy{background:#fff;color:#0f172a;border:0;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}th,td{text-align:left;border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}th{color:var(--muted);font-weight:600}
+  .note{border-left:3px solid var(--primary);background:var(--soft);border-radius:0 7px 7px 0;padding:9px 11px;margin:10px 0;color:#3730a3;font-size:12.5px}
+  .warnbox{border-left:3px solid var(--warn);background:#fffbeb;border-radius:0 7px 7px 0;padding:9px 11px;margin:10px 0;color:#92400e;font-size:12.5px}
+  .statusline{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:12.5px;color:var(--muted)}
+  details{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:10px 12px;margin:8px 0}summary{cursor:pointer;font-weight:600;color:var(--text)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Programmer Workflow · Migration</div>
+    <h1>先插件数据，再编辑器运行数据</h1>
+    <p class="lead">两个阶段有先后顺序。第一阶段只移动当前宿主的 <code>programmer-workflow</code> 插件数据；第二阶段才移动编辑器的会话/缓存/登录等运行数据。未适配的宿主只开放第一阶段。</p>
+    <div class="statusline" id="live-status">正在读取当前 DSH 迁移状态…</div>
+  </header>
+
+  <h2>第一阶段：迁移插件数据</h2>
+  <div class="card">
+    <div class="stage"><div class="num">1</div><div>
+      <h3>目标只是当前宿主的插件目录</h3>
+      <p>源：<code>&lt;host-home&gt;/programmer-workflow</code>。目标：<code>&lt;目标根&gt;/&lt;host-data-dir&gt;/programmer-workflow</code>。主机根分别来自 <code>DSH_HOME</code>、<code>KIMI_HOME</code>、<code>CODEBUDDY_HOME</code> 等；<strong>DSH_HOME 只影响 DSH</strong>。</p>
+      <p>设置页只负责预检、备份、清单和生成脚本；不会在 DSH 运行期间自动迁移。迁移后会校验 <code>memory.json</code> 的条目 ID、状态计数和 SHA-256，而不是只看文件数量。</p>
+    </div></div>
+    <div class="cmd"><code>python companion.py migrate-plugin status --host dsh --json</code><button class="copy" data-copy="python companion.py migrate-plugin status --host dsh --json">复制</button></div>
+    <div class="cmd"><code>python companion.py migrate-plugin prepare --host dsh --target-root &lt;目标根&gt; --json</code><button class="copy" data-copy="python companion.py migrate-plugin prepare --host dsh --target-root <目标根> --json">复制</button></div>
+    <div class="warnbox">目标已有未知数据、UNC 路径、源内嵌套 Junction、或 <code>memory.json</code> 不可解析时，预检必须失败；不得静默合并。备份放在 <code>&lt;host-home&gt;/.programmer-workflow-migration/backups</code>，不在即将被改名的插件目录里。</div>
+  </div>
+
+  <h2>第二阶段：迁移编辑器运行数据</h2>
+  <div class="card">
+    <div class="stage"><div class="num">2</div><div>
+      <h3>只有第一阶段完成并校验后才可用</h3>
+      <p>第二阶段处理会话、配置、缓存、登录等编辑器数据，有独立的目标和适配器。它不能复用 DSH/Kimi 脚本冒充通用适配器；“外部脚本存在”也不等于“已经适配”。</p>
+    </div></div>
+    <table>
+      <thead><tr><th>宿主</th><th>插件数据</th><th>运行数据</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>DeepSeek Harness</td><td>支持</td><td>支持（内置 migrate + rollback）</td><td>源目录来自解析后的 <code>DSH_HOME</code></td></tr>
+        <tr><td>Kimi Code</td><td>支持（需安装 Skill）</td><td>仅配置同时含 migrate/rollback 的工具后可用</td><td>适配器必须遵循 <code>KIMI_MIG_SRC</code>；否则自定义 <code>KIMI_HOME</code> 时不可用</td></tr>
+        <tr><td>CodeBuddy</td><td>支持（需安装/配置 Skill CLI）</td><td><span class="badge warn">未适配</span></td><td>找不到 CLI 时第一阶段也标记不可用</td></tr>
+        <tr><td>Claude / Cursor / Codex</td><td>支持独立根（需对应 CLI）</td><td><span class="badge warn">未适配</span></td><td>只支持插件数据，不冒用其他脚本</td></tr>
+      </tbody>
+    </table>
+    <div class="warnbox">第二阶段只准备脚本：设置页生成 <code>run-stage2-runtime.cmd</code> 与 <code>run-stage2-rollback.cmd</code>。<code>DSH_MIG_DEST</code> / <code>KIMI_MIG_DEST</code> 传的是<strong>目标根</strong>，宿主数据目录由适配器自己追加；重复拼接会失败。适配器目录必须同时含迁移与回滚脚本，否则状态为不可用，不会显示“支持”后点击才失败。</div>
+  </div>
+
+  <h2>当前支持情况（含真实验证状态）</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>阶段</th><th>宿主</th><th>状态</th><th>依赖</th><th>真实宿主数据验证</th></tr></thead>
+      <tbody>
+        <tr><td>第一阶段 · 插件数据</td><td>DeepSeek Harness</td><td>可准备脚本；完成后校验链接</td><td><code>DSH_HOME</code> 下的 <code>companion.py</code> 或 <code>PROGRAMMER_WORKFLOW_CLI</code></td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第一阶段 · 插件数据</td><td>Kimi Code</td><td>可准备脚本（依赖已安装 Skill CLI）</td><td><code>KIMI_HOME</code> 下的 <code>companion.py</code> 或 <code>PROGRAMMER_WORKFLOW_CLI</code></td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第一阶段 · 插件数据</td><td>CodeBuddy</td><td>取决于 CLI 是否可发现/配置；否则标记不可用并禁用入口</td><td>用户级 <code>companion.py</code> 或 <code>PROGRAMMER_WORKFLOW_CLI</code></td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第一阶段 · 插件数据</td><td>Claude / Cursor / Codex</td><td>独立插件数据根 + 能力入口</td><td>各自 home 下的 <code>companion.py</code> 或 <code>PROGRAMMER_WORKFLOW_CLI</code></td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第一阶段 · 插件数据</td><td>generic</td><td>中性数据根</td><td>同上</td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第二阶段 · 运行数据</td><td>DeepSeek Harness</td><td>内置 migrate + rollback 成对脚本</td><td>第一阶段已完成并校验；两阶段目标同根</td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第二阶段 · 运行数据</td><td>Kimi Code</td><td>仅配置含 migrate+rollback 的外部工具后可用</td><td><code>kimiMigrationTools</code>；自定义 <code>KIMI_HOME</code> 时适配器须读取 <code>KIMI_MIG_SRC</code></td><td><span class="badge warn">未验证</span></td></tr>
+        <tr><td>第二阶段 · 运行数据</td><td>CodeBuddy / Claude / Cursor / Codex</td><td><span class="badge warn">未适配</span></td><td>不提供执行入口</td><td>—</td></tr>
+        <tr><td>第二阶段 · 运行数据</td><td>generic</td><td><span class="badge warn">不提供</span></td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="warnbox">“有入口/有脚本”不等于“已验证”：本插件生成的脚本目前只在临时目录和契约测试中验证过，尚未在真实用户数据上执行。<br>
+    完成判定有两条：①<strong>本插件记录</strong>——链接指向记录目标且存在验证时间；②<strong>实际落盘</strong>——解析 junction/symlink 后的真实位置不在应用所在系统盘（默认 <code>C:</code>），即 <code>C:</code> 只是映射。第二种会在页面显示“已迁移，无需再次操作”与真实位置，并标注“已有迁移，未记为本插件验证”，不伪造 <code>verifiedAt</code>，也不再反复提示。仅存在状态文件、旧脚本或同盘链接都不算完成。</div>
+  </div>
+
+  <h2>旧共享数据与外部 override</h2>
+  <div class="card">
+    <p>旧版 <code>~/.workflow-companion</code> 或旧的 DSH 共享插件目录，只提供<strong>一次性导入</strong>，不会成为其他宿主的后台兜底。目标已有 <code>memory.json</code> 时：</p>
+    <ul>
+      <li>内容相同：跳过；</li>
+      <li>内容不同：生成冲突报告，保留双方，不覆盖；</li>
+      <li>不会把 <code>proposed</code> 提升为 <code>active</code>。</li>
+    </ul>
+    <p><code>PROGRAMMER_WORKFLOW_GLOBAL</code> / <code>PROGRAMMER_WORKFLOW_HOME</code> 指向宿主默认根之外时，状态会标记“外部路径，未由默认迁移覆盖”。请手动备份/导出，不要假装已覆盖。</p>
+  </div>
+
+  <h2>回滚与嵌套 Junction</h2>
+  <div class="card">
+    <ul>
+      <li>回滚顺序与迁移相反：<strong>先回滚第二阶段运行数据，再回滚第一阶段插件数据</strong>。</li>
+      <li>第一阶段回滚前先备份目标中“当前最新”的插件数据；与迁移时版本不同时提示存在新增/修改，并保留最新备份路径。</li>
+      <li>第二阶段预检会识别第一阶段产生的嵌套 Junction；本版本只支持<strong>同一目标根</strong>下的嵌套，跨根或需要按清单重建时直接拒绝，不复制链接、也不声称已重建（部分支持）。</li>
+      <li>第二阶段回滚入口是 <code>run-stage2-rollback.cmd</code>；第二阶段处于 prepared/completed 时，第一阶段回滚会拒绝并提示先回滚第二阶段。</li>
+      <li>任一阶段失败返回非零状态并显示失败阶段，不继续下一步，也不显示整体成功。</li>
+      <li>工作区记忆（<code>&lt;workspace&gt;/.programmer-workflow</code>）属于项目，不随两阶段迁移移动。</li>
+    </ul>
+  </div>
+
+  <h2>DSH / Kimi 操作提示</h2>
+  <details><summary>DSH</summary><p>设置页选择 DSH，填写第一阶段目标根，点“准备第一阶段脚本”；退出 DSH 后运行生成的脚本。第二阶段使用内置的 <code>dsh-migration-tools</code>（目标根单独填写），且必须等第一阶段完成。自定义 <code>DSH_HOME</code> 时脚本使用解析后的真实源目录，不固定 <code>%USERPROFILE%\.dsh</code>。</p></details>
+  <details><summary>Kimi Code</summary><p>设置页选择 Kimi，先确认 Kimi 迁移工具路径（工具目录需同时包含 <code>migrate-kimi-data.bat</code> 与 <code>rollback-kimi-data.bat</code>，且适配器要读取 <code>KIMI_MIG_SRC</code> 才算可用）；准备第一阶段脚本只移动 Kimi 自己的插件目录。Kimi 运行数据迁移是第二阶段，不能宣称会带动 DSH 或共享插件记忆。</p></details>
+  <details><summary>CodeBuddy / 其他宿主</summary><p>项目级 Skill 只解决项目工作区；用户级插件数据在各自 <code>&lt;host-home&gt;/programmer-workflow</code>。第一阶段需要该宿主的 <code>companion.py</code>（或 <code>PROGRAMMER_WORKFLOW_CLI</code>）；找不到时设置页标记不可用并禁用准备按钮。运行数据迁移尚未适配，不提供执行入口。</p></details>
+
+  <p style="margin-top:22px;font-size:12px">本页是操作指南，不代替真实迁移；状态接口和脚本以当前代码和备份清单为准。</p>
+</div>
+
+<script>
+(function () {
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]
+    })
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var text = button.getAttribute('data-copy') || ''
+      function done() { button.textContent = '已复制'; setTimeout(function () { button.textContent = '复制' }, 1200) }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(function () {})
+      else {
+        var area = document.createElement('textarea')
+        area.value = text; area.style.position = 'fixed'; area.style.opacity = '0'
+        document.body.appendChild(area); area.select()
+        try { document.execCommand('copy'); done() } catch (e) {}
+        area.remove()
+      }
+    })
+  })
+  fetch('/programmer-workflow/status?host=dsh', { headers: { accept: 'application/json' } })
+    .then(function (r) { return r.ok ? r.json() : null })
+    .then(function (data) {
+      var line = document.getElementById('live-status')
+      if (!data || !data.pluginData) { line.textContent = '无法读取当前 DSH 状态；请打开设置页检查 Host 插件。'; return }
+      var plugin = data.pluginMigration || {}
+      var runtime = data.runtimeMigration || {}
+      var cov = data.pluginData.coverage || 'unknown'
+      line.innerHTML = '<span class="badge">plugin stage 1: ' + escapeHtml(plugin.status || 'not-started') + '</span> ' +
+        '<span class="badge">runtime stage 2: ' + escapeHtml(runtime.status || 'blocked') + '</span> ' +
+        '插件路径：<code>' + escapeHtml(data.pluginData.globalRoot || '') + '</code>；覆盖状态：' + escapeHtml(cov) +
+        (runtime.reason ? '；' + escapeHtml(runtime.reason) : '')
+    })
+    .catch(function () {
+      document.getElementById('live-status').textContent = '无法读取当前 DSH 状态；请打开设置页检查 Host 插件。'
+    })
+})()
+</script>
+</body>
+</html>

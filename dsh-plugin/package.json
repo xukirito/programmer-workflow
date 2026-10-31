@@ -1,0 +1,32 @@
+{
+  "name": "@local/programmer-workflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Programmer Workflow settings, migration guidance and global data root for DeepSeek Harness.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "migration.html",
+    "dsh-migration-tools/**",
+    "README.md",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

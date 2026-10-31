@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>安装程序员工作流 · DSH / Kimi Code / CodeBuddy</title>
+<style>
+  :root{color-scheme:light;--bg:#f5f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--primary:#4f46e5;--soft:#eef2ff}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1000px;margin:auto;padding:28px 20px 60px}.eyebrow{font:600 10px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--primary);text-transform:uppercase}
+  h1{font-size:28px;line-height:1.2;letter-spacing:-.03em;margin:8px 0 10px}h2{font-size:18px;margin:26px 0 8px}h3{font-size:14px;margin:0 0 5px}
+  p{margin:6px 0;color:var(--muted)}.lead{font-size:15px;color:var(--text)}code{font:12px/1.5 ui-monospace,Consolas,monospace;background:#f1f5f9;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:#0f172a;overflow-wrap:anywhere}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .cmd{display:flex;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;border-radius:7px;padding:9px 10px;margin:8px 0;overflow:auto}.cmd code{background:none;border:0;color:#e2e8f0;flex:1}.copy{background:#fff;color:#0f172a;border:0;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer}
+  .note{border-left:3px solid var(--primary);background:var(--soft);border-radius:0 7px 7px 0;padding:9px 11px;margin:10px 0;color:#3730a3;font-size:12.5px}
+  .warnbox{border-left:3px solid #b45309;background:#fffbeb;border-radius:0 7px 7px 0;padding:9px 11px;margin:10px 0;color:#92400e;font-size:12.5px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}th,td{text-align:left;border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}th{color:var(--muted);font-weight:600}
+  ul{margin:6px 0 6px 20px;padding:0;color:var(--muted)}li{margin:3px 0}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Programmer Workflow · Install</div>
+  <h1>安装与验证</h1>
+  <p class="lead">同一个 Skill 可以装到多个 Agent/编辑器；它们的数据目录彼此独立。安装完成后的第一件事是用对应宿主的 <code>--host</code> 运行 <code>doctor</code>。</p>
+  <div class="warnbox"><strong>当前为 v0.1.0 测试版：</strong>只提供源码安装，暂不发布 GitHub Release。先克隆仓库再执行下面的命令：<code>git clone https://github.com/xukirito/programmer-workflow.git</code>。真实宿主的迁移尚未由本插件验证，详见 <a href="Migration.html">Migration.html</a>。</div>
+
+  <h2>先选宿主</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>宿主</th><th>插件数据根（默认）</th><th>安装位置</th></tr></thead>
+      <tbody>
+        <tr><td>DeepSeek Harness</td><td><code>&lt;DSH_HOME&gt;/programmer-workflow</code></td><td><code>~/.dsh/skills</code> / 项目 <code>.agents/skills</code></td></tr>
+        <tr><td>Kimi Code</td><td><code>&lt;KIMI_HOME&gt;/programmer-workflow</code></td><td><code>~/.kimi-code/skills</code> 或 Kimi 插件</td></tr>
+        <tr><td>CodeBuddy</td><td><code>&lt;CODEBUDDY_HOME&gt;/programmer-workflow</code></td><td>项目 <code>.codebuddy/skills</code> + <code>CODEBUDDY.md</code></td></tr>
+        <tr><td>Claude / Cursor / Codex</td><td>各宿主 home 下的 <code>programmer-workflow</code></td><td>用户级或项目级 Skill 目录</td></tr>
+      </tbody>
+    </table>
+    <div class="warnbox">不要假设 Kimi/CodeBuddy 会读取 DSH 的 <code>~/.dsh/programmer-workflow</code>。非 DSH 宿主没有该兜底。旧的共享数据只能用“一次性导入”进入对应宿主，不会自动同步。</div>
+  </div>
+
+  <h2>DSH</h2>
+  <div class="card">
+    <div class="grid">
+      <div>
+        <h3>1. 安装 Skill 与启动块</h3>
+        <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap">复制</button></div>
+        <p>项目级安装用 <code>-Targets project -HostId dsh -Bootstrap</code>；启动块会带 <code>--host dsh</code>。</p>
+      </div>
+      <div>
+        <h3>2. 安装 DSH 插件</h3>
+        <p>在 DSH 插件管理器中从本仓库的 <code>dsh-plugin</code> 目录安装本地 bundle。安装后「设置 → 程序员工作流」出现。</p>
+        <div class="cmd"><code>node --check dsh-plugin\index.js</code><button class="copy" data-copy="node --check dsh-plugin\index.js">复制</button></div>
+      </div>
+    </div>
+    <h3>3. 验证</h3>
+    <div class="cmd"><code>python "%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py" doctor --host dsh --workspace .</code><button class="copy" data-copy="python &quot;%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py&quot; doctor --host dsh --workspace .">复制</button></div>
+    <p>设置页会分别显示应用数据、插件数据、工作区数据和两个迁移阶段，不再用“整个 .dsh 是 Junction”推断插件迁移完成。</p>
+  </div>
+
+  <h2>Kimi Code</h2>
+  <div class="card">
+    <h3>插件安装（推荐）</h3>
+    <p>在 Kimi Code 中执行 <code>/plugins install</code>，指向本仓库根目录；插件会加载 Skill、系统提示和命令。</p>
+    <h3>用户级 / 项目级安装</h3>
+    <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets kimi -HostId kimi -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets kimi -HostId kimi -Bootstrap">复制</button></div>
+    <div class="cmd"><code>python "%USERPROFILE%\.kimi-code\skills\programmer-workflow\scripts\companion.py" doctor --host kimi --workspace .</code><button class="copy" data-copy="python &quot;%USERPROFILE%\.kimi-code\skills\programmer-workflow\scripts\companion.py&quot; doctor --host kimi --workspace .">复制</button></div>
+    <div class="note">Kimi 插件数据根是 <code>~/.kimi-code/programmer-workflow</code>，不是 DSH 的 <code>.dsh</code>。Kimi 运行数据迁移要求 <code>kimiMigrationTools</code> 目录同时含迁移与回滚脚本，且适配器读取 <code>KIMI_MIG_SRC</code>；否则显示“未配置/不可用”，不会成“已验证”。</div>
+  </div>
+
+  <h2>CodeBuddy</h2>
+  <div class="card">
+    <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets codebuddy -ProjectRoot &lt;项目根&gt; -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets codebuddy -ProjectRoot <项目根> -Bootstrap">复制</button></div>
+    <p>会写入项目 <code>.codebuddy/skills/programmer-workflow</code> 和 <code>CODEBUDDY.md</code>。项目级 Skill 只解决项目工作区；用户级插件数据在 <code>~/.codebuddy/programmer-workflow</code>，不会写进 <code>.dsh</code>。</p>
+    <p>CodeBuddy 的插件数据在注册表里是支持的，但第一阶段需要该宿主的 Skill CLI（<code>~/.codebuddy/skills/programmer-workflow/scripts/companion.py</code>，或用 <code>PROGRAMMER_WORKFLOW_CLI</code> 指定）；找不到时设置页标记不可用并禁用准备按钮。运行数据迁移未适配。</p>
+  </div>
+
+  <h2>模式与迁移</h2>
+  <div class="card">
+    <ul>
+      <li><code>workflowMode=plan</code>：普通运行需批准，先生成 <code>plan.md</code>/<code>plan.html</code>，回复“执行”后用 <code>run --yes</code>。</li>
+      <li><code>workflowMode=full-authority</code>：普通运行无需逐条批准，用 <code>run --full-authority</code>；破坏性操作仍需确认。</li>
+      <li>两者 flags 同时出现会报错；该设置不改变宿主权限，也不绕过只读/沙箱。</li>
+      <li>迁移第一阶段只移动当前宿主的插件数据；第二阶段才移动编辑器运行数据，且必须等第一阶段完成并校验、且适配器同时具备迁移与回滚脚本。</li>
+      <li>工作区记忆在 <code>&lt;workspace&gt;/.programmer-workflow</code>，永不随全局迁移移动。</li>
+    </ul>
+    <p>详细迁移与支持矩阵：<a href="Migration.html">Migration.html</a>。</p>
+  </div>
+
+  <h2>验证清单</h2>
+  <div class="card">
+    <div class="cmd"><code>python tests/run_tests.py</code><button class="copy" data-copy="python tests/run_tests.py">复制</button></div>
+    <div class="cmd"><code>node --check dsh-plugin\index.js &amp;&amp; node --check dsh-plugin\client.js</code><button class="copy" data-copy="node --check dsh-plugin\index.js &amp;&amp; node --check dsh-plugin\client.js">复制</button></div>
+    <div class="cmd"><code>python skills\programmer-workflow\scripts\companion.py docs --host dsh --spec docs\spec.json --check</code><button class="copy" data-copy="python skills\programmer-workflow\scripts\companion.py docs --host dsh --spec docs\spec.json --check">复制</button></div>
+    <p>上述静态/临时目录测试不等同于真实宿主链接切换或真实迁移；本机真实迁移结果需在目标编辑器关闭后单独验证。</p>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(function(button){
+  button.addEventListener('click',function(){
+    var text=button.getAttribute('data-copy')||'';
+    function done(){button.textContent='已复制';setTimeout(function(){button.textContent='复制'},1200)}
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(function(){});
+    else{var a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){}a.remove()}
+  });
+});
+</script>
+</body>
+</html>

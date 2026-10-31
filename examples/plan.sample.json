@@ -1,0 +1,46 @@
+{
+  "title": "三端设置与 Plan 模式适配",
+  "goal": "让 DSH / Kimi Code / CodeBuddy 共用一份配置，并在 Plan 模式下先生成可审核的计划。",
+  "context": "设置页已能读写全局 config.json；迁移工具分 DSH 内置与 Kimi 已验证外部工具两套；CodeBuddy 使用项目级 Skill。",
+  "mode": "Plan mode / 待审核",
+  "assumptions": [
+    "Kimi 数据已迁移到 D:\\KimiData\\migrated",
+    "DSH 数据已迁移到 D:\\AgentData\\migrated",
+    "Full authority 由宿主决定，插件不自行提权"
+  ],
+  "steps": [
+    {
+      "title": "写入 Plan 模式协议与命令",
+      "change": "新增 references/plan.md、commands/plan.md 和 plan CLI",
+      "command": "python skills/programmer-workflow/scripts/companion.py plan --host dsh --spec .programmer-workflow/plan.json --format md",
+      "why": "先有统一审核文件，再执行命令",
+      "risk": "low",
+      "verify": "plan.md 包含目标、步骤、风险、回滚和“执行”门"
+    },
+    {
+      "title": "设置页增加宿主适配",
+      "change": "client.js 增加 DSH/Kimi/CodeBuddy 切换、Plan 格式和迁移目标",
+      "command": "python tests/run_tests.py",
+      "why": "避免把三端路径混在一起",
+      "risk": "medium",
+      "verify": "三端切换、窄宽度和深色截图检查通过"
+    },
+    {
+      "title": "生成 DSH 与 Kimi 迁移脚本",
+      "change": "Host 增加 migration/prepare 的 host 参数",
+      "command": "curl -X POST <harness-url>/programmer-workflow/migration/prepare -d '{\"host\":\"kimi\",\"target\":\"D:\\\\KimiData\\\\migrated\"}'",
+      "why": "复用已验证工具，不复制不改写",
+      "risk": "medium",
+      "verify": "run-migrate-kimi.cmd 正确设置 KIMI_MIG_DEST"
+    }
+  ],
+  "verification": [
+    "python tests/run_tests.py 全绿",
+    "设置页接口返回 planFormat、kimiMigrationTarget 和 hosts",
+    "Plan.html 在浅色/深色下可读，复制按钮可用"
+  ],
+  "rollback": "删除 plan.md/plan.html；恢复 config.json 默认值；不执行迁移脚本即可保持现状。",
+  "questions": [
+    "Plan 文件默认放项目根，还是 .programmer-workflow/？"
+  ]
+}

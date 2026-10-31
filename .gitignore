@@ -1,0 +1,36 @@
+# Local memory and debug artifacts
+.programmer-workflow/
+.workflow-companion/
+debug-logs/
+.tmp-tests/
+.tmp-install-test/
+.tmp-*
+examples/.edge-profile/
+.edge-cdp-profile/
+.edge-cdp-profile2/
+.agents/
+
+# Review exports and machine-local guides
+*.review.json
+*.local.md
+
+# Screenshots captured from a real profile (contain machine paths).
+# Regenerate from tests/ui_preview.mjs after sanitizing its fixture, then
+# remove these two rules if the new images are safe to publish.
+examples/demo-output/ui-*.png
+examples/demo-output/Migration.png
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node / editors
+node_modules/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.vs/

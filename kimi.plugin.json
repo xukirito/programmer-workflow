@@ -1,0 +1,22 @@
+{
+  "name": "programmer-workflow",
+  "version": "0.1.0",
+  "description": "Per-host approval-gated memory, plan/full-authority workflow, stall escalation, instrumented debugging, offline architecture/feature docs, design prototypes, and separate plugin/runtime migration.",
+  "author": {
+    "name": "Programmer Workflow Contributors"
+  },
+  "license": "MIT",
+  "keywords": ["memory", "debugging", "architecture", "prototype", "workflow", "agent-skills"],
+  "skills": "./skills/",
+  "systemPromptPath": "./SYSTEM.md",
+  "sessionStart": {
+    "skill": "programmer-workflow"
+  },
+  "commands": "./commands/",
+  "interface": {
+    "displayName": "程序员工作流 / Programmer Workflow",
+    "shortDescription": "记忆、卡壳升级、调试、工程文档与设计原型",
+    "longDescription": "把长对话里容易丢失的工作流沉淀成可执行协议：按宿主独立的用户/工作区记忆与审批门、workflowMode 的 Plan/Full authority 审核、三轮卡壳后的行业做法升级、带日志的调试闭环、Architecture.html/Features.html 离线文档，以及 Prototype.html 设计评审。全部本地运行，无云端依赖；插件数据与编辑器运行数据分两阶段迁移。",
+    "developerName": "Programmer Workflow Contributors"
+  }
+}

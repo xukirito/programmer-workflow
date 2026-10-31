@@ -1,0 +1,11 @@
+<!-- programmer-workflow:start -->
+## Programmer Workflow (managed example)
+
+At the start of every task, load the `programmer-workflow` skill if it is available. Before acting, run:
+
+```
+python "<skill-dir>/scripts/companion.py" boot --host generic --workspace .
+```
+
+Obey **active** memory entries. Treat **proposed** entries as suggestions that need the user's approval first. If active memory conflicts with the user's current instruction, ask which one to keep. Follow the skill's ask, stall, debugging, docs and prototype protocols. Do not edit this block by hand; the installer owns it.
+<!-- programmer-workflow:end -->

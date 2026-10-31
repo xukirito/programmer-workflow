@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Programmer Workflow {{WC_VERSION}}">
+  <meta name="description" content="交互式工程文档：{{WC_PROJECT}}。包含模块地图、数据流、关键决策、风险与功能清单。">
+  <title>{{WC_TITLE}}</title>
+  <style>
+{{WC_STYLE}}
+  </style>
+</head>
+<body data-page="{{WC_KIND}}">
+  <div class="wc-shell">
+    <header class="wc-top" id="wc-top">
+      <div class="wc-topbar">
+        <div class="wc-brand">
+          <div class="wc-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M12 3v18"/><path d="m4 7.5 8 4.5 8-4.5"/>
+            </svg>
+          </div>
+          <div>
+            <h1 id="wc-page-title">{{WC_TITLE}}</h1>
+            <p><span id="wc-project">{{WC_PROJECT}}</span> · 交互式工程文档 · 生成于 <span id="wc-generated">{{WC_GENERATED}}</span></p>
+          </div>
+        </div>
+        <div class="wc-top-actions">
+          <a class="wc-btn small ghost" id="wc-sibling-link" href="Features.html" title="切换文档">功能地图</a>
+          <button class="wc-btn small ghost" id="wc-copy-md" title="把当前页摘要复制为 Markdown">
+            <svg class="wc-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            复制摘要
+          </button>
+          <button class="wc-btn small ghost" id="wc-print" title="打印或导出 PDF">
+            <svg class="wc-icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+            打印
+          </button>
+          <button class="wc-btn small icon ghost" id="wc-theme" title="切换明暗主题" aria-label="切换明暗主题">
+            <svg class="wc-icon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="wc-app" aria-live="polite">
+      <div class="wc-empty" style="margin-top:40px">
+        <strong>正在构建交互式文档…</strong>
+        如果长时间停在这里，请确认浏览器允许运行本地 JavaScript，或直接打开同目录的另一个 HTML 文件。
+      </div>
+    </main>
+  </div>
+
+  <div class="wc-drawer-overlay" id="wc-overlay" hidden></div>
+  <aside class="wc-drawer" id="wc-drawer" aria-hidden="true" aria-label="详情面板"></aside>
+  <div class="wc-modal-wrap" id="wc-modal" role="dialog" aria-modal="true" aria-labelledby="wc-modal-title">
+    <div class="wc-modal">
+      <h3 id="wc-modal-title"></h3>
+      <p id="wc-modal-desc"></p>
+      <div id="wc-modal-body"></div>
+      <div class="wc-modal-actions" id="wc-modal-actions"></div>
+    </div>
+  </div>
+  <div class="wc-toast" id="wc-toast" role="status"></div>
+
+  <div class="wc-reviewbar">
+    <div class="wc-reviewbar-inner">
+      <span class="status" id="wc-review-status">评审：<strong>未提交</strong></span>
+      <span class="spacer"></span>
+      <button class="wc-btn small" id="wc-review-note">添加意见</button>
+      <button class="wc-btn small warn" id="wc-review-changes">请求修改</button>
+      <button class="wc-btn small ok" id="wc-review-approve">通过</button>
+      <button class="wc-btn small primary" id="wc-review-export">导出评审 JSON</button>
+    </div>
+  </div>
+
+  <script id="wc-data" type="application/json">{{WC_DATA}}</script>
+  <script>
+{{WC_SCRIPT}}
+  </script>
+</body>
+</html>

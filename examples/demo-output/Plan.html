@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Programmer Workflow plan">
+<title>三端设置与 Plan 模式适配 · 执行计划</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#4f46e5;--green:#059669;--amber:#d97706;--red:#dc2626;--mono:ui-monospace,Consolas,"Cascadia Code",monospace;--sans:"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 var(--sans)}
+.shell{width:min(920px,100%);margin:0 auto;padding:30px 20px 80px}
+.top{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}h1{margin:0;font-size:28px;line-height:1.2;letter-spacing:-.03em}h2{font-size:15px;margin:24px 0 8px}h3{margin:0;font-size:14px}.sub{margin:5px 0 0;color:var(--muted);font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 9px;color:var(--muted);font-size:10.5px;font-weight:600;white-space:nowrap}
+.badge.pending{color:var(--amber);border-color:rgba(217,119,6,.35)} .badge.ok{color:var(--green);border-color:rgba(5,150,105,.35)}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:18px 20px;margin-top:12px}
+.lead{color:var(--muted);font-size:12.5px;margin:0}.lead code{font-family:var(--mono);font-size:.92em;background:rgba(15,23,42,.05);padding:1px 4px;border-radius:4px}
+ul{margin:6px 0 0;padding-left:18px}li{margin:4px 0;color:#334155}p{margin:6px 0;color:#334155}.empty{color:var(--muted);font-size:12px}
+.steps{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.step{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:14px 16px}
+.step-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.step-head h3{display:inline}.index{font-family:var(--mono);font-size:10.5px;color:var(--accent);margin-right:7px;font-weight:700}
+.check input{width:16px;height:16px;accent-color:var(--accent)}.risk{font-size:10px;border-radius:999px;padding:1px 7px;border:1px solid var(--line);margin-left:auto;color:var(--muted)}.risk.high{color:var(--red);border-color:rgba(220,38,38,.35)}.risk.medium{color:var(--amber);border-color:rgba(217,119,6,.35)}.risk.low{color:var(--green);border-color:rgba(5,150,105,.35)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin:10px 0 0}.meta div{min-width:0}.meta dt{font-size:10.5px;color:var(--muted);font-weight:600}.meta dd{margin:1px 0 0;font-size:12px;color:#334155;overflow-wrap:anywhere}
+.command{margin-top:10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;overflow:hidden}.command-head{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;color:var(--muted);font-size:10px;border-bottom:1px solid var(--line)}.command pre{margin:0;padding:9px 10px;overflow:auto;font:11px/1.55 var(--mono);color:#1e293b;white-space:pre-wrap;word-break:break-word}.copy{border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--text);font:600 10px/1.5 var(--sans);padding:1px 7px;cursor:pointer}
+.approval{border:1px solid rgba(79,70,229,.35);background:rgba(79,70,229,.06);border-radius:12px;padding:15px 17px;margin-top:18px}.approval h2{margin:0 0 4px;font-size:16px}.approval p{margin:3px 0;color:#334155}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.primary,.ghost{border:1px solid var(--accent);border-radius:7px;padding:7px 11px;font:600 12px/1.2 var(--sans);cursor:pointer}.primary{background:var(--accent);color:#fff}.ghost{background:#fff;color:var(--accent)}
+.footer{margin-top:26px;color:var(--muted);font-size:10.5px;text-align:center}@media(max-width:640px){.meta{grid-template-columns:1fr}h1{font-size:23px}.shell{padding:18px 14px 50px}}@media print{body{background:#fff}.copy,.actions{display:none}.card,.step{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><div><h1>三端设置与 Plan 模式适配</h1><p class="sub">Programmer Workflow · 执行计划 · 等待审核</p></div><span class="badge pending">PLAN / REVIEW</span></header>
+<section class="card"><p class="lead"><strong>先审核，再执行。</strong> 此页面不会自动运行命令。确认后回到对话回复 <code>执行</code>；需要调整就回复 <code>修改：...</code>；要停止就回复 <code>取消</code>。</p></section>
+<section class="card"><h2>目标</h2><p>让 DSH / Kimi Code / CodeBuddy 共用一份配置，并在 Plan 模式下先生成可审核的计划。</p><p>设置页已能读写全局 config.json；迁移工具分 DSH 内置与 Kimi 已验证外部工具两套；CodeBuddy 使用项目级 Skill。</p><h2>假设</h2><ul><li>Kimi 数据已迁移到 D:\KimiData\migrated</li><li>DSH 数据已迁移到 D:\AgentData\migrated</li><li>Full authority 由宿主决定，插件不自行提权</li></ul></section>
+<section><div class="steps"><article class="step" data-step="1">
+  <div class="step-head">
+    <label class="check"><input type="checkbox" data-check="1" aria-label="标记步骤 1 已验证"></label>
+    <div><span class="index">01</span><h3>写入 Plan 模式协议与命令</h3></div>
+    <span class="risk low">风险 低</span>
+  </div>
+  <dl class="meta">
+    <div><dt>变更</dt><dd>新增 references/plan.md、commands/plan.md 和 plan CLI</dd></div>
+    <div><dt>原因</dt><dd>先有统一审核文件，再执行命令</dd></div>
+    <div><dt>验证</dt><dd>plan.md 包含目标、步骤、风险、回滚和“执行”门</dd></div>
+  </dl>
+  <div class="command">
+    <div class="command-head"><span>命令</span><button type="button" class="copy" data-copy="python skills/programmer-workflow/scripts/companion.py plan --host dsh --spec .programmer-workflow/plan.json --format md">复制</button></div>
+    <pre><code>python skills/programmer-workflow/scripts/companion.py plan --host dsh --spec .programmer-workflow/plan.json --format md</code></pre>
+  </div>
+</article><article class="step" data-step="2">
+  <div class="step-head">
+    <label class="check"><input type="checkbox" data-check="2" aria-label="标记步骤 2 已验证"></label>
+    <div><span class="index">02</span><h3>设置页增加宿主适配</h3></div>
+    <span class="risk medium">风险 中</span>
+  </div>
+  <dl class="meta">
+    <div><dt>变更</dt><dd>client.js 增加 DSH/Kimi/CodeBuddy 切换、Plan 格式和迁移目标</dd></div>
+    <div><dt>原因</dt><dd>避免把三端路径混在一起</dd></div>
+    <div><dt>验证</dt><dd>三端切换、窄宽度和深色截图检查通过</dd></div>
+  </dl>
+  <div class="command">
+    <div class="command-head"><span>命令</span><button type="button" class="copy" data-copy="python tests/run_tests.py">复制</button></div>
+    <pre><code>python tests/run_tests.py</code></pre>
+  </div>
+</article><article class="step" data-step="3">
+  <div class="step-head">
+    <label class="check"><input type="checkbox" data-check="3" aria-label="标记步骤 3 已验证"></label>
+    <div><span class="index">03</span><h3>生成 DSH 与 Kimi 迁移脚本</h3></div>
+    <span class="risk medium">风险 中</span>
+  </div>
+  <dl class="meta">
+    <div><dt>变更</dt><dd>Host 增加 migration/prepare 的 host 参数</dd></div>
+    <div><dt>原因</dt><dd>复用已验证工具，不复制不改写</dd></div>
+    <div><dt>验证</dt><dd>run-migrate-kimi.cmd 正确设置 KIMI_MIG_DEST</dd></div>
+  </dl>
+  <div class="command">
+    <div class="command-head"><span>命令</span><button type="button" class="copy" data-copy="curl -X POST &lt;harness-url&gt;/programmer-workflow/migration/prepare -d &#x27;{&quot;host&quot;:&quot;kimi&quot;,&quot;target&quot;:&quot;D:\\KimiData\\migrated&quot;}&#x27;">复制</button></div>
+    <pre><code>curl -X POST &lt;harness-url&gt;/programmer-workflow/migration/prepare -d &#x27;{&quot;host&quot;:&quot;kimi&quot;,&quot;target&quot;:&quot;D:\\KimiData\\migrated&quot;}&#x27;</code></pre>
+  </div>
+</article></div></section>
+<section class="card"><h2>整体验证</h2><ul><li>python tests/run_tests.py 全绿</li><li>设置页接口返回 planFormat、kimiMigrationTarget 和 hosts</li><li>Plan.html 在浅色/深色下可读，复制按钮可用</li></ul><h2>回滚</h2><p>删除 plan.md/plan.html；恢复 config.json 默认值；不执行迁移脚本即可保持现状。</p><h2>需要你确认</h2><ul><li>Plan 文件默认放项目根，还是 .programmer-workflow/？</li></ul></section>
+<section class="approval" id="approval"><h2>等待你的决定</h2><p>回复“执行”后，Agent 才会按上面的步骤操作；高风险命令仍需单独确认。</p><div class="actions"><button type="button" class="primary" data-copy="执行">复制“执行”</button><button type="button" class="ghost" data-copy="修改：">复制“修改：”</button><button type="button" class="ghost" data-copy="取消">复制“取消”</button><button type="button" class="ghost" id="print">打印</button></div></section>
+<footer class="footer">Programmer Workflow · Plan mode / 待审核 · 本文件由插件生成，可重新生成覆盖</footer>
+</main>
+<script>
+(function() {
+  var KEY = 'pwf-plan-checks-v1:3a0897dccd3918b3';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') } catch (e) { state = {} }
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('[data-check]'));
+  function paint() { boxes.forEach(function (box) { box.checked = !!state[box.getAttribute('data-check')]; }); }
+  boxes.forEach(function (box) { box.addEventListener('change', function () { state[box.getAttribute('data-check')] = box.checked; try { localStorage.setItem(KEY, JSON.stringify(state)) } catch (e) {} }); });
+  paint();
+  document.addEventListener('click', function (event) {
+    var target = event.target.closest('[data-copy]');
+    if (!target) { if (event.target.id === 'print') window.print(); return; }
+    var text = target.getAttribute('data-copy');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function () {});
+    var old = target.textContent; target.textContent = '已复制'; setTimeout(function () { target.textContent = old; }, 1100);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Programmer Workflow",
+    "description": "Per-host memory and config, workflow-mode review, stall escalation, debug logs, architecture docs, design prototypes, and separate plugin/runtime migration."
+  }
+}
