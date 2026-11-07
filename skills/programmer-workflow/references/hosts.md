@@ -23,6 +23,28 @@ with an actionable error; use `--host generic` for an intentionally neutral root
 Each root contains `memory/`, `artifacts/`, `logs/` and `config.json`. A change in
 one host is invisible to the others.
 
+## Settings surfaces
+
+| Host | Where to configure | Notes |
+|---|---|---|
+| DSH | **Settings → Programmer Workflow** | Host/Client bundle in `dsh-plugin/`; React Slot UI |
+| Kimi Code | `/programmer-workflow:settings` local page | Python-only, loopback server; no React/DSH loader |
+| CodeBuddy | local page with `--host codebuddy` | Project-level install still uses its own user-level data root |
+| Claude/Cursor/Codex | none yet | CLI and manual config only |
+
+The local page command is:
+
+```bash
+python "<skill>/scripts/companion.py" settings --host kimi --workspace . --open
+```
+
+`<skill>` must be resolved from the currently loaded skill. After `/plugins install` the
+running copy is under `plugins/managed`, so do not hardcode `~/.kimi-code/skills`. The server
+listens on `127.0.0.1` only, uses a random token in the URL fragment
+(`#token=...`), and writes the same `<host-root>/config.json` read by `boot`, `docs`,
+`prototype`, `run` and `stall`. It only prepares migration/rollback scripts; it never
+executes them.
+
 ## Workflow mode and authority
 
 `workflowMode` is a plugin policy: `plan` (default) or `full-authority`. It does
@@ -40,17 +62,21 @@ not change the host's Plan/read-only/sandbox permissions. `--yes` and
 
 1. **Plugin data** — only `<host-home>/programmer-workflow`, with its own backup,
    inventory, hashes and a junction at the source path. The registry models every host,
-   but preparing a launcher needs that host's Skill CLI
-   (`<host-home>/skills/programmer-workflow/scripts/companion.py`) or an explicit
-   `PROGRAMMER_WORKFLOW_CLI`. Without one the capability is reported as
-   supported-but-not-ready and the prepare entry is disabled; CodeBuddy is the usual
-   case because it installs project-level by default.
+   but preparing a launcher needs that host's Skill CLI:
+   `PROGRAMMER_WORKFLOW_CLI`, `<host-home>/skills/programmer-workflow/scripts/companion.py`,
+   or the CLI that is actually running **when its host matches** the startup host. A managed
+   Kimi plugin copy under `<KIMI_HOME>/plugins/managed` is therefore usable for Kimi, but the
+   same file is never offered to DSH/CodeBuddy. Without a CLI the capability is reported as
+   supported-but-not-ready and the prepare entry is disabled; CodeBuddy is the usual case
+   because it installs project-level by default. Prepared launchers use the real
+   `companion.py` and pass `--host <id>` explicitly.
 2. **Editor runtime data** — separate adapter and separate target. It is gated on
    stage 1 `completed` + `verifiedAt` **and** on a complete adapter directory
    (`migrate-*` plus `rollback-*`). The launcher receives the target *root* in
    `DSH_MIG_DEST` / `KIMI_MIG_DEST` and the resolved host home in `DSH_MIG_SRC` /
    `KIMI_MIG_SRC`; the adapter appends its own data dir. Raw rollback runs through
-   `run-stage2-rollback.cmd` first, then `run-stage1-rollback-plugin.cmd`.
+   `run-stage2-rollback.cmd` first, then `run-stage1-rollback-plugin.cmd`. Both stages are
+   also preparable from the local settings page; that page never runs the launchers.
 
 | Host | Plugin migration | Runtime migration | Notes |
 |---|---|---|---|
@@ -87,12 +113,22 @@ External overrides (`PROGRAMMER_WORKFLOW_GLOBAL`, `PROGRAMMER_WORKFLOW_HOME`) ap
 ## Auto-load / session start
 
 - **DSH**: skill catalog from the directories above; installer can add a managed
-  bootstrap block that runs `boot --host dsh`.
-- **Kimi**: `kimi.plugin.json` (`sessionStart.skill`, system prompt, commands).
+  bootstrap block that runs `boot --host dsh`. The default `dsh plugin add` path also
+  copies the bundled Skill on first Host load.
+- **Kimi**: `kimi.plugin.json` (`sessionStart.skill`, system prompt, commands,
+  `hooks.SessionStart`), including the plugin-details homepage quick link and
+  `/programmer-workflow:settings`. The manifest deliberately has no `settings`/`configFile`
+  extension fields; the local Python page provides configuration. The hook starts
+  `127.0.0.1:8765` idempotently; `/quick?host=kimi` 302s to the tokenized page.
 - **Claude**: skill discovery + `.claude-plugin` manifest/commands.
 - **Cursor/Codex**: `.agents/skills` plus their bootstrap/`AGENTS.md` support.
 - **CodeBuddy**: project `.codebuddy/skills` + `CODEBUDDY.md`, or Settings → Skills.
 - **Generic/others**: project `.agents/skills` + an `AGENTS.md` block.
+
+The memory read is **not a background timer**. It happens when the host starts a new/resumed
+session and the skill's `boot` step runs; the managed `AGENTS.md` block is what makes DSH run
+`boot` at task start. If neither the bootstrap block nor `sessionStart` is present, memory is
+not injected automatically.
 
 Always pass the host in bootstrap commands; the installer writes the matching
 `--host` unless `-HostId`/`--host` overrides it.
@@ -119,7 +155,7 @@ quote paths with spaces.
 ## Plugin vs skill
 
 - **Skill**: instructions + scripts, discoverable by many hosts.
-- **Kimi plugin**: skill + manifest + `sessionStart` + commands.
+- **Kimi plugin**: skill + manifest + `sessionStart` + commands + the local Python settings page.
 - **Claude plugin**: manifest + skills + commands.
 - **DSH plugin**: this repository really ships one at `dsh-plugin/` — a Host/Client
   bundle with a settings page, per-host config/status, migration preparation and
@@ -131,7 +167,9 @@ quote paths with spaces.
 2. Start a new session so the catalog refreshes.
 3. Run `doctor` with `--host <id>`.
 4. Verify memory/config paths are under that host's own root.
-5. If the host does not trigger the skill, add its managed bootstrap block; use
+5. Open the settings surface for that host (DSH Settings page, or the local
+   `settings --host <id>` page) and confirm the paths match.
+6. If the host does not trigger the skill, add its managed bootstrap block; use
    the installer's `-HostId`/`--host` option.
 
 ## Environment overrides

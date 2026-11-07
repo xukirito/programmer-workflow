@@ -107,7 +107,7 @@
 
   <h2>DSH / Kimi 操作提示</h2>
   <details><summary>DSH</summary><p>设置页选择 DSH，填写第一阶段目标根，点“准备第一阶段脚本”；退出 DSH 后运行生成的脚本。第二阶段使用内置的 <code>dsh-migration-tools</code>（目标根单独填写），且必须等第一阶段完成。自定义 <code>DSH_HOME</code> 时脚本使用解析后的真实源目录，不固定 <code>%USERPROFILE%\.dsh</code>。</p></details>
-  <details><summary>Kimi Code</summary><p>设置页选择 Kimi，先确认 Kimi 迁移工具路径（工具目录需同时包含 <code>migrate-kimi-data.bat</code> 与 <code>rollback-kimi-data.bat</code>，且适配器要读取 <code>KIMI_MIG_SRC</code> 才算可用）；准备第一阶段脚本只移动 Kimi 自己的插件目录。Kimi 运行数据迁移是第二阶段，不能宣称会带动 DSH 或共享插件记忆。</p></details>
+  <details><summary>Kimi Code</summary><p>Kimi 可直接执行 <code>/programmer-workflow:settings</code> 打开本地设置页（也可用 <code>companion.py settings --host kimi --workspace . --open</code>）。先确认 Kimi 迁移工具路径（工具目录需同时包含 <code>migrate-kimi-data.bat</code> 与 <code>rollback-kimi-data.bat</code>，且适配器要读取 <code>KIMI_MIG_SRC</code> 才算可用）；准备第一阶段脚本只移动 Kimi 自己的插件目录。Kimi 运行数据迁移是第二阶段，不能宣称会带动 DSH 或共享插件记忆。</p></details>
   <details><summary>CodeBuddy / 其他宿主</summary><p>项目级 Skill 只解决项目工作区；用户级插件数据在各自 <code>&lt;host-home&gt;/programmer-workflow</code>。第一阶段需要该宿主的 <code>companion.py</code>（或 <code>PROGRAMMER_WORKFLOW_CLI</code>）；找不到时设置页标记不可用并禁用准备按钮。运行数据迁移尚未适配，不提供执行入口。</p></details>
 
   <p style="margin-top:22px;font-size:12px">本页是操作指南，不代替真实迁移；状态接口和脚本以当前代码和备份清单为准。</p>

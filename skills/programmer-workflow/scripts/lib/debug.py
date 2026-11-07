@@ -35,6 +35,7 @@ from .common import (
     run_git,
     truncate,
 )
+from . import environment
 
 DESTRUCTIVE_PATTERNS = [
     r"\brm\s+(-[a-zA-Z]*[rf][a-zA-Z]*\s+)?(?:/|~|\$HOME|[A-Za-z]:\\)",
@@ -106,6 +107,7 @@ def run_command(
     assume_yes: bool = False,
     full_authority: bool = False,
     allow_destructive: bool = False,
+    target_os: str | None = None,
     max_log_bytes: int = 50_000_000,
     tail_lines: int = 120,
 ) -> dict[str, Any]:
@@ -124,6 +126,14 @@ def run_command(
             "refusing a potentially destructive command; ask the user and rerun with --allow-destructive "
             f"(matched: {dangerous})"
         )
+    workspace = workspace.resolve()
+    # Preflight before consent or spawn: a missing executable must never become
+    # a failed run, a log directory, or a retry. The check is a PATH lookup plus
+    # the cached probe; it does not execute the command.
+    if target_os:
+        environment.assert_local_target(target_os)
+    for candidate in environment.command_names_for_run(raw_command, shell):
+        environment.require_command(candidate, workspace, target_os=target_os)
     if not assume_yes and not full_authority and load_plugin_config(workspace).get("workflowMode", "plan") == "plan":
         if not sys.stdin.isatty():
             raise ConsentRequiredError(
@@ -136,7 +146,6 @@ def run_command(
         if answer not in ("y", "yes"):
             raise ConsentRequiredError("cancelled by user")
 
-    workspace = workspace.resolve()
     stamp = now_stamp()
     log_root = debug_log_dir(workspace)
     log_dir = ensure_dir(log_root / f"{stamp}-{_slug(label)}")

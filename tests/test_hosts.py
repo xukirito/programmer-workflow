@@ -129,6 +129,39 @@ class HostIsolationTests(unittest.TestCase):
         self.assertEqual(capability["cliPath"], str(custom.resolve()))
         self.assertIn("pluginMigrationReady", hosts.all_hosts()[0])
 
+    def test_managed_plugin_cli_is_host_scoped(self) -> None:
+        """A Kimi managed-plugin CLI may serve Kimi only, never another host."""
+        managed = (
+            self.tmp / "kimi-home" / "plugins" / "managed" / "programmer-workflow"
+            / "skills" / "programmer-workflow" / "scripts" / "companion.py"
+        )
+        managed.parent.mkdir(parents=True)
+        managed.write_text("# managed plugin copy", encoding="utf-8")
+        os.environ["PROGRAMMER_WORKFLOW_HOST"] = "kimi"
+        self.assertEqual(hosts.running_companion_cli(managed), managed.resolve())
+        self.assertEqual(hosts.companion_cli("kimi", current=managed), managed.resolve())
+        self.assertEqual(hosts.companion_cli("kimi"), None, "sys.argv is not companion.py in tests")
+
+        old_argv = sys.argv
+        try:
+            sys.argv = [str(managed)]
+            self.assertEqual(hosts.companion_cli("kimi"), managed.resolve())
+            # The same running file must not be offered to DSH even though it is
+            # a perfectly valid companion.py.
+            os.environ["PROGRAMMER_WORKFLOW_HOST"] = "dsh"
+            self.assertIsNone(hosts.companion_cli("dsh"))
+            self.assertIsNone(hosts.companion_cli("codebuddy"))
+        finally:
+            sys.argv = old_argv
+
+        # DSH's own installed CLI wins over the Kimi managed copy.
+        dsh_cli = hosts.host_home("dsh") / "skills" / "programmer-workflow" / "scripts" / "companion.py"
+        dsh_cli.parent.mkdir(parents=True)
+        dsh_cli.write_text("# dsh copy", encoding="utf-8")
+        os.environ["PROGRAMMER_WORKFLOW_HOST"] = "kimi"
+        self.assertEqual(hosts.companion_cli("dsh", current=managed), dsh_cli.resolve())
+        self.assertNotEqual(hosts.companion_cli("kimi", current=managed), dsh_cli.resolve())
+
     @unittest.skipUnless(os.environ.get("WC_NODE"), "Node is not configured (set WC_NODE)")
     def test_host_and_cli_resolve_the_same_override_roots(self) -> None:
         import subprocess

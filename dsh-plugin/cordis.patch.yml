@@ -1,4 +1,4 @@
 - insert:
     - id: programmer-workflow
-      name: '@local/programmer-workflow'
+      name: 'dsh-plugin-programmer-workflow'
       config: {}

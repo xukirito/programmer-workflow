@@ -8,6 +8,7 @@ import tempfile
 import unittest
 import uuid
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 TEST_TMP = ROOT / ".tmp-tests"
@@ -347,7 +348,109 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(migration.read_state("kimi")["status"], "failed")
 
 
-    def test_nested_junction_is_detected(self) -> None:
+    @unittest.skipUnless(os.name == "nt", "Windows .cmd launchers")
+    def test_prepare_plugin_writes_target_bound_launchers(self) -> None:
+        cli = self.tmp / "managed" / "programmer-workflow" / "scripts" / "companion.py"
+        cli.parent.mkdir(parents=True)
+        cli.write_text("# managed copy", encoding="utf-8")
+        result = migration.prepare_plugin_migration("kimi", self.target_root, companion=cli)
+        self.assertEqual(result["status"], "prepared")
+        launcher = Path(result["launcher"])
+        rollback = Path(result["rollbackLauncher"])
+        self.assertTrue(launcher.is_file())
+        self.assertTrue(rollback.is_file())
+        text = launcher.read_bytes().decode("utf-8")
+        self.assertIn(str(cli.resolve()), text)
+        self.assertIn("--host kimi", text)
+        self.assertIn("migrate-plugin apply", text)
+        self.assertIn(str(self.target_root), text)
+        self.assertIn('set "PROGRAMMER_WORKFLOW_HOST=kimi"', text)
+        rollback_text = rollback.read_bytes().decode("utf-8")
+        self.assertIn("migrate-plugin rollback --host kimi", rollback_text)
+        self.assertIn("Roll stage 2 back first", rollback_text)
+        state = migration.read_state("kimi")
+        assert state is not None
+        self.assertEqual(state["status"], "prepared")
+        self.assertEqual(Path(state["launcher"]), launcher)
+        self.assertFalse(migration.stage1_summary("kimi")["completed"])
+
+    @unittest.skipUnless(os.name == "nt", "Windows .cmd launchers")
+    def test_prepare_plugin_accepts_the_running_managed_cli(self) -> None:
+        managed = (
+            self.tmp / "kimi-home" / "plugins" / "managed" / "programmer-workflow"
+            / "skills" / "programmer-workflow" / "scripts" / "companion.py"
+        )
+        managed.parent.mkdir(parents=True)
+        managed.write_text("# managed copy", encoding="utf-8")
+        with mock.patch.object(sys, "argv", [str(managed)]):
+            result = migration.prepare_plugin_migration("kimi", self.target_root)
+        self.assertEqual(Path(result["companion"]), managed.resolve())
+        self.assertIn(str(managed.resolve()), Path(result["launcher"]).read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(os.name == "nt", "Windows .cmd launchers")
+    def test_prepare_plugin_respects_the_action_switch(self) -> None:
+        from lib import config as configlib
+        configlib.save("kimi", {"migrationActionEnabled": False})
+        cli = self.tmp / "managed" / "programmer-workflow" / "scripts" / "companion.py"
+        cli.parent.mkdir(parents=True)
+        cli.write_text("", encoding="utf-8")
+        with self.assertRaises(migration.MigrationConflict):
+            migration.prepare_plugin_migration("kimi", self.target_root, companion=cli)
+
+    @unittest.skipUnless(os.name == "nt", "Windows .cmd launchers")
+    def test_prepare_runtime_requires_stage1_adapter_and_nested_target(self) -> None:
+        tools = self.tmp / "kimi-tools"
+        tools.mkdir()
+        (tools / "migrate-kimi-data.bat").write_text("REM KIMI_MIG_SRC", encoding="utf-8")
+        (tools / "rollback-kimi-data.bat").write_text("REM rollback", encoding="utf-8")
+        os.environ["KIMI_MIGRATION_TOOLS"] = str(tools)
+
+        with self.assertRaises(migration.MigrationConflict):
+            migration.prepare_runtime_migration("kimi", self.target_root)
+
+        migration.apply("kimi", self.target_root, assume_yes=True)
+        other_root = self.tmp / "other-root"
+        with self.assertRaises(migration.MigrationConflict):
+            migration.prepare_runtime_migration("kimi", other_root)
+        with self.assertRaises(migration.MigrationError):
+            migration.prepare_runtime_migration("kimi", "relative-root")
+
+        result = migration.prepare_runtime_migration("kimi", self.target_root)
+        self.assertEqual(result["status"], "prepared")
+        self.assertEqual(Path(result["target"]), (self.target_root / ".kimi-code").resolve())
+        launcher = Path(result["launcher"])
+        rollback = Path(result["rollbackLauncher"])
+        self.assertTrue(launcher.is_file())
+        self.assertTrue(rollback.is_file())
+        launcher_text = launcher.read_text(encoding="utf-8")
+        self.assertIn(f'set "KIMI_MIG_DEST={self.target_root.resolve()}"', launcher_text)
+        self.assertIn(f'set "KIMI_MIG_SRC={hosts.host_home("kimi")}"', launcher_text)
+        self.assertIn(f'set "KIMI_MIGRATION_TOOLS={tools.resolve()}"', launcher_text)
+        self.assertIn(f'call "{tools.resolve() / "migrate-kimi-data.bat"}"', launcher_text)
+        self.assertIn("runtime-completed.txt", launcher_text)
+        rollback_text = rollback.read_text(encoding="utf-8")
+        self.assertIn("runtime-rolled-back.txt", rollback_text)
+        self.assertIn("rollback-kimi-data.bat", rollback_text)
+        state = migration.read_runtime_state("kimi")
+        assert state is not None
+        self.assertEqual(state["status"], "prepared")
+        self.assertEqual(Path(state["targetRoot"]), self.target_root.resolve())
+        status = migration.runtime_status("kimi")
+        self.assertEqual(status["stage2Status"], "prepared")
+        self.assertFalse(status["stage2Completed"], "prepared must never claim completed")
+
+        # Turning the action switch off blocks stage 2 as well.
+        from lib import config as configlib
+        configlib.save("kimi", {"migrationActionEnabled": False})
+        with self.assertRaises(migration.MigrationConflict):
+            migration.prepare_runtime_migration("kimi", self.target_root)
+
+    def test_prepare_runtime_unavailable_without_migrate_and_rollback_pair(self) -> None:
+        migration.apply("kimi", self.target_root, assume_yes=True)
+        with self.assertRaises(migration.MigrationError):
+            migration.prepare_runtime_migration("kimi", self.target_root)
+
+
         nested_target = self.tmp / "nested-target"
         nested_target.mkdir()
         nested = self.source / "artifacts" / "nested"

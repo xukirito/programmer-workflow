@@ -16,8 +16,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from . import config as configlib
 from . import hosts
-from .common import atomic_write_json, now_iso, now_stamp, read_json, sha256_file
+from .common import atomic_write_json, atomic_write_text, now_iso, now_stamp, read_json, sha256_file
 
 TRANSFER_FILES = ("memory.json", "MEMORY.md", "config.json", "README.md")
 TRANSIENT_NAMES = {"memory.lock"}
@@ -121,6 +122,40 @@ def stage2_summary(host: str | None = None) -> dict[str, Any]:
 
 class MigrationError(RuntimeError):
     pass
+
+
+class MigrationConflict(MigrationError):
+    """A state conflict (not a bad request): gated stage, duplicate target, …"""
+
+
+def platform_supported() -> bool:
+    """The generated launchers are Windows batch files."""
+    return os.name == "nt"
+
+
+def platform_reason() -> str:
+    if platform_supported():
+        return ""
+    return (
+        "迁移启动器是 Windows 批处理（.cmd），本机不是 Windows；"
+        "可以查看状态和备份，但不能生成可执行的迁移脚本。"
+    )
+
+
+def _norm_path(value: str | Path) -> str:
+    return os.path.normcase(os.path.abspath(os.path.expanduser(str(value))))
+
+
+def _same_path(a: str | Path, b: str | Path) -> bool:
+    return _norm_path(a) == _norm_path(b)
+
+
+def _path_inside(child: str | Path, parent: str | Path) -> bool:
+    try:
+        Path(_norm_path(child)).relative_to(Path(_norm_path(parent)))
+        return True
+    except ValueError:
+        return False
 
 
 def _safe_json(path: Path) -> Any:
@@ -530,6 +565,241 @@ def prepare(host: str, target_root: str | Path) -> dict[str, Any]:
     return {"ok": True, **state}
 
 
+def stage1_launcher_paths(host: str | None = None) -> tuple[Path, Path]:
+    control = control_dir(host)
+    return control / "run-stage1-plugin.cmd", control / "run-stage1-rollback-plugin.cmd"
+
+
+def stage2_launcher_paths(host: str | None = None) -> tuple[Path, Path]:
+    control = control_dir(host)
+    return control / "run-stage2-runtime.cmd", control / "run-stage2-rollback.cmd"
+
+
+def _write_lines(path: Path, lines: list[str]) -> Path:
+    atomic_write_text(path, "\r\n".join(lines) + "\r\n")
+    return path
+
+
+def _resolve_stage1_cli(host_id: str, companion: str | Path | None) -> Path:
+    if companion is not None:
+        candidate = Path(companion).expanduser()
+    else:
+        resolved = hosts.companion_cli(host_id)
+        candidate = Path(resolved) if resolved else None
+    if candidate is None or not candidate.is_file():
+        raise MigrationError(
+            "未找到该宿主的 Skill CLI（companion.py）：请先安装 Programmer Workflow Skill，"
+            "或把 PROGRAMMER_WORKFLOW_CLI 指向可用的 companion.py。"
+        )
+    return candidate.resolve()
+
+
+def prepare_plugin_migration(
+    host: str,
+    target_root: str | Path,
+    companion: str | Path | None = None,
+) -> dict[str, Any]:
+    """Prepare stage 1 exactly like the DSH settings page.
+
+    The launcher must use the CLI that is really running (a managed Kimi plugin
+    copy is fine) and must pass ``--host`` explicitly, so a later environment
+    change cannot make it apply to another host.
+    """
+    host_id = hosts.resolve_host(host)
+    if not platform_supported():
+        raise MigrationError(platform_reason())
+    config = configlib.read(host_id)
+    if not config.get("migrationActionEnabled", True):
+        raise MigrationConflict("设置页的“允许准备迁移脚本”开关当前关闭；请先打开并保存后再试。")
+    target = plugin_target(host_id, target_root)
+    current = stage1_summary(host_id)
+    if current["completed"] and current.get("target"):
+        if _same_path(target, current["target"]):
+            raise MigrationConflict(f"目标与当前迁移位置相同：{current['target']}；无需再次迁移。")
+        if _overlaps(Path(target), Path(current["target"])):
+            raise MigrationConflict("新目标不能与当前实际迁移位置重叠；请选择完全独立的空目录。")
+    overrides = hosts.external_overrides(host_id)
+    if overrides["pluginRootIsExternal"]:
+        raise MigrationConflict(
+            "检测到外部路径 override；默认迁移不会覆盖它，请先备份/导出并移除 override，或手工迁移。"
+        )
+    cli = _resolve_stage1_cli(host_id, companion)
+    result = prepare(host_id, target_root)
+    state = read_state(host_id) or {}
+    source = str(result["source"])
+    launcher, rollback_launcher = stage1_launcher_paths(host_id)
+    _write_lines(launcher, [
+        "@echo off",
+        "setlocal",
+        f'set "PROGRAMMER_WORKFLOW_HOST={host_id}"',
+        f'set "PROGRAMMER_WORKFLOW_GLOBAL={source}"',
+        f'python "{cli}" migrate-plugin apply --host {host_id} --target-root "{result["targetRoot"]}" --yes',
+        "if errorlevel 1 (echo.",
+        "  echo Plugin data migration failed. See the error above and keep the backup.",
+        "  pause",
+        "  exit /b 1",
+        ")",
+        "endlocal",
+        "",
+    ])
+    _write_lines(rollback_launcher, [
+        "@echo off",
+        "setlocal",
+        "REM Order is enforced: while stage 2 is prepared/active/completed the CLI",
+        "REM refuses to restore stage 1. Roll stage 2 back first.",
+        f'set "PROGRAMMER_WORKFLOW_HOST={host_id}"',
+        f'set "PROGRAMMER_WORKFLOW_GLOBAL={source}"',
+        f'python "{cli}" migrate-plugin rollback --host {host_id}',
+        "if errorlevel 1 (echo.",
+        "  echo Plugin data rollback failed. The latest backup remains under .programmer-workflow-migration\\backups.",
+        "  pause",
+        "  exit /b 1",
+        ")",
+        "endlocal",
+        "",
+    ])
+    state.update({
+        "launcher": str(launcher),
+        "rollbackLauncher": str(rollback_launcher),
+        "companion": str(cli),
+    })
+    write_state(host_id, state)
+    return {
+        **result,
+        "ok": True,
+        "host": host_id,
+        "launcher": str(launcher),
+        "rollbackLauncher": str(rollback_launcher),
+        "companion": str(cli),
+        "statePath": str(state_path(host_id)),
+    }
+
+
+def prepare_runtime_migration(host: str, target_root: str | Path | None = None) -> dict[str, Any]:
+    """Prepare stage 2 with the rules DSH already enforces.
+
+    This only writes launchers and ``runtime-state.json``. It never runs the
+    adapter, never executes a batch file and never marks the move completed.
+    """
+    host_id = hosts.resolve_host(host)
+    if not platform_supported():
+        raise MigrationError(platform_reason())
+    config = configlib.read(host_id)
+    if not config.get("migrationActionEnabled", True):
+        raise MigrationConflict("设置页的“允许准备迁移脚本”开关当前关闭；请先打开并保存后再试。")
+    stage1 = stage1_summary(host_id)
+    if not stage1["completed"]:
+        raise MigrationConflict("请先完成并校验第一阶段插件数据迁移。")
+    spec = hosts.host_spec(host_id)
+    if not spec.get("runtime_migration_supported"):
+        raise MigrationError("当前仅支持迁移 Programmer Workflow 插件数据，尚未适配该编辑器的运行数据迁移。")
+    adapter = inspect_runtime_adapter(host_id)
+    if not adapter["adapterReady"] or not adapter["migrateScript"] or not adapter["rollbackScript"]:
+        raise MigrationError(adapter["reason"] or "运行数据迁移适配器不可用。")
+    raw_root = str(target_root or config.get("runtimeMigrationTargetRoot") or "").strip()
+    if not raw_root:
+        raise MigrationError("请填写第二阶段运行数据目标根")
+    if raw_root.startswith("\\\\") or raw_root.startswith("//"):
+        raise MigrationError("运行数据迁移不支持 UNC 目标")
+    if os.name == "nt" and not re.match(r"^[A-Za-z]:[\\/]", raw_root):
+        raise MigrationError("目标根必须是绝对路径（例如 D:\\AgentData）")
+    if not os.path.isabs(raw_root):
+        raise MigrationError("目标根必须是绝对路径")
+    resolved_root = os.path.abspath(os.path.expanduser(raw_root))
+    target = os.path.join(resolved_root, spec["data_dir"])
+    stage2 = stage2_summary(host_id)
+    if stage2["completed"] and stage2.get("actualLocation"):
+        if _same_path(target, stage2["actualLocation"]):
+            raise MigrationConflict(f"目标与当前运行数据位置相同：{stage2['actualLocation']}；无需再次迁移。")
+    plugin_record = read_state(host_id) or {}
+    plugin_target_value = plugin_record.get("target")
+    if plugin_target_value and not _path_inside(plugin_target_value, target):
+        raise MigrationConflict(
+            "第一阶段插件目标不在第二阶段运行数据目标内；本版本只支持同一目标根下的嵌套 Junction"
+            "（跨根按清单重建尚未实现）。请把两阶段目标放在同一根下，或先手工迁移插件数据。"
+        )
+    control = control_dir(host_id)
+    control.mkdir(parents=True, exist_ok=True)
+    env_prefix = "KIMI" if adapter["adapter"] == "kimi" else "DSH"
+    tools_env = "KIMI_MIGRATION_TOOLS" if adapter["adapter"] == "kimi" else "PROGRAMMER_WORKFLOW_DSH_TOOLS"
+    source = str(hosts.host_home(host_id))
+    common_lines = [
+        "@echo off",
+        "setlocal",
+        f'set "{env_prefix}_MIG_DEST={resolved_root}"',
+        f'set "{env_prefix}_MIG_SRC={source}"',
+        f'set "{tools_env}={adapter["toolsPath"]}"',
+    ]
+    completed_marker = control / "runtime-completed.txt"
+    rolled_back_marker = control / "runtime-rolled-back.txt"
+    launcher, rollback_launcher = stage2_launcher_paths(host_id)
+    _write_lines(launcher, [
+        *common_lines,
+        f'call "{adapter["migrateScript"]}"',
+        "if errorlevel 1 (echo.",
+        "  echo Stage 2 runtime migration failed. See the error above.",
+        "  pause",
+        "  exit /b 1",
+        ")",
+        f'del "{rolled_back_marker}" >nul 2>&1',
+        f'echo completed %DATE% %TIME% > "{completed_marker}"',
+        "endlocal",
+        "",
+    ])
+    _write_lines(rollback_launcher, [
+        *common_lines,
+        f'call "{adapter["rollbackScript"]}"',
+        "if errorlevel 1 (echo.",
+        "  echo Stage 2 rollback failed. See the error above.",
+        "  pause",
+        "  exit /b 1",
+        ")",
+        f'del "{completed_marker}" >nul 2>&1',
+        f'echo rolled back %DATE% %TIME% > "{rolled_back_marker}"',
+        "endlocal",
+        "",
+    ])
+    previous = None
+    if stage2["completed"]:
+        previous = {
+            "status": "completed",
+            "target": stage2.get("actualLocation"),
+            "targetRoot": stage2.get("recordedTargetRoot") or "",
+            "completedAt": stage2.get("verifiedAt"),
+        }
+    state = {
+        "host": host_id,
+        "status": "prepared",
+        "adapter": adapter["adapter"],
+        "source": source,
+        "target": target,
+        "targetRoot": resolved_root,
+        "toolsPath": adapter["toolsPath"],
+        "migrateScript": adapter["migrateScript"],
+        "rollbackScript": adapter["rollbackScript"],
+        "launcher": str(launcher),
+        "rollbackLauncher": str(rollback_launcher),
+        "preparedAt": now_iso(),
+        "previous": previous,
+    }
+    atomic_write_json(runtime_state_path(host_id), state)
+    return {
+        "ok": True,
+        "host": host_id,
+        "adapter": adapter["adapter"],
+        "source": source,
+        "target": target,
+        "targetRoot": resolved_root,
+        "toolsPath": adapter["toolsPath"],
+        "launcher": str(launcher),
+        "rollbackLauncher": str(rollback_launcher),
+        "statePath": str(runtime_state_path(host_id)),
+        "status": "prepared",
+        "reprepare": bool(previous),
+        "previousLocation": previous["target"] if previous else None,
+    }
+
+
 def _unique_old(source: Path) -> Path:
     stamp = now_stamp()
     candidate = source.with_name(source.name + f".old-{stamp}")
@@ -865,7 +1135,10 @@ def runtime_status(host: str) -> dict[str, Any]:
     adapter = inspect_runtime_adapter(host_id)
     status = "blocked"
     reason = "请先完成并校验第一阶段插件数据迁移。"
-    if not supported:
+    if not platform_supported():
+        status = "unavailable"
+        reason = platform_reason()
+    elif not supported:
         status = "unavailable"
         reason = "当前仅支持迁移 Programmer Workflow 插件数据，尚未适配该编辑器的运行数据迁移。"
     elif not stage1["completed"]:
@@ -881,6 +1154,8 @@ def runtime_status(host: str) -> dict[str, Any]:
     return {
         "host": host_id,
         "supported": supported,
+        "platformOk": platform_supported(),
+        "platformReason": platform_reason(),
         "adapter": spec.get("runtime_adapter"),
         "stage1Completed": stage1["completed"],
         "stage1Verified": stage1["verified"],

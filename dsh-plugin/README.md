@@ -2,11 +2,45 @@
 
 DeepSeek Harness Host/Client bundle for the `programmer-workflow` skill.
 
+## Install (DSH default)
+
+The repository root is a normal DSH plugin package, so install it from GitHub exactly like
+`dsh-plugin-whale-pet`:
+
+```powershell
+dsh plugin --profile web add github:xukirito/programmer-workflow
+```
+
+or from a local checkout root:
+
+```powershell
+dsh plugin --profile web add .
+```
+
+The nested `dsh-plugin/` directory is the implementation payload, not the install target.
+The root package includes `skills/programmer-workflow`, so a fresh install also gets the CLI
+and Skill; Host startup copies it to `<DSH_HOME>/skills/programmer-workflow` when absent.
+
+Remove an old `@local/programmer-workflow` bundle before installing this package; two bundles
+must not declare the same `programmer-workflow` loader entry.
+
 ## What it adds
 
 - **Settings → 程序员工作流** with per-host tabs (DSH / Kimi / CodeBuddy) that read and
   write each host's **own** `programmer-workflow/config.json`; host tabs never share
   memory or config.
+- **Account balance chip** above the sidebar account row (`sidebar.footer.action`). The Host
+  route `GET /programmer-workflow/balance` calls `deepseekAccount.getBalance`, caches for 30s,
+  returns wallets only (no credentials), and pauses while the page is hidden. Disable or change
+  the refresh interval in Settings.
+- **`/screenshot` and `/截图`**: run the bundled `companion.py` capture helper
+  (Windows GDI; Linux native capture) and copy the PNG to the clipboard. An Agent reads
+  the image with the model's vision capability; no local OCR engine is invoked. The
+  DSH direct command performs capture/copy, then the user can ask the Agent to read it.
+  The `screenshotEnabled` setting gates the whole feature.
+- **Environment preflight**: `env probe` caches the workspace OS/shell/commands into
+  `.programmer-workflow/environment.json` and active workspace memory; `run` checks the executable
+  before spawning and refuses cross-OS targets.
 - **Workflow mode** enum (`plan` / `full-authority`) with safe migration from old
   `requireRunConsent` configs (missing/invalid → `plan`; old `false` is not promoted).
 - **Two-stage migration**:
@@ -93,7 +127,7 @@ DSH serves `dsh.client` bundles as **classic browser scripts** into the page's
 `window.__ModuleLoader__` lazy-CJS facade. `client.js` must therefore:
 
 - contain no top-level `import`/`export` (a classic script cannot parse ESM);
-- call `window.__ModuleLoader__.load({ id: '@local/programmer-workflow', factory(require) { … } })`
+- call `window.__ModuleLoader__.load({ id: 'dsh-plugin-programmer-workflow', factory(require) { … } })`
   where `id` is exactly the package name;
 - take React from the module table — `const React = require('react')` plus
   `React.createElement`; there is no `h` export to import;

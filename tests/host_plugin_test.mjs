@@ -373,5 +373,19 @@ assert.ok(status.data.pluginData.globalRoot.includes('codebuddy'))
 const dshStatus = await call('/programmer-workflow/status', 'GET', '/programmer-workflow/status?host=dsh')
 assert.notEqual(status.data.pluginData.globalRoot, dshStatus.data.pluginData.globalRoot)
 
+// UTF-8 output must be decoded as a stream, not as independent chunks: the
+// first write deliberately ends in the middle of a Chinese character.
+const encodingProbe = path.join(base, 'utf8-probe.py')
+fs.writeFileSync(encodingProbe, [
+  "import os, time",
+  "payload = '中文识别结果'.encode('utf-8')",
+  "os.write(1, payload[:2])",
+  "time.sleep(0.05)",
+  "os.write(1, payload[2:])",
+].join('\n'), 'utf8')
+const encodingResult = await mod.runCompanion(encodingProbe, [], 5000)
+assert.equal(encodingResult.code, 0, encodingResult.stderr)
+assert.equal(encodingResult.stdout, '中文识别结果')
+
 console.log('host plugin tests ok')
 fs.rmSync(base, { recursive: true, force: true })

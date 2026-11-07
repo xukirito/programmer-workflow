@@ -127,6 +127,18 @@ Examples:
 
 ## Environment facts (request 4)
 
+The workspace environment has two layers:
+
+- `.programmer-workflow/environment.json` — machine-readable cache written by
+  `env probe` (or by `boot` when the cache is missing): OS, shell, installed commands,
+  capture/clipboard tools and probe time. Recognition uses the model, not a local OCR engine.
+- one active workspace `environment` entry tagged `environment-probe` — a compact
+  summary used by `boot`. It is refreshed in place, never duplicated. `boot` filters it
+  out of the rendered block and prints the compact `ENVIRONMENT` line instead.
+
+Re-run `env probe` after installing/removing tools or changing shells; do not probe every
+turn. `env check <cmd>` is read-only and reports installed alternatives.
+
 When the user states:
 
 - pure development environment, no deployment;

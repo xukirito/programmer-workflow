@@ -1,0 +1,57 @@
+{
+  "name": "dsh-plugin-programmer-workflow",
+  "version": "0.1.1",
+  "description": "Programmer Workflow for DeepSeek Harness: per-host memory, workflow gates, environment preflight, screenshot/model vision, balance and migration.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/xukirito/programmer-workflow",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xukirito/programmer-workflow.git"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "workflow",
+    "memory",
+    "screenshot",
+    "model-vision"
+  ],
+  "exports": {
+    ".": "./dsh-plugin/index.js",
+    "./client": "./dsh-plugin/client.js",
+    "./locale/*.json": "./dsh-plugin/locale/*.json",
+    "./icon": "./dsh-plugin/icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dsh-plugin/**",
+    "skills/programmer-workflow/**",
+    "!skills/programmer-workflow/**/__pycache__/**",
+    "!skills/programmer-workflow/**/*.pyc",
+    "commands/**",
+    "scripts/**",
+    "Open-Settings.vbs",
+    "SYSTEM.md",
+    "kimi.plugin.json",
+    "locales/**",
+    "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
+    "VERSION",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./dsh-plugin/cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  }
+}

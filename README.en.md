@@ -6,12 +6,12 @@ Review-first working memory, stall recovery, instrumented debugging, offline arc
 design prototypes for coding agents — portable across DeepSeek Harness, Kimi Code, CodeBuddy, Claude Code,
 Cursor and Codex.
 
-[![version](https://img.shields.io/badge/version-0.1.0--preview-orange)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.1.1--preview-orange)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.8%2B-blue)](skills/programmer-workflow/scripts/companion.py)
 [![hosts](https://img.shields.io/badge/hosts-DSH%20%7C%20Kimi%20%7C%20CodeBuddy%20%7C%20Claude%20%7C%20Cursor%20%7C%20Codex-informational)](#compatibility)
 
-> **v0.1.0 preview — source install only, no GitHub Release yet.**
+> **v0.1.1 preview.** DSH installs from the GitHub root package; Kimi uses the official `/plugins install`.
 > Config fields, review contracts and the DSH client bundle may still change. Real-host migration has not
 > been verified by this plugin; see [Compatibility](#compatibility) and [docs/Migration.html](docs/Migration.html).
 
@@ -25,6 +25,11 @@ Cursor and Codex.
 - **Stall recovery** — after repeated failures, stop guessing and choose between industry practice,
   instrumented debugging, re-interpretation or scope reduction.
 - **Debug loop** — tagged logs, captured output, `TRIAGE.md`, and one hypothesis at a time.
+- **Environment preflight** — probe the workspace OS/shell/commands once, cache it, and check an
+  executable before `run`; a cross-OS target is never executed locally.
+- **Screenshot / model vision / clipboard** — `/screenshot` or `/截图` captures a named window or
+  screen and copies the PNG; the Agent reads text with the model's own vision capability, never local OCR.
+- **DSH balance chip** — the current account balance above the account row; it never returns credentials.
 - **Offline docs and prototypes** — `Architecture.html`, `Features.html` and `Prototype.html` are
   single-file, searchable, reviewable HTML; `localStorage` keeps review state and exports JSON.
 
@@ -36,11 +41,11 @@ Python package.
 “Supported” means the code path exists and has contract/temporary-directory tests. “Verified” means it was
 run against real host data. This repository never turns “a script exists” into “the plugin verified it”.
 
-| Host | Install entry | Default plugin data root | DSH settings page | Runtime-data migration | Verification |
+| Host | Install entry | Default plugin data root | Settings UI | Runtime-data migration | Verification |
 |---|---|---|---|---|---|
-| **DeepSeek Harness** | `install.ps1 -Targets dsh` + local `dsh-plugin` bundle | `<DSH_HOME>/programmer-workflow` (`~/.dsh/...`) | Yes | Built-in migrate + rollback (stage 2) | Temp-dir/contract tests; real migration not verified |
-| **Kimi Code** | `/plugins install` or `install.ps1 -Targets kimi` | `<KIMI_HOME>/programmer-workflow` (`~/.kimi-code/...`) | No (DSH-only page) | Needs a user-supplied migrate + rollback tool pair | Code path/temp-dir tests; no real Kimi migration |
-| **CodeBuddy** | project `.codebuddy/skills` + `CODEBUDDY.md` | `<CODEBUDDY_HOME>/programmer-workflow` | No | **Not adapted** | Installer/manifest tests; end-to-end not verified |
+| **DeepSeek Harness** | `dsh plugin --profile web add github:xukirito/programmer-workflow` (or root `add .`) | `<DSH_HOME>/programmer-workflow` (`~/.dsh/...`) | Yes (Settings → Programmer Workflow) | Built-in migrate + rollback (stage 2) | Root-package install applied; temp-dir/contract tests; real migration not verified |
+| **Kimi Code** | `/plugins install` or `install.ps1 -Targets kimi` | `<KIMI_HOME>/programmer-workflow` (`~/.kimi-code/...`) | Yes (plugin homepage quick link / `/programmer-workflow:settings`) | Needs a user-supplied migrate + rollback tool pair | Local server + Chromium E2E; real Kimi session not verified |
+| **CodeBuddy** | project `.codebuddy/skills` + `CODEBUDDY.md` | `<CODEBUDDY_HOME>/programmer-workflow` | Local page switch (`--host codebuddy`) | **Not adapted** | Installer/manifest tests; end-to-end not verified |
 | **Claude Code** | `install.ps1 -Targets claude` / `.claude-plugin` | `~/.claude/programmer-workflow` | No | **Not adapted** | Manifest/install tests; marketplace flow not verified |
 | **Cursor** | `install.ps1 -Targets cursor` | `~/.cursor/programmer-workflow` | No | **Not adapted** | Install-path/skill tests |
 | **Codex** | `install.ps1 -Targets codex` | `~/.codex/programmer-workflow` | No | **Not adapted** | Install-path/skill tests |
@@ -57,20 +62,29 @@ Notes:
 
 ### DeepSeek Harness
 
-```powershell
-git clone https://github.com/xukirito/programmer-workflow.git
-cd programmer-workflow
+The repository root is a normal DSH package, so install it from GitHub like `dsh-plugin-whale-pet`:
 
+```powershell
+dsh plugin --profile web add github:xukirito/programmer-workflow
+```
+
+Or install the local root (`dsh plugin --profile web add .`). The package contains the Skill, commands
+and Host/Client halves; Host startup copies the bundled Skill to `<DSH_HOME>/skills/programmer-workflow`
+when it is absent. **Settings → Programmer Workflow** should appear after a restart/refresh. If an old
+`@local/programmer-workflow` bundle is still installed, remove it first.
+
+`install.ps1` remains available for the managed `AGENTS.md` bootstrap or offline installs:
+
+```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
   -Targets dsh -HostId dsh -Bootstrap
 ```
 
-Then open DSH → sidebar **Plugins** → install/add a local bundle → select this repository's `dsh-plugin`
-folder → enable it. **Settings → Programmer Workflow** should appear. Restart DSH or start a new session,
-then verify:
+Verify:
 
 ```powershell
 python "$env:USERPROFILE\.dsh\skills\programmer-workflow\scripts\companion.py" doctor --host dsh --workspace .
+python "$env:USERPROFILE\.dsh\skills\programmer-workflow\scripts\companion.py" env probe --host dsh --workspace .
 ```
 
 Use `$env:DSH_HOME` instead of `$env:USERPROFILE\.dsh` when DSH uses a custom home.
@@ -92,6 +106,41 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets curso
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets codex -HostId codex -Bootstrap
 ```
 
+### Local settings page (Kimi Code / CodeBuddy / DSH)
+
+After changing a local source installation, reinstall the same directory with `/plugins install <repository-root>`
+(or remove and re-add it in the plugin manager). Kimi runs the copied `plugins/managed` snapshot; restarting alone
+does not synchronize newer source files. Check the new version in plugin details, then start a new session.
+There are two configuration entries:
+
+1. Send `/programmer-workflow:settings` in the Kimi chat input (not CMD), or use the terminal command below.
+2. On Windows, double-click `Open-Settings.vbs` without a model turn or command entry. Use either
+   `<repository-root>\Open-Settings.vbs` or the installed copy at
+   `<KIMI_HOME>\plugins\managed\programmer-workflow\Open-Settings.vbs` (`%USERPROFILE%\.kimi-code` by default).
+
+The launcher opens the local page and starts the hidden service when needed. Keep it next to the plugin files.
+Kimi may not render homepage links for custom plugins, so do not rely on that entry.
+If a local install fails with `EPERM ... symlink`, remove stale `.tmp-tests/pwf-host-*` test directories and
+their Windows junctions before adding the repository again; `.gitignore` does not exclude files from Kimi's copy.
+
+Kimi has no DSH `settings.section` Slot, so the same Python configuration code is exposed as
+`/programmer-workflow:settings`. The command starts a loopback-only page in a host background task:
+
+```powershell
+# <skill> is the skill directory actually loaded by the host
+python "<skill>/scripts/companion.py" settings --host kimi --workspace . --open
+```
+
+- After `/plugins install`, the running copy lives under `plugins/managed`; let the agent resolve the CLI
+  from the loaded skill instead of hardcoding `~/.kimi-code/skills`.
+- The page defaults to the startup host and can switch DeepSeek Harness / Kimi Code / CodeBuddy. Every API
+  request names a host explicitly; an unknown host is a 400 and never falls back to DSH.
+- Values are written to `<host-home>/programmer-workflow/config.json`; a rejected save returns field-level
+  errors and never silently replaces the draft with defaults.
+- The page only **prepares** migration/rollback scripts. It never executes a migration, rollback or batch file.
+- `--port 0` picks a random free port. Stop the background task (or press Ctrl+C); config, memory and
+  migration state are kept.
+
 macOS/Linux:
 
 ```bash
@@ -104,6 +153,8 @@ macOS/Linux:
 Talk to the agent; you rarely need commands:
 
 - “Remember: this project uses pnpm, not npm.” → a proposed memory with evidence; approve it to activate.
+- “Open the Programmer Workflow settings.” → in Kimi/CodeBuddy, runs `/programmer-workflow:settings` and
+  prints the local page URL.
 - “Give me a plan first.” → `plan.md` / `plan.html`.
 - “We tried three times and it still fails.” → stall escalation with concrete options.
 - “Add logs and reproduce the 500.” → instrumented run + `TRIAGE.md`.
@@ -151,10 +202,14 @@ win. Destructive commands remain blocked in both modes.
 2. **Runtime data** — sessions, config, caches and credentials; requires a completed/verified stage 1 and a
    migrate + rollback adapter pair.
 
-DSH ships both scripts; Kimi needs a configured tool directory; CodeBuddy/Claude/Cursor/Codex runtime
-migration is not adapted. Run only after fully quitting the target editor, and keep `.old` until the new
-location has been stable for at least a day. See [docs/Migration.html](docs/Migration.html) and
-[docs/Reinstall-DSH.md](docs/Reinstall-DSH.md).
+Both the DSH Settings page and the local page prepare, but never execute, migration scripts. Stage 1
+launchers use the real `companion.py` and pass `--host` explicitly; stage 2 launchers pass
+`KIMI_MIG_SRC` / `KIMI_MIG_DEST` (or the DSH equivalents) and record `runtime-state.json`. `prepared`
+only means the scripts exist; a live link or real on-disk verification is required for `completed`.
+
+Kimi needs a configured tool directory; CodeBuddy/Claude/Cursor/Codex runtime migration is not adapted.
+Run only after fully quitting the target editor, and keep `.old` until the new location has been stable
+for at least a day. See [docs/Migration.html](docs/Migration.html) and [docs/Reinstall-DSH.md](docs/Reinstall-DSH.md).
 
 ## Development
 
@@ -162,6 +217,8 @@ location has been stable for at least a day. See [docs/Migration.html](docs/Migr
 python tests\run_tests.py
 node --check dsh-plugin\index.js
 node --check dsh-plugin\client.js
+node --check skills\programmer-workflow\templates\settings.js
+python skills\programmer-workflow\scripts\companion.py settings --help
 python skills\programmer-workflow\scripts\companion.py docs --host dsh --spec docs\spec.json --check
 ```
 
@@ -170,7 +227,7 @@ Tests use temporary homes; they never write into real host memory. Regenerate ge
 
 ## Version and release
 
-- Current: `v0.1.0` preview; **no GitHub Release or tag yet**.
+- Current: `v0.1.1` preview; **no GitHub Release or tag yet**.
 - Changelog: [CHANGELOG.md](CHANGELOG.md).
 - Before a release: all tests green, real-data migration verified, compatibility matrix updated, no personal
   paths or credentials in the tree.

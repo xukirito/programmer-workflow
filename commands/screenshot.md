@@ -1,0 +1,18 @@
+---
+name: screenshot
+description: 截取指定软件窗口或屏幕，复制图片并由大模型识别图中文字
+---
+
+用户要对「$ARGUMENTS」截图并读取其中的文字。
+
+执行前确认：用户已经明确要求截图和剪贴板操作；如果只是推测，先问一句“是否截图并把图片复制到剪贴板？”。
+
+确认后运行（把 `<skill>` 换成当前加载的 programmer-workflow 技能目录）：
+
+```bash
+python "<skill>/scripts/companion.py" screenshot --host kimi --target "$ARGUMENTS" --yes
+```
+
+如果不知道窗口名，先运行 `screenshot --list` 让用户选。命令只捕获并复制 PNG，不调用 Windows OCR、Tesseract 等本机 OCR。
+
+成功后必须使用宿主自身的图片读取能力打开输出中的 PNG，再根据用户目标转写文字；不要编造识别结果。保留原语言、标点和换行，无法辨认处标为 `[无法辨认]`。把识别文本和剪贴板状态返回给用户。失败时返回错误和可用窗口列表，不要重复截图。

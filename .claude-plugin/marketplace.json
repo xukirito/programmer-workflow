@@ -8,7 +8,7 @@
       "name": "programmer-workflow",
       "source": "./",
       "description": "Persistent memory with approval, stall escalation, instrumented debugging, interactive architecture/feature docs, and UI/art/model prototypes.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Programmer Workflow Contributors"
       },

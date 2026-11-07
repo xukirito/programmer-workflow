@@ -1,0 +1,7 @@
+{
+  "displayName": "Programmer Workflow",
+  "shortDescription": "Memory, environment preflight, screenshots and model vision, debugging, docs and prototypes",
+  "longDescription": "Per-host memory with approval, environment preflight, screenshot capture with model-based visual recognition, stall escalation, instrumented debugging, offline architecture/feature docs and design prototypes. Runs locally.",
+  "developerName": "Programmer Workflow Contributors",
+  "websiteURL": "http://127.0.0.1:8765/quick?host=kimi"
+}

@@ -1,6 +1,6 @@
 {
   "name": "programmer-workflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Persistent user/workspace memory with approval, stall escalation, instrumented debugging, interactive architecture/feature docs, and UI/art/model prototypes.",
   "author": {
     "name": "Programmer Workflow Contributors"

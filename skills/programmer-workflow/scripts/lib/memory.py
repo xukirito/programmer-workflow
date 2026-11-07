@@ -382,8 +382,12 @@ class MemoryStore:
         atomic_write_text(self.md_path, self.render_markdown(data))
 
     # -- boot -----------------------------------------------------------
-    def boot_entries(self, limit: int = 40) -> list[dict[str, Any]]:
-        return self.entries(status="active")[:limit]
+    def boot_entries(self, limit: int = 40, exclude_tags: tuple[str, ...] = ()) -> list[dict[str, Any]]:
+        entries = self.entries(status="active")
+        if exclude_tags:
+            excluded = set(exclude_tags)
+            entries = [entry for entry in entries if not excluded.intersection(entry.get("tags") or [])]
+        return entries[:limit]
 
     def active_char_count(self) -> int:
         return sum(len(e.get("text", "")) + len(e.get("detail", "")) for e in self.entries(status="active"))
@@ -412,11 +416,12 @@ python <skill>/scripts/companion.py memory reject <id> --scope {self.scope}
 """
 
 
-def text_boot_block(store: MemoryStore, limit: int = 40) -> str:
-    entries = store.boot_entries(limit)
+def text_boot_block(store: MemoryStore, limit: int = 40, exclude_tags: tuple[str, ...] = ()) -> str:
+    entries = store.boot_entries(limit, exclude_tags=exclude_tags)
     counts = store.counts()
+    visible_active = len(store.boot_entries(100000, exclude_tags=exclude_tags)) if exclude_tags else counts.get("active", 0)
     label = "USER MEMORY (global)" if store.scope == "user" else f"WORKSPACE MEMORY ({store.workspace})"
-    lines = [f"{label} — {counts.get('active', 0)} active, {counts.get('proposed', 0)} pending"]
+    lines = [f"{label} — {visible_active} active, {counts.get('proposed', 0)} pending"]
     if not entries:
         lines.append("- (no active entries)")
     for entry in entries:
@@ -459,6 +464,19 @@ def boot_payload(workspace: Path | None = None) -> dict[str, Any]:
     env_flags = workspace_environment_flags(ws)
     dev_auto = bool(cfg.get("devOnlyAutoInstrument", True))
     workflow_mode = normalize_workflow_mode(cfg.get("workflowMode"))
+    # Reuse a cached probe; probe once on the first boot and then stay quiet.
+    # Imported lazily so memory.py and environment.py do not form an import cycle.
+    try:
+        from . import environment as environmentlib
+
+        cache = environmentlib.load_cached(ws)
+        if cache is None:
+            cache, _ = environmentlib.ensure_cached(ws, record=True)
+        environment_info = environmentlib.summary(cache, ws)
+        environment_line = environmentlib.boot_line(cache, ws)
+    except (OSError, ValueError, KeyError) as error:
+        environment_info = {"probed": False, "error": str(error)}
+        environment_line = f"ENVIRONMENT — 探测失败：{error}"
     payload: dict[str, Any] = {
         "tool": "programmer-workflow",
         "workspace": str(ws),
@@ -474,6 +492,8 @@ def boot_payload(workspace: Path | None = None) -> dict[str, Any]:
             "policy": "plugin policy only; the host's Plan/read-only/sandbox restrictions still apply",
         },
         "overrides": cfg.get("overrides", {}),
+        "environment": environment_info,
+        "environmentLine": environment_line,
         "user": {
             "path": str(user.md_path),
             "enabled": user_enabled,
@@ -488,7 +508,7 @@ def boot_payload(workspace: Path | None = None) -> dict[str, Any]:
             "initialized": local.json_path.exists(),
             "writable": local.can_write(),
             "counts": local.counts() if workspace_enabled and local.json_path.exists() else {"active": 0, "proposed": 0, "total": 0},
-            "entries": local.boot_entries() if workspace_enabled and local.json_path.exists() else [],
+            "entries": local.boot_entries(exclude_tags=("environment-probe",)) if workspace_enabled and local.json_path.exists() else [],
         },
         "instructions": [
             "Obey active entries unless the user's current instruction conflicts; ask which to keep.",
@@ -514,7 +534,7 @@ def boot_text(workspace: Path | None = None) -> str:
         user_line += " (run: memory init --scope user)"
     local_line = f"WORKSPACE MEMORY ({payload['workspace']}) — not loaded at startup"
     if payload["workspace_memory"].get("enabled", True) and payload["workspace_memory"]["initialized"]:
-        local_line = text_boot_block(local)
+        local_line = text_boot_block(local, exclude_tags=("environment-probe",))
     elif not payload["workspace_memory"].get("enabled", True):
         local_line = f"WORKSPACE MEMORY ({payload['workspace']}) — disabled for startup loading (CLI still reads/writes it)"
     elif not payload["workspace_memory"].get("writable", True):
@@ -541,6 +561,8 @@ def boot_text(workspace: Path | None = None) -> str:
         user_line,
         "",
         local_line,
+        "",
+        payload.get("environmentLine", "ENVIRONMENT — 尚未探测"),
         "",
         *policy,
         "",

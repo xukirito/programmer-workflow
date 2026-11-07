@@ -10,10 +10,11 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const ENTRY_ID = 'programmer-workflow'
-const VERSION = '0.1.0'
+const VERSION = '0.1.1'
 // Public defaults are empty: the settings page asks the user for a target.
 // A machine-specific default must never ship, or a fresh install points at
 // a drive/path that only the original author has.
@@ -45,6 +46,9 @@ const DEFAULT_CONFIG = {
   kimiMigrationTarget: DEFAULT_KIMI_TARGET,
   kimiMigrationTools: '',
   planFormat: 'md',
+  screenshotEnabled: true,
+  balanceDisplay: true,
+  balanceRefreshSeconds: 60,
   pluginMigrationTargetRoot: '',
   runtimeMigrationTargetRoot: '',
 }
@@ -59,9 +63,9 @@ const PATH_FIELDS = ['workspaceDataDir', 'debugLogDir', 'docsDir', 'prototypeFil
 const BOOL_FIELDS = [
   'userMemoryEnabled', 'workspaceMemoryEnabled',
   'devOnlyAutoInstrument', 'docsEnabled', 'prototypeEnabled', 'promptMigration',
-  'migrationActionEnabled',
+  'migrationActionEnabled', 'screenshotEnabled', 'balanceDisplay',
 ]
-const INT_FIELDS = ['satisfactionThreshold', 'bugfixThreshold', 'retentionDays']
+const INT_FIELDS = ['satisfactionThreshold', 'bugfixThreshold', 'retentionDays', 'balanceRefreshSeconds']
 
 const HOSTS = {
   dsh: { id: 'dsh', label: 'DeepSeek Harness', dataDir: '.dsh', env: 'DSH_HOME', home: '~/.dsh', pluginMigration: true, runtimeMigration: true, runtimeAdapter: 'dsh' },
@@ -177,6 +181,7 @@ function normalizeConfig(input) {
   config.satisfactionThreshold = clampInt(source.satisfactionThreshold, 3, 1, 10)
   config.bugfixThreshold = clampInt(source.bugfixThreshold, 2, 1, 10)
   config.retentionDays = clampInt(source.retentionDays, 30, 1, 365)
+  config.balanceRefreshSeconds = clampInt(source.balanceRefreshSeconds, 60, 15, 600)
   config.language = String(source.language || 'zh-CN').slice(0, 20)
   config.planFormat = source.planFormat === 'html' ? 'html' : 'md'
   config.workflowMode = WORKFLOW_MODE_IDS.includes(source.workflowMode) ? source.workflowMode : 'plan'
@@ -956,12 +961,23 @@ function inventoryJson(root) {
   return { sha256: sha256File(file), counts, ids: entries.map((e) => e && e.id).filter(Boolean).sort() }
 }
 
+function bundledCompanionPath() {
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'skills', 'programmer-workflow', 'scripts', 'companion.py')
+}
+
 function companionForHost(host) {
   const id = normalizeHost(host)
   const override = process.env.PROGRAMMER_WORKFLOW_CLI
   if (override) return fs.existsSync(override) ? path.resolve(override) : null
-  const candidate = path.join(hostHome(id), 'skills', 'programmer-workflow', 'scripts', 'companion.py')
-  return fs.existsSync(candidate) ? candidate : null
+  const homeCandidate = path.join(hostHome(id), 'skills', 'programmer-workflow', 'scripts', 'companion.py')
+  const bundled = bundledCompanionPath()
+  // The bundled skill belongs to DSH. Other hosts must keep their own CLI
+  // boundary: a DSH copy must never make Kimi/CodeBuddy migration look ready.
+  const candidates = id === 'dsh' ? [bundled, homeCandidate] : [homeCandidate]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate
+  }
+  return null
 }
 
 function pluginDataReadyMessage(host) {
@@ -1271,12 +1287,184 @@ function serveMigration(_req, res) {
   }
 }
 
+let balanceCache = { at: 0, payload: null }
+
+function walletList(items) {
+  if (!Array.isArray(items)) return []
+  return items
+    .filter((item) => item && (item.currency === 'CNY' || item.currency === 'USD'))
+    .map((item) => ({ currency: item.currency, balance: String(item.balance == null ? '' : item.balance) }))
+    .filter((item) => item.balance !== '')
+}
+
+async function getBalancePayload(ctx, force = false) {
+  const config = readConfig('dsh')
+  const refreshSeconds = clampInt(config.balanceRefreshSeconds, 60, 15, 600)
+  if (!config.balanceDisplay) {
+    return { ok: false, status: 'disabled', refreshSeconds, at: new Date().toISOString() }
+  }
+  let account
+  try {
+    account = ctx.get('deepseekAccount')
+  } catch (error) {
+    account = undefined
+  }
+  if (!account || typeof account.getBalance !== 'function') {
+    return { ok: false, status: 'unavailable', refreshSeconds, at: new Date().toISOString(), error: 'deepseek account service is not mounted' }
+  }
+  const now = Date.now()
+  if (!force && balanceCache.payload && now - balanceCache.at < 30_000) {
+    return { ...balanceCache.payload, cached: true }
+  }
+  const client = {
+    version: VERSION,
+    locale: String(config.language || 'zh-CN'),
+    timezoneOffsetSeconds: -new Date().getTimezoneOffset() * 60,
+  }
+  try {
+    const state = await account.getState()
+    if (!state || state.status !== 'credential-stored') {
+      const payload = { ok: false, status: 'signed-out', refreshSeconds, at: new Date().toISOString() }
+      balanceCache = { at: now, payload }
+      return payload
+    }
+    const balance = await account.getBalance(client)
+    if (!balance) {
+      const payload = { ok: false, status: 'signed-out', refreshSeconds, at: new Date().toISOString() }
+      balanceCache = { at: now, payload }
+      return payload
+    }
+    if (balance.status !== 'ready') {
+      const payload = { ok: false, status: 'failed', refreshSeconds, at: new Date().toISOString(), error: 'balance query failed' }
+      balanceCache = { at: now, payload }
+      return payload
+    }
+    const payload = {
+      ok: true,
+      status: 'ready',
+      wallets: walletList(balance.value),
+      bonusWallets: walletList(balance.bonusWallets),
+      refreshSeconds,
+      at: new Date().toISOString(),
+    }
+    balanceCache = { at: now, payload }
+    return payload
+  } catch (error) {
+    return {
+      ok: false,
+      status: 'error',
+      refreshSeconds,
+      at: new Date().toISOString(),
+      error: String(error && error.message ? error.message : error),
+    }
+  }
+}
+
+function runCompanion(cli, args, timeoutMs = 120_000) {
+  return new Promise((resolve) => {
+    const python = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3')
+    let child
+    try {
+      child = spawn(python, [cli, ...args], {
+        cwd: process.cwd(),
+        env: process.env,
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      })
+    } catch (error) {
+      resolve({ code: -1, stdout: '', stderr: String(error && error.message ? error.message : error) })
+      return
+    }
+    let stdout = ''
+    let stderr = ''
+    let settled = false
+    const timer = setTimeout(() => {
+      if (settled) return
+      settled = true
+      try { child.kill() } catch {}
+      resolve({ code: -1, stdout, stderr: stderr + '\n[timeout]' })
+    }, timeoutMs)
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
+    child.stdout.on('data', (chunk) => { stdout += chunk })
+    child.stderr.on('data', (chunk) => { stderr += chunk })
+    child.on('error', (error) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolve({ code: -1, stdout, stderr: stderr + String(error && error.message ? error.message : error) })
+    })
+    child.on('close', (code) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolve({ code: typeof code === 'number' ? code : -1, stdout, stderr })
+    })
+  })
+}
+
+async function screenshotCommand(invocation) {
+  const config = readConfig('dsh')
+  if (!config.screenshotEnabled) {
+    return { kind: 'error', text: '截图功能已在 设置 → 程序员工作流 中关闭。打开“截图 / 大模型识别 / 剪贴板”后再试。' }
+  }
+  const raw = String(invocation.rawInput || '').trim()
+  const cli = companionForHost('dsh')
+  if (!cli) {
+    return { kind: 'error', text: '未找到 companion.py：请安装 Programmer Workflow Skill，或设置 PROGRAMMER_WORKFLOW_CLI。' }
+  }
+  if (!raw) {
+    return {
+      kind: 'success',
+      text: '用法：/screenshot 微信（按窗口标题或进程名模糊匹配）\n/screenshot 屏幕（全屏）\n/screenshot --list（列出可捕获窗口）\n命令只捕获并复制 PNG，不调用本机 OCR；需要文字时，让 Agent 读取生成的图片。',
+    }
+  }
+  const args = ['screenshot', '--host', 'dsh']
+  if (raw === '--list' || raw.toLowerCase() === 'list') {
+    args.push('--list')
+  } else {
+    args.push('--target', raw, '--yes')
+  }
+  const result = await runCompanion(cli, args, 120_000)
+  const output = (result.stdout || '').trim()
+  if (result.code !== 0) {
+    return { kind: 'error', text: (result.stderr || output || '截图失败').trim().slice(-4000) }
+  }
+  return { kind: 'success', text: (output || '截图完成，但没有输出。').slice(-8000) }
+}
+
+function ensureBundledSkill() {
+  const source = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'skills', 'programmer-workflow')
+  const target = path.join(hostHome('dsh'), 'skills', 'programmer-workflow')
+  if (!fs.existsSync(path.join(source, 'SKILL.md'))) return { copied: false, reason: 'bundled skill missing' }
+  if (fs.existsSync(path.join(target, 'SKILL.md'))) return { copied: false, reason: 'already installed' }
+  try {
+    copyDir(source, target)
+    return { copied: true, target }
+  } catch (error) {
+    return { copied: false, reason: String(error && error.message ? error.message : error) }
+  }
+}
+
 export function apply(ctx) {
   try {
     ensureLayout()
+    ensureBundledSkill()
   } catch (error) {
-    console.error('[programmer-workflow] cannot prepare global data root:', error)
+    console.error('[programmer-workflow] cannot prepare global data root/skill:', error)
   }
+
+  ctx.inject(['commands'], (child) => {
+    child.effect(() => {
+      if (!child.commands || typeof child.commands.register !== 'function') return () => {}
+      return child.commands.register({
+        name: 'screenshot',
+        description: '截取指定软件窗口或屏幕，复制 PNG 供大模型识别',
+        input: { hint: '软件名 / 窗口标题 / 屏幕 / --list' },
+        handler: screenshotCommand,
+      })
+    })
+  })
 
   // This plugin ships its own Settings page and stores its config in
   // <globalRoot>/config.json, so it does not depend on the Host settings schema.
@@ -1289,6 +1477,19 @@ export function apply(ctx) {
           sendJson(res, 200, statusPayload(requestHost(req)))
         } catch (error) {
           sendJson(res, 400, { ok: false, error: String(error.message || error) })
+        }
+      },
+    }))
+    child.effect(() => child.webServer.register({
+      kind: 'exact',
+      path: '/programmer-workflow/balance',
+      handler: async (req, res) => {
+        if (req.method !== 'GET') return sendJson(res, 405, { ok: false, error: 'GET required' })
+        try {
+          const force = /[?&]refresh=1(?:&|$)/.test(String(req.url || ''))
+          sendJson(res, 200, await getBalancePayload(ctx, force))
+        } catch (error) {
+          sendJson(res, 200, { ok: false, status: 'error', error: String(error && error.message ? error.message : error) })
         }
       },
     }))
@@ -1367,4 +1568,4 @@ export function apply(ctx) {
   })
 }
 
-export { ENTRY_ID, DEFAULT_CONFIG, VERSION }
+export { ENTRY_ID, DEFAULT_CONFIG, VERSION, runCompanion }

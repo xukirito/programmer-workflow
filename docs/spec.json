@@ -3,29 +3,102 @@
     "project": {
       "name": "程序员工作流 / Programmer Workflow",
       "tagline": "跨 Agent 的记忆、调试与评审工作流",
-      "summary": "Programmer Workflow 是一个可安装到多种编码 Agent 的便携式 Skill/Plugin。它把容易在长对话中丢失的工作流沉淀成可执行协议：按宿主隔离的用户/工作区记忆、workflowMode（plan/full-authority）审核、卡壳后的行业做法升级、带日志的调试闭环，以及可交互的工程文档与设计原型。\n核心不是替代 Agent，而是给 Agent 一套可检查、可回滚、可评审的外部状态：记忆有 proposed/active 审批门，Plan 模式命令需要用户批准而 Full authority 普通运行不逐条批准，文档与原型都是单文件离线 HTML，评审意见可导出为 JSON 回到对话。\n整个包只依赖 Python 标准库与浏览器，不引入 MCP、数据库或云端服务；DSH/Kimi/CodeBuddy/Claude/Cursor/Codex 各自使用独立数据根，DSH 另有原生 Host/Client 设置页与两阶段迁移。",
-      "version": "0.1.0",
+      "summary": "Programmer Workflow 是一个可安装到多种编码 Agent 的便携式 Skill/Plugin。它把容易在长对话中丢失的工作流沉淀成可执行协议：按宿主隔离的用户/工作区记忆、workflowMode（plan/full-authority）审核、卡壳后的行业做法升级、带日志的调试闭环，以及可交互的工程文档与设计原型。\n核心不是替代 Agent，而是给 Agent 一套可检查、可回滚、可评审的外部状态：记忆有 proposed/active 审批门，Plan 模式命令需要用户批准而 Full authority 普通运行不逐条批准，文档与原型都是单文件离线 HTML，评审意见可导出为 JSON 回到对话。\n整个包只依赖 Python 标准库与浏览器，不引入 MCP、数据库或云端服务；DSH/Kimi/CodeBuddy/Claude/Cursor/Codex 各自使用独立数据根，DSH 另有原生 Host/Client 设置页与两阶段迁移。\nKimi Code 通过 /programmer-workflow:settings 启动本地 Python 设置页，使用受控的 127.0.0.1 服务读写该宿主独立的 config.json。",
+      "version": "0.1.1",
       "generated_at": "",
       "language": "zh-CN",
       "confidence": "high",
-      "scope": ["skills/programmer-workflow", "dsh-plugin", "dsh-plugin/dsh-migration-tools", "commands", "install.ps1", "install.sh", "kimi.plugin.json", ".claude-plugin", "docs", "docs/Install.html", "docs/Migration.html", "tests"],
+      "scope": [
+        ".claude-plugin",
+        "commands",
+        "docs",
+        "docs/Install.html",
+        "docs/Migration.html",
+        "dsh-plugin",
+        "dsh-plugin/dsh-migration-tools",
+        "install.ps1",
+        "install.sh",
+        "kimi.plugin.json",
+        "locales",
+        "package.json",
+        "scripts",
+        "skills/programmer-workflow",
+        "skills/programmer-workflow/scripts/platform",
+        "tests"
+      ],
       "source": "仓库源码 + 临时目录测试 + 本机设置页/HTTP 静态验证（真实宿主迁移未执行）"
     },
     "stack": [
-      { "name": "Python", "version": "3.8+", "role": "记忆、扫描、调试运行、日志分诊、HTML 规格校验与组装", "evidence": "skills/programmer-workflow/scripts/companion.py" },
-      { "name": "HTML / CSS / JavaScript", "version": "现代浏览器", "role": "离线单文件交互文档与原型，带评审导出", "evidence": "skills/programmer-workflow/templates/docs.html" },
-      { "name": "PowerShell", "version": "5.1+/7+", "role": "Windows 安装、权限与路径处理", "evidence": "install.ps1" },
-      { "name": "Bash", "version": "3.2+", "role": "macOS/Linux 安装", "evidence": "install.sh" },
-      { "name": "Agent Skills 格式", "version": "SKILL.md", "role": "跨 Agent 的行为入口", "evidence": "skills/programmer-workflow/SKILL.md" },
-      { "name": "DeepSeek Harness", "version": "Cordis + React", "role": "设置页 Host/Client 插件、配置 JSON、迁移状态路由", "evidence": "dsh-plugin/index.js" },
-      { "name": "CodeBuddy Skills", "version": "SKILL.md", "role": "CodeBuddy 项目级 Skill 发现与 CODEBUDDY.md 自举", "evidence": ".codebuddy/skills" },
-      { "name": "Kimi Plugin", "version": "kimi.plugin.json", "role": "Kimi Code 一键安装、会话启动加载、斜杠命令", "evidence": "kimi.plugin.json" }
+      {
+        "name": "Python",
+        "version": "3.8+",
+        "role": "记忆、扫描、调试运行、日志分诊、HTML 规格校验与组装",
+        "evidence": "skills/programmer-workflow/scripts/companion.py"
+      },
+      {
+        "name": "HTML / CSS / JavaScript",
+        "version": "现代浏览器",
+        "role": "离线单文件交互文档与原型，带评审导出",
+        "evidence": "skills/programmer-workflow/templates/docs.html"
+      },
+      {
+        "name": "PowerShell",
+        "version": "5.1+/7+",
+        "role": "Windows 安装、权限与路径处理",
+        "evidence": "install.ps1"
+      },
+      {
+        "name": "Bash",
+        "version": "3.2+",
+        "role": "macOS/Linux 安装",
+        "evidence": "install.sh"
+      },
+      {
+        "name": "Agent Skills 格式",
+        "version": "SKILL.md",
+        "role": "跨 Agent 的行为入口",
+        "evidence": "skills/programmer-workflow/SKILL.md"
+      },
+      {
+        "name": "DeepSeek Harness",
+        "version": "Cordis + React",
+        "role": "设置页 Host/Client 插件、配置 JSON、迁移状态路由",
+        "evidence": "dsh-plugin/index.js"
+      },
+      {
+        "name": "CodeBuddy Skills",
+        "version": "SKILL.md",
+        "role": "CodeBuddy 项目级 Skill 发现与 CODEBUDDY.md 自举",
+        "evidence": ".codebuddy/skills"
+      },
+      {
+        "name": "Kimi Plugin",
+        "version": "kimi.plugin.json",
+        "role": "Kimi Code 一键安装、会话启动加载、斜杠命令",
+        "evidence": "kimi.plugin.json"
+      }
     ],
     "layers": [
-      { "id": "interface", "name": "交互层", "description": "模型读到的协议、命令与各宿主适配；决定何时触发、如何询问。" },
-      { "id": "core", "name": "核心层", "description": "记忆审批、证据扫描、卡壳计数、调试运行与日志分诊。" },
-      { "id": "presentation", "name": "呈现层", "description": "规格校验、单文件 HTML 组装、评审状态与导出。" },
-      { "id": "distribution", "name": "分发层", "description": "安装器、Kimi/Claude 清单、示例、自举指令与测试。" }
+      {
+        "id": "interface",
+        "name": "交互层",
+        "description": "模型读到的协议、命令与各宿主适配；决定何时触发、如何询问。"
+      },
+      {
+        "id": "core",
+        "name": "核心层",
+        "description": "记忆审批、证据扫描、卡壳计数、调试运行与日志分诊。"
+      },
+      {
+        "id": "presentation",
+        "name": "呈现层",
+        "description": "规格校验、单文件 HTML 组装、评审状态与导出。"
+      },
+      {
+        "id": "distribution",
+        "name": "分发层",
+        "description": "安装器、Kimi/Claude 清单、示例、自举指令与测试。"
+      }
     ],
     "modules": [
       {
@@ -41,17 +114,46 @@
           "规定询问、记忆、调试、文档、原型之间的优先级。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/SKILL.md", "purpose": "总协议与触发矩阵" },
-          { "path": "skills/programmer-workflow/references/ask.md", "purpose": "选项 + 自由回答的询问协议" },
-          { "path": "skills/programmer-workflow/references/memory.md", "purpose": "记忆范围、审批与习惯采集" },
-          { "path": "skills/programmer-workflow/references/satisfaction.md", "purpose": "三轮卡壳、行业做法与解释卡" },
-          { "path": "skills/programmer-workflow/references/debugging.md", "purpose": "日志埋点与硬件协作" },
-          { "path": "skills/programmer-workflow/references/docs.md", "purpose": "Architecture/Features 规格与证据规则" },
-          { "path": "skills/programmer-workflow/references/prototype.md", "purpose": "原型方向、评审与美术/模型说明" }
+          {
+            "path": "skills/programmer-workflow/SKILL.md",
+            "purpose": "总协议与触发矩阵"
+          },
+          {
+            "path": "skills/programmer-workflow/references/ask.md",
+            "purpose": "选项 + 自由回答的询问协议"
+          },
+          {
+            "path": "skills/programmer-workflow/references/memory.md",
+            "purpose": "记忆范围、审批与习惯采集"
+          },
+          {
+            "path": "skills/programmer-workflow/references/satisfaction.md",
+            "purpose": "三轮卡壳、行业做法与解释卡"
+          },
+          {
+            "path": "skills/programmer-workflow/references/debugging.md",
+            "purpose": "日志埋点与硬件协作"
+          },
+          {
+            "path": "skills/programmer-workflow/references/docs.md",
+            "purpose": "Architecture/Features 规格与证据规则"
+          },
+          {
+            "path": "skills/programmer-workflow/references/prototype.md",
+            "purpose": "原型方向、评审与美术/模型说明"
+          }
         ],
-        "depends_on": ["cli"],
-        "used_by": ["installers", "host-manifests"],
-        "evidence": ["SKILL.md 的触发矩阵", "references 的分工"],
+        "depends_on": [
+          "cli"
+        ],
+        "used_by": [
+          "installers",
+          "host-manifests"
+        ],
+        "evidence": [
+          "SKILL.md 的触发矩阵",
+          "references 的分工"
+        ],
         "confidence": "high",
         "notes": "协议本身不执行代码；它把确定性工作交给 CLI，把判断工作留给模型。"
       },
@@ -62,18 +164,44 @@
         "path": "skills/programmer-workflow/scripts/companion.py",
         "role": "统一命令行入口，把 boot/memory/scan/env/stall/run/triage/docs/prototype/doctor 路由到核心模块。",
         "responsibilities": [
-          "解析子命令与参数，输出人类可读或 --json 结果。",
-          "统一错误处理与退出码，避免 Agent 猜测失败原因。",
+          "env probe/check：把本机环境探测一次，缓存到工作区并写入记忆",
+          "screenshot：跨平台截图、大模型识别与剪贴板",
+          "settings 子命令：启动本地设置页并保持宿主后台任务。",
           "把 HTML 规格校验与渲染串起来。",
-          "提供 doctor 自检，定位模板或安装缺失。"
+          "提供 doctor 自检，定位模板或安装缺失。",
+          "统一错误处理与退出码，避免 Agent 猜测失败原因。",
+          "解析子命令与参数，输出人类可读或 --json 结果。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/companion.py", "purpose": "参数解析与命令路由" },
-          { "path": "skills/programmer-workflow/scripts/lib/common.py", "purpose": "路径、JSON、锁、文本与进程工具" }
+          {
+            "path": "skills/programmer-workflow/scripts/companion.py",
+            "purpose": "参数解析与命令路由"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/common.py",
+            "purpose": "路径、JSON、锁、文本与进程工具"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/companion.py",
+            "purpose": "settings 子命令与 --host/--workspace/--open/--port"
+          }
         ],
-        "depends_on": ["memory", "scan", "debug", "stall", "renderer"],
-        "used_by": ["skill-protocol"],
-        "evidence": ["companion.py 的 build_parser", "各 cmd_* 函数"],
+        "depends_on": [
+          "debug",
+          "environment",
+          "memory",
+          "renderer",
+          "scan",
+          "screenshot",
+          "stall"
+        ],
+        "used_by": [
+          "skill-protocol"
+        ],
+        "evidence": [
+          "companion.py 的 build_parser",
+          "各 cmd_* 函数"
+        ],
         "confidence": "high",
         "notes": "只依赖 Python 标准库，避免在 Agent 环境里安装依赖。"
       },
@@ -90,12 +218,25 @@
           "渲染人类可读的 MEMORY.md 与会话启动块。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/memory.py", "purpose": "MemoryStore 与审批状态机" },
-          { "path": "skills/programmer-workflow/scripts/lib/common.py", "purpose": "FileLock、atomic_write_json" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/memory.py",
+            "purpose": "MemoryStore 与审批状态机"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/common.py",
+            "purpose": "FileLock、atomic_write_json"
+          }
         ],
         "depends_on": [],
-        "used_by": ["cli", "scan"],
-        "evidence": ["memory.py 的 STATUSES", "boot_text", "promote 只写 proposed"],
+        "used_by": [
+          "cli",
+          "scan"
+        ],
+        "evidence": [
+          "memory.py 的 STATUSES",
+          "boot_text",
+          "promote 只写 proposed"
+        ],
         "confidence": "high",
         "notes": "拒绝条目保留在 JSON 中作为审计记录，但不进入 MEMORY.md。"
       },
@@ -112,12 +253,25 @@
           "把推断与证据分离，提示“线索不等于结论”。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/scan.py", "purpose": "scan_project / project_map / env_facts" },
-          { "path": "skills/programmer-workflow/scripts/lib/common.py", "purpose": "iter_project_files 与文本读取" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/scan.py",
+            "purpose": "scan_project / project_map / env_facts"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/common.py",
+            "purpose": "iter_project_files 与文本读取"
+          }
         ],
         "depends_on": [],
-        "used_by": ["cli", "env"],
-        "evidence": ["scan.py 的 privacy 字段", "list_transcripts 的 opt-in", "project_map 的截断标记"],
+        "used_by": [
+          "cli",
+          "env"
+        ],
+        "evidence": [
+          "scan.py 的 privacy 字段",
+          "list_transcripts 的 opt-in",
+          "project_map 的截断标记"
+        ],
         "confidence": "high",
         "notes": "扫描上限 4000–6000 文件，避免大仓库拖慢会话。"
       },
@@ -134,12 +288,25 @@
           "生成 TRIAGE.md / TRIAGE.json 与下一步验证顺序。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/debug.py", "purpose": "run_command、triage_log、triage_markdown" },
-          { "path": "skills/programmer-workflow/scripts/lib/common.py", "purpose": "日志路径与 git 信息" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/debug.py",
+            "purpose": "run_command、triage_log、triage_markdown"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/common.py",
+            "purpose": "日志路径与 git 信息"
+          }
         ],
         "depends_on": [],
-        "used_by": ["cli", "skill-protocol"],
-        "evidence": ["ConsentRequiredError", "DESTRUCTIVE_PATTERNS", "HYPOTHESES"],
+        "used_by": [
+          "cli",
+          "skill-protocol"
+        ],
+        "evidence": [
+          "ConsentRequiredError",
+          "DESTRUCTIVE_PATTERNS",
+          "HYPOTHESES"
+        ],
         "confidence": "high",
         "notes": "分诊是文本模式推断，报告里必须保留“需验证”声明。"
       },
@@ -155,11 +322,20 @@
           "只提示阈值，不替模型决定是否真的卡壳。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/stall.py", "purpose": "bump/status/reset" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/stall.py",
+            "purpose": "bump/status/reset"
+          }
         ],
         "depends_on": [],
-        "used_by": ["cli", "skill-protocol"],
-        "evidence": ["THRESHOLDS", "STALE_AFTER"],
+        "used_by": [
+          "cli",
+          "skill-protocol"
+        ],
+        "evidence": [
+          "THRESHOLDS",
+          "STALE_AFTER"
+        ],
         "confidence": "high",
         "notes": "计数是辅助证据，最终触发仍要看用户的明确不满意信号。"
       },
@@ -176,12 +352,26 @@
           "通过模板 token 注入 CSS/JS/JSON，产出无外部依赖的页面。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/render/spec.py", "purpose": "normalize_* 与 sanitize_html" },
-          { "path": "skills/programmer-workflow/scripts/lib/render/pages.py", "purpose": "模板组装与输出描述" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/render/spec.py",
+            "purpose": "normalize_* 与 sanitize_html"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/render/pages.py",
+            "purpose": "模板组装与输出描述"
+          }
         ],
-        "depends_on": ["templates"],
-        "used_by": ["cli"],
-        "evidence": ["SpecError 的可操作报错", "sanitize_html 的正则", "attach_hash"],
+        "depends_on": [
+          "templates"
+        ],
+        "used_by": [
+          "cli"
+        ],
+        "evidence": [
+          "SpecError 的可操作报错",
+          "sanitize_html 的正则",
+          "attach_hash"
+        ],
         "confidence": "high",
         "notes": "规格错误必须在写文件前失败，避免半成品 HTML。"
       },
@@ -195,19 +385,56 @@
           "用同一套设计 token 支持深/浅主题、响应式与打印。",
           "Architecture/Features 共用 docs.html，按 kind 渲染不同章节。",
           "Prototype 支持方向/视口切换、色板复制、画布标注。",
-          "评审状态存 localStorage，可复制或下载 JSON。"
+          "评审状态存 localStorage，可复制或下载 JSON。",
+          "本地设置页 HTML/CSS/JS 模板；无第三方资源。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/templates/docs.html", "purpose": "文档外壳" },
-          { "path": "skills/programmer-workflow/templates/docs.js", "purpose": "章节渲染、筛选、依赖图、抽屉" },
-          { "path": "skills/programmer-workflow/templates/prototype.html", "purpose": "原型外壳" },
-          { "path": "skills/programmer-workflow/templates/prototype.js", "purpose": "方向/视口/标注/评审" },
-          { "path": "skills/programmer-workflow/templates/review.js", "purpose": "共享评审控制器、主题、复制、弹窗" },
-          { "path": "skills/programmer-workflow/templates/base.css", "purpose": "设计系统与响应式" }
+          {
+            "path": "skills/programmer-workflow/templates/docs.html",
+            "purpose": "文档外壳"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/docs.js",
+            "purpose": "章节渲染、筛选、依赖图、抽屉"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/prototype.html",
+            "purpose": "原型外壳"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/prototype.js",
+            "purpose": "方向/视口/标注/评审"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/review.js",
+            "purpose": "共享评审控制器、主题、复制、弹窗"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/base.css",
+            "purpose": "设计系统与响应式"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/settings.html",
+            "purpose": "设置页结构"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/settings.css",
+            "purpose": "设置页设计令牌与响应式"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/settings.js",
+            "purpose": "设置页交互"
+          }
         ],
         "depends_on": [],
-        "used_by": ["renderer"],
-        "evidence": ["review.js 的 Review 控制器", "docs.js 的布局与筛选", "prototype.css 的设备框"],
+        "used_by": [
+          "renderer"
+        ],
+        "evidence": [
+          "review.js 的 Review 控制器",
+          "docs.js 的布局与筛选",
+          "prototype.css 的设备框"
+        ],
         "confidence": "high",
         "notes": "所有资源内联，断网可用；不使用框架以降低安装与安全成本。"
       },
@@ -221,15 +448,36 @@
           "host ID 规范化与 --host/PROGRAMMER_WORKFLOW_HOST 解析；无法确定时明确报错。",
           "DSH_HOME 仅影响 DSH；KIMI_HOME/CODEBUDDY_HOME 等只影响各自宿主。",
           "暴露 pluginRoot、memoryRoot、默认根、external override 标记。",
-          "为各宿主声明 plugin/runtime migration 支持能力。"
+          "为各宿主声明 plugin/runtime migration 支持能力。",
+          "解析“当前正在运行、且 host 与启动 host 相同”的 managed 插件 CLI，禁止跨 host 复用。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/hosts.py", "purpose": "宿主注册表、数据根和 override" },
-          { "path": "tests/test_hosts.py", "purpose": "宿主隔离与不回退测试" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/hosts.py",
+            "purpose": "宿主注册表、数据根和 override"
+          },
+          {
+            "path": "tests/test_hosts.py",
+            "purpose": "宿主隔离与不回退测试"
+          },
+          {
+            "path": "tests/test_hosts.py",
+            "purpose": "managed 插件 CLI 的 host 作用域测试"
+          }
         ],
         "depends_on": [],
-        "used_by": ["cli", "memory", "migration", "dsh-plugin"],
-        "evidence": ["hosts.py", "tests/test_hosts.py 动态测试"],
+        "used_by": [
+          "cli",
+          "memory",
+          "migration",
+          "dsh-plugin",
+          "config",
+          "settings"
+        ],
+        "evidence": [
+          "hosts.py",
+          "tests/test_hosts.py 动态测试"
+        ],
         "confidence": "high",
         "notes": "generic 是唯一的匿名根；所有其他宿主必须显式指定。"
       },
@@ -244,15 +492,38 @@
           "记录 active/proposed/rejected 数量、ID 集合与文件 SHA-256，生成独立备份。",
           "保护 legacy/共享数据的冲突，不覆盖、不自动提升 proposed。",
           "回滚前备份目标当前最新插件数据；任一阶段失败返回非零并保留可恢复路径。",
-          "运行数据阶段按宿主能力矩阵启用，未适配宿主明确拒绝。"
+          "运行数据阶段按宿主能力矩阵启用，未适配宿主明确拒绝。",
+          "为第一阶段生成 run-stage1-plugin.cmd / run-stage1-rollback-plugin.cmd，使用真实 companion.py 并显式传 --host。",
+          "把 DSH 的第二阶段规则实现为可测试的 Python 函数，传入 KIMI_MIG_SRC / KIMI_MIG_DEST 并写入 runtime-state.json。",
+          "prepared 不等于 completed；只有链接或真实落盘校验通过才报告完成。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/migration.py", "purpose": "预检、备份、apply、rollback、legacy import" },
-          { "path": "tests/test_migration.py", "purpose": "临时目录迁移/冲突/回滚/阶段门测试" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/migration.py",
+            "purpose": "预检、备份、apply、rollback、legacy import"
+          },
+          {
+            "path": "tests/test_migration.py",
+            "purpose": "临时目录迁移/冲突/回滚/阶段门测试"
+          },
+          {
+            "path": "tests/test_migration.py",
+            "purpose": "两阶段 launcher、目标根、回滚顺序与状态测试"
+          }
         ],
-        "depends_on": ["hosts", "cli"],
-        "used_by": ["dsh-plugin"],
-        "evidence": ["migration.py", "migrate-plugin CLI", "tests/test_migration.py"],
+        "depends_on": [
+          "hosts",
+          "cli"
+        ],
+        "used_by": [
+          "dsh-plugin",
+          "settings"
+        ],
+        "evidence": [
+          "migration.py",
+          "migrate-plugin CLI",
+          "tests/test_migration.py"
+        ],
         "confidence": "medium",
         "notes": "Python 逻辑已在临时目录创建 Junction 并验证；真实宿主迁移尚未在用户机器上执行，UI 不得声称已完成真实验证。"
       },
@@ -269,13 +540,31 @@
           "明确区分 Plan 模式与 Full authority，不把审核文件当成执行令牌。"
         ],
         "key_files": [
-          { "path": "skills/programmer-workflow/scripts/lib/plan.py", "purpose": "计划校验与渲染" },
-          { "path": "skills/programmer-workflow/references/plan.md", "purpose": "Plan/Full authority 协议" },
-          { "path": "commands/plan.md", "purpose": "斜杠命令入口" }
+          {
+            "path": "skills/programmer-workflow/scripts/lib/plan.py",
+            "purpose": "计划校验与渲染"
+          },
+          {
+            "path": "skills/programmer-workflow/references/plan.md",
+            "purpose": "Plan/Full authority 协议"
+          },
+          {
+            "path": "commands/plan.md",
+            "purpose": "斜杠命令入口"
+          }
         ],
-        "depends_on": ["cli"],
-        "used_by": ["dsh-plugin", "host-manifests"],
-        "evidence": ["lib/plan.py", "plan --spec ... --format html", "tests/test_plan.py"],
+        "depends_on": [
+          "cli"
+        ],
+        "used_by": [
+          "dsh-plugin",
+          "host-manifests"
+        ],
+        "evidence": [
+          "lib/plan.py",
+          "plan --spec ... --format html",
+          "tests/test_plan.py"
+        ],
         "confidence": "high",
         "notes": "Plan 文件是审核快照，不是权限令牌；Full authority 由宿主决定，插件不自行提权。"
       },
@@ -284,25 +573,55 @@
         "name": "DSH 设置页、宿主适配与迁移",
         "layer": "presentation",
         "path": "dsh-plugin",
-        "role": "DeepSeek Harness 原生 Host/Client 插件：按宿主独立的设置与插件数据、两阶段迁移准备、状态接口和教程。",
+        "role": "DeepSeek Harness Host/Client：设置页、余额路由、/screenshot 直命令、环境预检与两阶段迁移。",
         "responsibilities": [
+          "Client 侧注册 settings.section 页面，切换宿主时读取对应配置/记忆路径；显示两个迁移阶段和未适配原因。",
+          "GET /programmer-workflow/balance：调用 deepseekAccount.getBalance，30 秒缓存，不返回凭据",
           "为 DSH/Kimi/CodeBuddy/Claude/Cursor/Codex 解析各自独立的数据根并读写各自的 config.json。",
-          "提供 workflowMode 枚举、严格写入校验和旧 requireRunConsent 的安全读取兼容（不提升为 full-authority）。",
-          "提供 pluginData/legacy/external override/工作区记忆边界状态，不用 .dsh Junction 推断插件迁移完成。",
-          "第一阶段：清单、SHA-256、独立备份、冲突保护和目标脚本；第二阶段：仅在第一阶段 completed+verified 后准备。",
           "提供 /programmer-workflow/status?host=、/config?host=、plugin-migration/prepare、legacy-import、migration/prepare 路由。",
-          "Client 侧注册 settings.section 页面，切换宿主时读取对应配置/记忆路径；显示两个迁移阶段和未适配原因。"
+          "提供 pluginData/legacy/external override/工作区记忆边界状态，不用 .dsh Junction 推断插件迁移完成。",
+          "提供 workflowMode 枚举、严格写入校验和旧 requireRunConsent 的安全读取兼容（不提升为 full-authority）。",
+          "注册 /screenshot 与 /截图，直接运行 bundled companion.py，不经过模型回合",
+          "第一阶段：清单、SHA-256、独立备份、冲突保护和目标脚本；第二阶段：仅在第一阶段 completed+verified 后准备。",
+          "首次加载把内置 Skill 复制到 <DSH_HOME>/skills，并复用同一份 CLI"
         ],
         "key_files": [
-          { "path": "dsh-plugin/index.js", "purpose": "Host：宿主注册表、独立配置、状态、两阶段迁移准备" },
-          { "path": "dsh-plugin/client.js", "purpose": "Client：设置页、workflowMode、宿主切换与两阶段迁移 UI" },
-          { "path": "dsh-plugin/migration.html", "purpose": "两阶段/按宿主迁移教程" },
-          { "path": "dsh-plugin/dsh-migration-tools", "purpose": "随插件分发的 DSH 运行数据迁移/回滚工具" },
-          { "path": "dsh-plugin/cordis.patch.yml", "purpose": "插件行" }
+          {
+            "path": "dsh-plugin/index.js",
+            "purpose": "Host：宿主注册表、独立配置、状态、两阶段迁移准备"
+          },
+          {
+            "path": "dsh-plugin/client.js",
+            "purpose": "Client：设置页、workflowMode、宿主切换与两阶段迁移 UI"
+          },
+          {
+            "path": "dsh-plugin/migration.html",
+            "purpose": "两阶段/按宿主迁移教程"
+          },
+          {
+            "path": "dsh-plugin/dsh-migration-tools",
+            "purpose": "随插件分发的 DSH 运行数据迁移/回滚工具"
+          },
+          {
+            "path": "dsh-plugin/cordis.patch.yml",
+            "purpose": "插件行"
+          }
         ],
-        "depends_on": ["cli", "memory", "plan"],
-        "used_by": ["host-manifests"],
-        "evidence": ["dsh-plugin/index.js", "dsh-plugin/client.js", "settings.section occupant programmer-workflow"],
+        "depends_on": [
+          "cli",
+          "environment",
+          "memory",
+          "plan",
+          "screenshot"
+        ],
+        "used_by": [
+          "host-manifests"
+        ],
+        "evidence": [
+          "dsh-plugin/index.js",
+          "dsh-plugin/client.js",
+          "settings.section occupant programmer-workflow"
+        ],
         "confidence": "high",
         "notes": "每个宿主的 config.json 与 memory 独立；DSH_HOME 只影响 DSH。插件数据迁移与编辑器运行数据迁移是两个有顺序的状态机。"
       },
@@ -320,18 +639,48 @@
           "DSH/Cursor/Codex 通过 .agents/skills 或各自 skills 目录安装。"
         ],
         "key_files": [
-          { "path": "kimi.plugin.json", "purpose": "Kimi Code 插件清单" },
-          { "path": ".claude-plugin/plugin.json", "purpose": "Claude Code 插件清单" },
-          { "path": "SYSTEM.md", "purpose": "Kimi 插件常驻系统提示" },
-          { "path": "commands/boot.md", "purpose": "启动记忆" },
-          { "path": "commands/remember.md", "purpose": "记一件事" },
-          { "path": "commands/architecture.md", "purpose": "生成工程文档" },
-          { "path": "commands/prototype.md", "purpose": "生成设计原型" },
-          { "path": "commands/debug.md", "purpose": "进入调试流程" }
+          {
+            "path": "kimi.plugin.json",
+            "purpose": "Kimi Code 插件清单"
+          },
+          {
+            "path": ".claude-plugin/plugin.json",
+            "purpose": "Claude Code 插件清单"
+          },
+          {
+            "path": "SYSTEM.md",
+            "purpose": "Kimi 插件常驻系统提示"
+          },
+          {
+            "path": "commands/boot.md",
+            "purpose": "启动记忆"
+          },
+          {
+            "path": "commands/remember.md",
+            "purpose": "记一件事"
+          },
+          {
+            "path": "commands/architecture.md",
+            "purpose": "生成工程文档"
+          },
+          {
+            "path": "commands/prototype.md",
+            "purpose": "生成设计原型"
+          },
+          {
+            "path": "commands/debug.md",
+            "purpose": "进入调试流程"
+          }
         ],
-        "depends_on": ["skill-protocol"],
+        "depends_on": [
+          "skill-protocol"
+        ],
         "used_by": [],
-        "evidence": ["kimi.plugin.json 字段", ".claude-plugin/plugin.json", "commands/*.md"],
+        "evidence": [
+          "kimi.plugin.json 字段",
+          ".claude-plugin/plugin.json",
+          "commands/*.md"
+        ],
         "confidence": "high",
         "notes": "清单只做发现与注入；真正的行为仍在 SKILL.md 与 CLI 中，避免多份逻辑漂移。"
       },
@@ -348,14 +697,31 @@
           "提供 install.sh 对应 macOS/Linux。"
         ],
         "key_files": [
-          { "path": "install.ps1", "purpose": "Windows 安装器" },
-          { "path": "install.sh", "purpose": "macOS/Linux 安装器" },
-          { "path": "bootstrap/AGENTS.md", "purpose": "通用自举片段" },
-          { "path": "bootstrap/CLAUDE.md", "purpose": "Claude 自举片段" }
+          {
+            "path": "install.ps1",
+            "purpose": "Windows 安装器"
+          },
+          {
+            "path": "install.sh",
+            "purpose": "macOS/Linux 安装器"
+          },
+          {
+            "path": "bootstrap/AGENTS.md",
+            "purpose": "通用自举片段"
+          },
+          {
+            "path": "bootstrap/CLAUDE.md",
+            "purpose": "Claude 自举片段"
+          }
         ],
-        "depends_on": ["skill-protocol"],
+        "depends_on": [
+          "skill-protocol"
+        ],
         "used_by": [],
-        "evidence": ["install.ps1 的参数", "受管块标记"],
+        "evidence": [
+          "install.ps1 的参数",
+          "受管块标记"
+        ],
         "confidence": "high",
         "notes": "安装器只动目标目录与受管块；卸载只删这些内容。"
       },
@@ -372,15 +738,350 @@
           "用 Node 检查内联脚本语法。"
         ],
         "key_files": [
-          { "path": "tests/test_companion.py", "purpose": "记忆、扫描、调试、CLI" },
-          { "path": "tests/test_render.py", "purpose": "规格校验与 HTML 输出" },
-          { "path": "tests/run_tests.py", "purpose": "统一测试入口" }
+          {
+            "path": "tests/test_companion.py",
+            "purpose": "记忆、扫描、调试、CLI"
+          },
+          {
+            "path": "tests/test_render.py",
+            "purpose": "规格校验与 HTML 输出"
+          },
+          {
+            "path": "tests/run_tests.py",
+            "purpose": "统一测试入口"
+          }
         ],
-        "depends_on": ["cli", "memory", "scan", "debug", "renderer"],
+        "depends_on": [
+          "cli",
+          "memory",
+          "scan",
+          "debug",
+          "renderer"
+        ],
         "used_by": [],
-        "evidence": ["tests 目录", "run_tests.py"],
+        "evidence": [
+          "tests 目录",
+          "run_tests.py"
+        ],
         "confidence": "high",
         "notes": "测试只用标准库；Node 仅用于可选语法检查。"
+      },
+      {
+        "id": "config",
+        "name": "宿主独立配置的严格读写",
+        "layer": "core",
+        "path": "skills/programmer-workflow/scripts/lib/config.py",
+        "role": "设置页的唯一写路径：默认值、容错读取、严格校验、加锁合并保存、原子写入与仅当前宿主的恢复默认。",
+        "responsibilities": [
+          "以 common.DEFAULT_CONFIG 为基础补齐迁移相关字段，保持 CLI 容错读取不变。",
+          "工作区路径必须是非空相对路径；布尔、整数、枚举与迁移绝对路径逐字段校验。",
+          "获取配置文件锁后读取旧配置、合并、完整校验，再用 atomic_write_json 写入。",
+          "恢复默认只重置当前宿主的 config.json，不删除 memory/、MEMORY.md 或 memory.json。",
+          "未知或拼错的 host 直接报错，绝不回退到 DSH。"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/scripts/lib/config.py",
+            "purpose": "默认值、严格校验、合并保存与恢复默认"
+          },
+          {
+            "path": "tests/test_settings.py",
+            "purpose": "配置合并、校验、host 隔离与重置测试"
+          }
+        ],
+        "depends_on": [
+          "hosts"
+        ],
+        "used_by": [
+          "settings",
+          "migration",
+          "cli"
+        ],
+        "evidence": [
+          "config.py",
+          "tests/test_settings.py::ConfigTests"
+        ],
+        "confidence": "high",
+        "notes": "严格拒绝只用于设置页写入；load_plugin_config 的旧容错行为保持不变。"
+      },
+      {
+        "id": "settings",
+        "name": "本地设置页状态与 API 服务",
+        "layer": "interface",
+        "path": "skills/programmer-workflow/scripts/lib/settings.py",
+        "role": "为 Kimi/CodeBuddy 等没有 DSH Slot 的宿主提供 127.0.0.1 本地设置页：状态组装、严格配置 API、迁移脚本准备 API、token 与静态白名单。",
+        "responsibilities": [
+          "只监听 127.0.0.1，端口 0 时选择随机空闲端口；启动时生成随机 token。",
+          "浏览器地址使用 #token=...，API 通过 X-Programmer-Workflow-Token 请求头校验。",
+          "只提供 /、/settings.css、/settings.js 三个静态资源，不读取任意本地文件。",
+          "GET /api/config、GET /api/status、POST /api/config 与三个迁移准备路由；显式校验 host。",
+          "不开放 CORS，POST 仅接受 application/json 并限制请求体大小；500 不泄露 traceback。",
+          "Web API 只准备脚本，绝不执行迁移、回滚或外部 batch 文件；workspace 在启动时固定。"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/scripts/lib/settings.py",
+            "purpose": "状态组装、HTTP 服务、token 与 API"
+          },
+          {
+            "path": "commands/settings.md",
+            "purpose": "/programmer-workflow:settings 的 Agent 执行说明"
+          },
+          {
+            "path": "tests/test_settings.py",
+            "purpose": "随机端口 API、token、静态白名单和保存流程测试"
+          }
+        ],
+        "depends_on": [
+          "hosts",
+          "config",
+          "migration"
+        ],
+        "used_by": [
+          "cli"
+        ],
+        "evidence": [
+          "settings.py",
+          "commands/settings.md",
+          "tests/test_settings.py::ServerTests"
+        ],
+        "confidence": "high",
+        "notes": "不加载 dsh-plugin/client.js，不引入 React、Node、MCP 或 CDN。"
+      },
+      {
+        "id": "settings-ui",
+        "name": "本地设置页界面",
+        "layer": "presentation",
+        "path": "skills/programmer-workflow/templates/settings.html",
+        "role": "DSH 设置页与本地设置页共用字段；新增余额、截图开关与刷新间隔。",
+        "responsibilities": [
+          "保持 #pwf-app、#pwf-host-tabs、#pwf-section-nav、#pwf-content、#pwf-savebar 等稳定 DOM。",
+          "路径只读并带复制按钮；长路径换行，复制按钮不会被挤出屏幕。",
+          "修改后显示未保存状态；保存中禁止重复提交；失败保留草稿并显示字段错误。",
+          "迁移步骤显示可用/不可用原因，只能准备脚本；高级信息和回滚说明用原生 details 折叠。",
+          "使用 prefers-color-scheme 跟随系统主题，并满足 focus-visible、aria 和 reduced-motion 要求。"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/templates/settings.html",
+            "purpose": "页面结构与 ARIA 语义"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/settings.css",
+            "purpose": "设计令牌、深浅色与响应式布局"
+          },
+          {
+            "path": "skills/programmer-workflow/templates/settings.js",
+            "purpose": "状态机、保存/重置/迁移准备与复制交互"
+          }
+        ],
+        "depends_on": [
+          "settings"
+        ],
+        "used_by": [],
+        "evidence": [
+          "templates/settings.html",
+          "templates/settings.css",
+          "templates/settings.js"
+        ],
+        "confidence": "high",
+        "notes": "无 CDN、无 eval、无 inline event handler；不使用渐变、玻璃拟态或装饰插画。"
+      },
+      {
+        "id": "environment",
+        "name": "环境预检与缓存",
+        "layer": "core",
+        "path": "skills/programmer-workflow/scripts/lib/environment.py",
+        "role": "探测本机 OS/shell/命令/图形与截图工具，缓存到工作区，并为 run 提供执行前检查。",
+        "responsibilities": [
+          "probe/load_cached/ensure_cached：一次探测，缓存 environment.json",
+          "check_command/require_command：PATH 查询与已安装替代，不执行命令",
+          "assert_local_target：本机与用户指定 OS 不同时拒绝执行",
+          "把摘要写入一条 active 工作区 environment 记忆"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/scripts/lib/environment.py",
+            "purpose": "核心探测与缓存"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/debug.py",
+            "purpose": "run 前置检查"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/memory.py",
+            "purpose": "boot 环境摘要与记忆过滤"
+          }
+        ],
+        "depends_on": [],
+        "used_by": [
+          "cli",
+          "memory",
+          "dsh-plugin",
+          "screenshot"
+        ],
+        "evidence": [
+          "environment.py",
+          "debug.py run_command",
+          "memory.py boot_payload",
+          ".programmer-workflow/environment.json"
+        ],
+        "confidence": "high",
+        "notes": "只做 PATH/OS 查询，不执行被探测命令；首次 boot 缺缓存时自动探测。"
+      },
+      {
+        "id": "screenshot",
+        "name": "截图 / 大模型识别 / 剪贴板",
+        "layer": "core",
+        "path": "skills/programmer-workflow/scripts/lib/screenshot.py",
+        "role": "Windows/Linux 截图、窗口匹配、PNG 剪贴板写入与模型识别交接。",
+        "responsibilities": [
+          "Windows：PowerShell + GDI 捕获并复制 PNG，UTF-8 输出",
+          "Linux：grim/gnome-screenshot/spectacle/scrot/import 捕获并复制 PNG",
+          "按窗口标题/进程名匹配，失败返回可用窗口列表且不退化为全屏",
+          "Agent 用大模型读取图片；screenshotEnabled 关闭时拒绝"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/scripts/lib/screenshot.py",
+            "purpose": "Python 调度与 Linux 实现"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/platform/windows_capture.ps1",
+            "purpose": "Windows 捕获、UTF-8 与 PNG 剪贴板"
+          },
+          {
+            "path": "commands/screenshot.md",
+            "purpose": "Kimi 命令与模型读图提示"
+          }
+        ],
+        "depends_on": [
+          "environment"
+        ],
+        "used_by": [
+          "cli",
+          "dsh-plugin"
+        ],
+        "evidence": [
+          "screenshot.py",
+          "windows_capture.ps1",
+          "tests/test_screenshot.py"
+        ],
+        "confidence": "high",
+        "notes": "不使用本机 OCR；DSH 直接命令只负责捕获和复制，文字识别由 Agent 读取 PNG 完成。"
+      },
+      {
+        "id": "platform-tools",
+        "name": "平台截图脚本",
+        "layer": "core",
+        "path": "skills/programmer-workflow/scripts/platform",
+        "role": "Windows PowerShell 捕获、UTF-8 输出与窗口枚举。",
+        "responsibilities": [
+          "EnumWindows 窗口枚举",
+          "GDI CopyFromScreen",
+          "指定窗口失败时拒绝全屏回退",
+          "剪贴板 PNG 图像"
+        ],
+        "key_files": [
+          {
+            "path": "skills/programmer-workflow/scripts/platform/windows_capture.ps1",
+            "purpose": "Windows 实现"
+          }
+        ],
+        "depends_on": [
+          "screenshot"
+        ],
+        "used_by": [
+          "screenshot"
+        ],
+        "evidence": [
+          "windows_capture.ps1",
+          "真实窗口捕获验证"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "kimi-quick-config",
+        "name": "Kimi 快捷设置入口",
+        "layer": "interface",
+        "path": "Open-Settings.vbs",
+        "role": "Windows 用户双击 VBS 直接打开配置页；已有服务则复用，否则隐藏启动本地服务。",
+        "responsibilities": [
+          "双击打开配置页，不输入命令、不经过模型",
+          "复用 127.0.0.1:8765 /quick 服务或按需启动新服务",
+          "保留 /programmer-workflow:settings 命令回退"
+        ],
+        "key_files": [
+          {
+            "path": "Open-Settings.vbs",
+            "purpose": "Windows 无命令行双击入口"
+          },
+          {
+            "path": "scripts/kimi_settings_hook.py",
+            "purpose": "可选的会话启动预启动"
+          },
+          {
+            "path": "skills/programmer-workflow/scripts/lib/settings.py",
+            "purpose": "/quick 路由与 token 校验"
+          },
+          {
+            "path": "kimi.plugin.json",
+            "purpose": "hooks 与 homepage"
+          }
+        ],
+        "depends_on": [
+          "settings",
+          "hosts"
+        ],
+        "used_by": [
+          "host-manifests"
+        ],
+        "evidence": [
+          "Open-Settings.vbs",
+          "settings.py /quick",
+          "Windows 双击启动验证"
+        ],
+        "confidence": "high",
+        "notes": "Kimi 自定义插件详情不一定渲染 homepage；VBS 双击文件才是文档承诺的点击入口。"
+      },
+      {
+        "id": "dsh-package",
+        "name": "DSH 根包与 GitHub 安装",
+        "layer": "distribution",
+        "path": "package.json",
+        "role": "把仓库根目录变成 DSH 默认安装包，支持 dsh plugin add github:owner/repo。",
+        "responsibilities": [
+          "dsh.bundle.patch 指向 dsh-plugin/cordis.patch.yml",
+          "exports 暴露 Host/Client/icon/locale",
+          "files 打包 skills/commands/locales/scripts",
+          "包名与 cordis entry、client loader id 一致"
+        ],
+        "key_files": [
+          {
+            "path": "package.json",
+            "purpose": "根包清单"
+          },
+          {
+            "path": "dsh-plugin/package.json",
+            "purpose": "本地实现清单"
+          },
+          {
+            "path": "dsh-plugin/cordis.patch.yml",
+            "purpose": "loader 插入"
+          }
+        ],
+        "depends_on": [
+          "dsh-plugin",
+          "host-manifests"
+        ],
+        "used_by": [
+          "installers"
+        ],
+        "evidence": [
+          "package.json",
+          "plugin_manager install_bundle 应用成功"
+        ],
+        "confidence": "high"
       }
     ],
     "flows": [
@@ -389,98 +1090,626 @@
         "name": "会话启动与记忆注入",
         "summary": "新会话先读生效记忆，再开始任务；待审核条目只提示，不当作规则。",
         "steps": [
-          { "actor": "Agent", "action": "加载 programmer-workflow Skill", "target": "SKILL.md", "detail": "按描述判断是否需要本 Skill；Kimi Plugin 通过 sessionStart 自动加载。", "evidence": "kimi.plugin.json" },
-          { "actor": "Agent", "action": "运行 boot", "target": "companion.py boot --workspace .", "detail": "输出用户与工作区 active 条目、待审核数量。", "evidence": "cmd_boot" },
-          { "actor": "Agent", "action": "遵守 active 记忆", "target": "MEMORY.md", "detail": "若与用户当前指令冲突，先问保留哪一条。", "evidence": "boot_text" },
-          { "actor": "Agent", "action": "提示待审核", "target": "memory review", "detail": "只提示数量，不把 proposed 当规则。", "evidence": "pending 计数" }
+          {
+            "actor": "Agent",
+            "action": "加载 programmer-workflow Skill",
+            "target": "SKILL.md",
+            "detail": "按描述判断是否需要本 Skill；Kimi Plugin 通过 sessionStart 自动加载。",
+            "evidence": "kimi.plugin.json"
+          },
+          {
+            "actor": "Agent",
+            "action": "运行 boot",
+            "target": "companion.py boot --workspace .",
+            "detail": "输出用户与工作区 active 条目、待审核数量。",
+            "evidence": "cmd_boot"
+          },
+          {
+            "actor": "Agent",
+            "action": "遵守 active 记忆",
+            "target": "MEMORY.md",
+            "detail": "若与用户当前指令冲突，先问保留哪一条。",
+            "evidence": "boot_text"
+          },
+          {
+            "actor": "Agent",
+            "action": "提示待审核",
+            "target": "memory review",
+            "detail": "只提示数量，不把 proposed 当规则。",
+            "evidence": "pending 计数"
+          }
         ],
-        "artifacts": ["MEMORY.md", "boot 输出"],
-        "failure_modes": ["记忆文件损坏", "Agent 未加载 Skill", "宿主没有 shell"]
+        "artifacts": [
+          "MEMORY.md",
+          "boot 输出"
+        ],
+        "failure_modes": [
+          "记忆文件损坏",
+          "Agent 未加载 Skill",
+          "宿主没有 shell"
+        ]
       },
       {
         "id": "habit",
         "name": "习惯采集与用户定夺",
         "summary": "扫描证据 → 汇总候选 → 逐条 proposed → 用户选择保留/修改/拒绝 → 生效。",
         "steps": [
-          { "actor": "Agent", "action": "征得同意后扫描", "target": "companion.py scan", "detail": "默认不读对话记录；需要时显式开启并说明隐私。", "evidence": "scan_project" },
-          { "actor": "Agent", "action": "归纳 3–8 条候选", "target": "scan.json", "detail": "每条带证据、置信度与适用范围，不把一次偶然当习惯。", "evidence": "conventions / style" },
-          { "actor": "Agent", "action": "写入 proposed", "target": "memory propose", "detail": "用户未确认前绝不 active。", "evidence": "status=proposed" },
-          { "actor": "User", "action": "逐条定夺", "target": "询问卡", "detail": "保留 / 修改 / 删除 / 稍后；可多选。", "evidence": "ask.md" },
-          { "actor": "Agent", "action": "应用决定", "target": "memory accept|reject|edit", "detail": "重新渲染 MEMORY.md 并复述结果。", "evidence": "set_status" }
+          {
+            "actor": "Agent",
+            "action": "征得同意后扫描",
+            "target": "companion.py scan",
+            "detail": "默认不读对话记录；需要时显式开启并说明隐私。",
+            "evidence": "scan_project"
+          },
+          {
+            "actor": "Agent",
+            "action": "归纳 3–8 条候选",
+            "target": "scan.json",
+            "detail": "每条带证据、置信度与适用范围，不把一次偶然当习惯。",
+            "evidence": "conventions / style"
+          },
+          {
+            "actor": "Agent",
+            "action": "写入 proposed",
+            "target": "memory propose",
+            "detail": "用户未确认前绝不 active。",
+            "evidence": "status=proposed"
+          },
+          {
+            "actor": "User",
+            "action": "逐条定夺",
+            "target": "询问卡",
+            "detail": "保留 / 修改 / 删除 / 稍后；可多选。",
+            "evidence": "ask.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "应用决定",
+            "target": "memory accept|reject|edit",
+            "detail": "重新渲染 MEMORY.md 并复述结果。",
+            "evidence": "set_status"
+          }
         ],
-        "artifacts": ["scan.json", "memory.json", "MEMORY.md"],
-        "failure_modes": ["把推断当事实", "读取了未授权的对话", "用户拒绝后仍重复建议"]
+        "artifacts": [
+          "scan.json",
+          "memory.json",
+          "MEMORY.md"
+        ],
+        "failure_modes": [
+          "把推断当事实",
+          "读取了未授权的对话",
+          "用户拒绝后仍重复建议"
+        ]
       },
       {
         "id": "stall-debug",
         "name": "卡壳升级与调试闭环",
         "summary": "连续失败触发询问 → 加最小日志 → 用户批准后运行 → 分诊 → 修复与回归。",
         "steps": [
-          { "actor": "Agent", "action": "记录失败轮次", "target": "companion.py stall bump", "detail": "satisfaction 3 次或 bugfix 2 次；结合用户明确不满意。", "evidence": "THRESHOLDS" },
-          { "actor": "Agent", "action": "提出选项", "target": "询问卡", "detail": "行业做法 / 加日志 / 静态分析 / 需要硬件；推荐项在前。", "evidence": "satisfaction.md" },
-          { "actor": "Agent", "action": "加最小可回滚日志", "target": "源码", "detail": "统一 [DBG-...] 标记，不记录密钥与个人信息。", "evidence": "debugging.md" },
-          { "actor": "User", "action": "批准运行", "target": "询问卡", "detail": "Agent 用 run --yes 执行；破坏性命令需额外确认。", "evidence": "ConsentRequiredError" },
-          { "actor": "Agent", "action": "运行并分诊", "target": "companion.py run / triage", "detail": "生成 combined.log、TRIAGE.md 与假设。", "evidence": "triage_markdown" },
-          { "actor": "Agent", "action": "修复、回归、清理", "target": "代码与测试", "detail": "删除临时日志或改为 DEBUG 开关；补回归测试。", "evidence": "测试" }
+          {
+            "actor": "Agent",
+            "action": "记录失败轮次",
+            "target": "companion.py stall bump",
+            "detail": "satisfaction 3 次或 bugfix 2 次；结合用户明确不满意。",
+            "evidence": "THRESHOLDS"
+          },
+          {
+            "actor": "Agent",
+            "action": "提出选项",
+            "target": "询问卡",
+            "detail": "行业做法 / 加日志 / 静态分析 / 需要硬件；推荐项在前。",
+            "evidence": "satisfaction.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "加最小可回滚日志",
+            "target": "源码",
+            "detail": "统一 [DBG-...] 标记，不记录密钥与个人信息。",
+            "evidence": "debugging.md"
+          },
+          {
+            "actor": "User",
+            "action": "批准运行",
+            "target": "询问卡",
+            "detail": "Agent 用 run --yes 执行；破坏性命令需额外确认。",
+            "evidence": "ConsentRequiredError"
+          },
+          {
+            "actor": "Agent",
+            "action": "运行并分诊",
+            "target": "companion.py run / triage",
+            "detail": "生成 combined.log、TRIAGE.md 与假设。",
+            "evidence": "triage_markdown"
+          },
+          {
+            "actor": "Agent",
+            "action": "修复、回归、清理",
+            "target": "代码与测试",
+            "detail": "删除临时日志或改为 DEBUG 开关；补回归测试。",
+            "evidence": "测试"
+          }
         ],
-        "artifacts": ["debug-logs/*/combined.log", "TRIAGE.md", "TRIAGE.json"],
-        "failure_modes": ["日志不足", "运行环境与用户环境不同", "硬件未连接", "误删日志或代码"]
+        "artifacts": [
+          "debug-logs/*/combined.log",
+          "TRIAGE.md",
+          "TRIAGE.json"
+        ],
+        "failure_modes": [
+          "日志不足",
+          "运行环境与用户环境不同",
+          "硬件未连接",
+          "误删日志或代码"
+        ]
       },
       {
         "id": "docs",
         "name": "工程文档生成",
         "summary": "工程地图与源码证据 → 规格 JSON → 校验 → Architecture/Features 双页 → 浏览器评审。",
         "steps": [
-          { "actor": "Agent", "action": "判断触发", "target": "用户话术", "detail": "“总结架构/功能”等；不明确时先确认范围。", "evidence": "SKILL.md 触发矩阵" },
-          { "actor": "Agent", "action": "收集证据", "target": "companion.py map + 关键文件", "detail": "清单、入口、路由、测试、配置；结论附路径。", "evidence": "project_map" },
-          { "actor": "Agent", "action": "写规格", "target": "docs/spec.json", "detail": "模块、流程、决策、风险、功能、待确认。", "evidence": "docs.md" },
-          { "actor": "Agent", "action": "校验并渲染", "target": "companion.py docs", "detail": "失败在写文件前报错；成功输出两个 HTML。", "evidence": "cmd_docs" },
-          { "actor": "User", "action": "浏览器评审", "target": "Architecture.html / Features.html", "detail": "搜索、筛选、看依赖图，提交意见并导出 JSON。", "evidence": "review.js" },
-          { "actor": "Agent", "action": "按评审修改", "target": "spec + HTML", "detail": "保留规格哈希，评审失效时明确提示。", "evidence": "spec_hash" }
+          {
+            "actor": "Agent",
+            "action": "判断触发",
+            "target": "用户话术",
+            "detail": "“总结架构/功能”等；不明确时先确认范围。",
+            "evidence": "SKILL.md 触发矩阵"
+          },
+          {
+            "actor": "Agent",
+            "action": "收集证据",
+            "target": "companion.py map + 关键文件",
+            "detail": "清单、入口、路由、测试、配置；结论附路径。",
+            "evidence": "project_map"
+          },
+          {
+            "actor": "Agent",
+            "action": "写规格",
+            "target": "docs/spec.json",
+            "detail": "模块、流程、决策、风险、功能、待确认。",
+            "evidence": "docs.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "校验并渲染",
+            "target": "companion.py docs",
+            "detail": "失败在写文件前报错；成功输出两个 HTML。",
+            "evidence": "cmd_docs"
+          },
+          {
+            "actor": "User",
+            "action": "浏览器评审",
+            "target": "Architecture.html / Features.html",
+            "detail": "搜索、筛选、看依赖图，提交意见并导出 JSON。",
+            "evidence": "review.js"
+          },
+          {
+            "actor": "Agent",
+            "action": "按评审修改",
+            "target": "spec + HTML",
+            "detail": "保留规格哈希，评审失效时明确提示。",
+            "evidence": "spec_hash"
+          }
         ],
-        "artifacts": ["docs/Architecture.html", "docs/Features.html", "docs/spec.json"],
-        "failure_modes": ["证据不足导致编造", "HTML 过大", "用户浏览器禁用 JS"]
+        "artifacts": [
+          "docs/Architecture.html",
+          "docs/Features.html",
+          "docs/spec.json"
+        ],
+        "failure_modes": [
+          "证据不足导致编造",
+          "HTML 过大",
+          "用户浏览器禁用 JS"
+        ]
       },
       {
         "id": "prototype",
         "name": "设计原型与评审",
         "summary": "澄清约束 → 2–3 个有意义的方向 → Prototype.html → 标注/通过/修改 → 评审 JSON。",
         "steps": [
-          { "actor": "Agent", "action": "快速澄清", "target": "询问卡", "detail": "平台、受众、风格、必须内容；最多 3 个问题，其余先假设。", "evidence": "prototype.md" },
-          { "actor": "Agent", "action": "写规格", "target": "design.json", "detail": "方向差异要落在信息架构与视觉语言，不是换色。", "evidence": "normalize_prototype" },
-          { "actor": "Agent", "action": "渲染", "target": "companion.py prototype", "detail": "单文件 HTML，断网可用。", "evidence": "render_prototype" },
-          { "actor": "User", "action": "切换与标注", "target": "Prototype.html", "detail": "方向/视口切换，画布点选留言，底部评审。", "evidence": "prototype.js" },
-          { "actor": "Agent", "action": "按评审迭代", "target": "spec + HTML", "detail": "优先解决 blocking 意见，再讨论风格偏好。", "evidence": "review JSON" }
+          {
+            "actor": "Agent",
+            "action": "快速澄清",
+            "target": "询问卡",
+            "detail": "平台、受众、风格、必须内容；最多 3 个问题，其余先假设。",
+            "evidence": "prototype.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "写规格",
+            "target": "design.json",
+            "detail": "方向差异要落在信息架构与视觉语言，不是换色。",
+            "evidence": "normalize_prototype"
+          },
+          {
+            "actor": "Agent",
+            "action": "渲染",
+            "target": "companion.py prototype",
+            "detail": "单文件 HTML，断网可用。",
+            "evidence": "render_prototype"
+          },
+          {
+            "actor": "User",
+            "action": "切换与标注",
+            "target": "Prototype.html",
+            "detail": "方向/视口切换，画布点选留言，底部评审。",
+            "evidence": "prototype.js"
+          },
+          {
+            "actor": "Agent",
+            "action": "按评审迭代",
+            "target": "spec + HTML",
+            "detail": "优先解决 blocking 意见，再讨论风格偏好。",
+            "evidence": "review JSON"
+          }
         ],
-        "artifacts": ["Prototype.html", "design.json", "review JSON"],
-        "failure_modes": ["方向只是换色", "原型被误当成成品", "美术方向缺少可执行说明"]
+        "artifacts": [
+          "Prototype.html",
+          "design.json",
+          "review JSON"
+        ],
+        "failure_modes": [
+          "方向只是换色",
+          "原型被误当成成品",
+          "美术方向缺少可执行说明"
+        ]
       },
       {
         "id": "dsh-settings",
         "name": "DSH 设置与迁移",
         "summary": "设置页读取全局配置与迁移状态；用户改路径/开关后 Host 写 config.json；CLI 下次运行读取。",
         "steps": [
-          { "actor": "User", "action": "打开设置 → 程序员工作流", "target": "settings.section", "detail": "Client 插件注册的页面。", "evidence": "dsh-plugin/client.js" },
-          { "actor": "Client", "action": "读取 /config 与 /status", "target": "dsh-plugin/index.js", "detail": "显示全局/实际落盘路径、迁移状态与配置字段。", "evidence": "/programmer-workflow/status" },
-          { "actor": "User", "action": "保存配置", "target": "POST /config", "detail": "路径校验为工作区相对路径；Host 写 config.json。", "evidence": "normalizeConfig" },
-          { "actor": "CLI", "action": "读取 config.json", "target": "load_plugin_config", "detail": "docs/prototype/run/stall 使用新路径与阈值。", "evidence": "common.py" },
-          { "actor": "User", "action": "查看迁移教程", "target": "Migration.html", "detail": "已迁移则显示目标；未迁移则提示运行迁移工具。", "evidence": "dsh-plugin/migration.html" }
+          {
+            "actor": "User",
+            "action": "打开设置 → 程序员工作流",
+            "target": "settings.section",
+            "detail": "Client 插件注册的页面。",
+            "evidence": "dsh-plugin/client.js"
+          },
+          {
+            "actor": "Client",
+            "action": "读取 /config 与 /status",
+            "target": "dsh-plugin/index.js",
+            "detail": "显示全局/实际落盘路径、迁移状态与配置字段。",
+            "evidence": "/programmer-workflow/status"
+          },
+          {
+            "actor": "User",
+            "action": "保存配置",
+            "target": "POST /config",
+            "detail": "路径校验为工作区相对路径；Host 写 config.json。",
+            "evidence": "normalizeConfig"
+          },
+          {
+            "actor": "CLI",
+            "action": "读取 config.json",
+            "target": "load_plugin_config",
+            "detail": "docs/prototype/run/stall 使用新路径与阈值。",
+            "evidence": "common.py"
+          },
+          {
+            "actor": "User",
+            "action": "查看迁移教程",
+            "target": "Migration.html",
+            "detail": "已迁移则显示目标；未迁移则提示运行迁移工具。",
+            "evidence": "dsh-plugin/migration.html"
+          }
         ],
-        "artifacts": ["config.json", "Migration.html"],
-        "failure_modes": ["设置页未注册", "全局路径不可写", "迁移状态检测失败"]
+        "artifacts": [
+          "config.json",
+          "Migration.html"
+        ],
+        "failure_modes": [
+          "设置页未注册",
+          "全局路径不可写",
+          "迁移状态检测失败"
+        ]
       },
       {
         "id": "remember",
         "name": "明确“记住”",
         "summary": "用户说记住时先确定范围，再决定是否需要确认文本；写入后复述。",
         "steps": [
-          { "actor": "Agent", "action": "识别“记住”", "target": "用户话术", "detail": "“记住/以后都/别再”等。", "evidence": "SKILL.md" },
-          { "actor": "Agent", "action": "判断范围", "target": "询问卡", "detail": "用户级（全局）还是工作区级；未说明必须问。", "evidence": "ask.md" },
-          { "actor": "Agent", "action": "写入", "target": "memory add --scope ...", "detail": "显式指令可直接 active；推断只能 proposed。", "evidence": "add" },
-          { "actor": "Agent", "action": "复述", "target": "回复", "detail": "说明存到哪、内容、如何删除。", "evidence": "MEMORY.md" }
+          {
+            "actor": "Agent",
+            "action": "识别“记住”",
+            "target": "用户话术",
+            "detail": "“记住/以后都/别再”等。",
+            "evidence": "SKILL.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "判断范围",
+            "target": "询问卡",
+            "detail": "用户级（全局）还是工作区级；未说明必须问。",
+            "evidence": "ask.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "写入",
+            "target": "memory add --scope ...",
+            "detail": "显式指令可直接 active；推断只能 proposed。",
+            "evidence": "add"
+          },
+          {
+            "actor": "Agent",
+            "action": "复述",
+            "target": "回复",
+            "detail": "说明存到哪、内容、如何删除。",
+            "evidence": "MEMORY.md"
+          }
         ],
-        "artifacts": ["MEMORY.md"],
-        "failure_modes": ["把临时偏好存成全局", "记了密钥", "范围猜错"]
+        "artifacts": [
+          "MEMORY.md"
+        ],
+        "failure_modes": [
+          "把临时偏好存成全局",
+          "记了密钥",
+          "范围猜错"
+        ]
+      },
+      {
+        "id": "local-settings",
+        "name": "本地设置页保存配置",
+        "summary": "Kimi/CodeBuddy 没有 DSH Slot，由 settings 子命令启动 loopback 页面；页面保存时后端加锁合并并严格校验。",
+        "steps": [
+          {
+            "actor": "Agent",
+            "action": "定位当前 Skill 的 companion.py",
+            "target": "scripts/companion.py",
+            "detail": "managed 插件副本优先；不写死宿主 home 下的 skills 路径。",
+            "evidence": "commands/settings.md"
+          },
+          {
+            "actor": "Agent",
+            "action": "后台运行 settings",
+            "target": "companion.py settings --host kimi --workspace . --open",
+            "detail": "服务只监听 127.0.0.1，打印带 #token 的 URL。",
+            "evidence": "settings.serve"
+          },
+          {
+            "actor": "Browser",
+            "action": "读取 /api/status",
+            "target": "GET /api/status?host=kimi",
+            "detail": "显式 host；未知 host 返回 400，不回退 DSH。",
+            "evidence": "settings.Handler"
+          },
+          {
+            "actor": "Browser",
+            "action": "保存表单",
+            "target": "POST /api/config?host=kimi",
+            "detail": "后端获取文件锁、读取旧配置、合并、完整校验，再 atomic_write_json。",
+            "evidence": "config.save"
+          },
+          {
+            "actor": "CLI",
+            "action": "读取新配置",
+            "target": "boot --host kimi --json",
+            "detail": "load_plugin_config 读到同一个 config.json 的 workflowMode/planFormat。",
+            "evidence": "tests/test_settings.py"
+          }
+        ],
+        "artifacts": [
+          "config.json",
+          "MEMORY.md"
+        ],
+        "failure_modes": [
+          "未知 host 返回 400",
+          "字段错误返回具体错误且不改文件",
+          "token 缺失返回 403",
+          "500 不泄露 traceback"
+        ]
+      },
+      {
+        "id": "settings-migration-prepare",
+        "name": "本地设置页准备两阶段迁移脚本",
+        "summary": "页面只生成脚本和状态，不执行迁移；第二阶段还要求第一阶段完成且适配器成对存在。",
+        "steps": [
+          {
+            "actor": "User",
+            "action": "填写第一阶段目标根",
+            "target": "pluginMigrationTargetRoot",
+            "detail": "非空绝对路径；准备操作同时持久化目标根。",
+            "evidence": "settings._post_plugin_prepare"
+          },
+          {
+            "actor": "Server",
+            "action": "生成第一阶段 launcher",
+            "target": "run-stage1-plugin.cmd",
+            "detail": "使用当前真实 companion.py，并显式传 --host kimi。",
+            "evidence": "migration.prepare_plugin_migration"
+          },
+          {
+            "actor": "Server",
+            "action": "检查第二阶段门禁",
+            "target": "run-stage2-runtime.cmd",
+            "detail": "第一阶段 completed、平台支持、adapter 成对、目标嵌套合法。",
+            "evidence": "migration.prepare_runtime_migration"
+          },
+          {
+            "actor": "User",
+            "action": "退出编辑器后手动运行脚本",
+            "target": ".programmer-workflow-migration/*.cmd",
+            "detail": "回滚顺序为先第二阶段、后第一阶段；页面不提供立即迁移按钮。",
+            "evidence": "references/hosts.md"
+          }
+        ],
+        "artifacts": [
+          "run-stage1-plugin.cmd",
+          "run-stage1-rollback-plugin.cmd",
+          "run-stage2-runtime.cmd",
+          "runtime-state.json"
+        ],
+        "failure_modes": [
+          "动作开关关闭",
+          "第一阶段未完成",
+          "适配器缺 migrate/rollback",
+          "目标根重叠或跨根嵌套",
+          "非 Windows 平台"
+        ]
+      },
+      {
+        "id": "env-preflight",
+        "name": "环境预检到命令执行",
+        "summary": "首次探测后缓存；每次 run 只做 PATH 检查，缺失时直接给替代。",
+        "steps": [
+          {
+            "actor": "Agent",
+            "action": "boot",
+            "target": "memory",
+            "detail": "读取环境摘要",
+            "evidence": "memory.py boot_payload"
+          },
+          {
+            "actor": "CLI",
+            "action": "env probe",
+            "target": "environment",
+            "detail": "探测并写 environment.json + 工作区记忆",
+            "evidence": "environment.py probe"
+          },
+          {
+            "actor": "Agent",
+            "action": "env check <cmd>",
+            "target": "environment",
+            "detail": "缺命令时给已安装替代",
+            "evidence": "environment.py check_command"
+          },
+          {
+            "actor": "CLI",
+            "action": "run",
+            "target": "debug",
+            "detail": "spawn 前 preflight；跨 OS 直接拒绝",
+            "evidence": "debug.py run_command"
+          }
+        ],
+        "artifacts": [
+          ".programmer-workflow/environment.json",
+          "active environment memory"
+        ],
+        "failure_modes": [
+          "Python 不可用",
+          "PATH 在工作区前后变化",
+          "用户指定了另一系统"
+        ]
+      },
+      {
+        "id": "screenshot",
+        "name": "截图到大模型识别",
+        "summary": "/screenshot 指定窗口或屏幕并复制 PNG；Agent 再用大模型视觉能力读取文字。",
+        "steps": [
+          {
+            "actor": "User",
+            "action": "/screenshot 微信",
+            "target": "dsh-plugin",
+            "detail": "直接命令只捕获/复制；Agent 流程继续读图",
+            "evidence": "dsh-plugin/index.js screenshotCommand"
+          },
+          {
+            "actor": "CLI",
+            "action": "screenshot --target",
+            "target": "screenshot",
+            "detail": "窗口匹配/捕获，找不到窗口时拒绝全屏回退",
+            "evidence": "screenshot.py capture"
+          },
+          {
+            "actor": "Platform",
+            "action": "GDI / native capture",
+            "target": "platform-tools",
+            "detail": "生成 PNG 并以 UTF-8 返回中文窗口信息",
+            "evidence": "windows_capture.ps1"
+          },
+          {
+            "actor": "Agent",
+            "action": "read image",
+            "target": "screenshot",
+            "detail": "大模型读取 PNG 并转写文字，不调用本机 OCR",
+            "evidence": "commands/screenshot.md"
+          }
+        ],
+        "artifacts": [
+          "PNG 截图",
+          "剪贴板图像",
+          "模型识别文本"
+        ],
+        "failure_modes": [
+          "窗口未找到",
+          "剪贴板工具不可用",
+          "宿主不支持图片读取",
+          "功能开关关闭"
+        ]
+      },
+      {
+        "id": "balance",
+        "name": "左下角账号余额",
+        "summary": "Client 轮询 balance 路由；Host 缓存 30 秒并调用官方账号服务。",
+        "steps": [
+          {
+            "actor": "Client",
+            "action": "BalanceChip",
+            "target": "dsh-plugin",
+            "detail": "注册 sidebar.footer.action",
+            "evidence": "client.js BalanceChip"
+          },
+          {
+            "actor": "Host",
+            "action": "GET /programmer-workflow/balance",
+            "target": "dsh-plugin",
+            "detail": "readConfig + 30s cache",
+            "evidence": "index.js getBalancePayload"
+          },
+          {
+            "actor": "Host",
+            "action": "deepseekAccount.getBalance",
+            "target": "dsh-plugin",
+            "detail": "只读钱包，不返回 token",
+            "evidence": "index.js"
+          }
+        ],
+        "artifacts": [
+          "余额条",
+          "钱包 JSON"
+        ],
+        "failure_modes": [
+          "未登录",
+          "账号服务未挂载",
+          "接口失败/限流"
+        ]
+      },
+      {
+        "id": "kimi-quick-config",
+        "name": "Kimi 快捷配置",
+        "summary": "Windows 用户双击 Open-Settings.vbs；已有本地服务则复用，否则隐藏启动服务并打开设置页。",
+        "steps": [
+          {
+            "actor": "User",
+            "action": "双击 Open-Settings.vbs",
+            "target": "kimi-quick-config",
+            "detail": "不输入命令，不经过模型",
+            "evidence": "Open-Settings.vbs"
+          },
+          {
+            "actor": "Launcher",
+            "action": "探测 /quick 或启动 companion settings",
+            "target": "kimi-quick-config",
+            "detail": "复用已有服务；否则隐藏启动",
+            "evidence": "Open-Settings.vbs"
+          },
+          {
+            "actor": "Server",
+            "action": "302 /?host=kimi#token=...",
+            "target": "settings",
+            "detail": "loopback 限定",
+            "evidence": "settings.py _quick_link"
+          }
+        ],
+        "artifacts": [
+          "设置页",
+          "config.json"
+        ],
+        "failure_modes": [
+          "端口被占用",
+          "Python 不在 PATH",
+          "hook 未触发",
+          "服务进程被宿主回收"
+        ]
       }
     ],
     "decisions": [
@@ -488,60 +1717,220 @@
         "id": "portable-skill",
         "title": "以 Agent Skill 为核心，而不是只做某个框架的插件",
         "choice": "SKILL.md + Python CLI 作为行为事实来源；各宿主只负责发现、注入与独立数据根；DSH 另有原生 Host/Client 插件承载设置与迁移。",
-        "why": ["用户的诉求是“各家 AI Agent 可安装”，单一框架插件会绑定宿主。", "Skill 格式已被 DSH、Kimi、Cursor 等直接支持或兼容。", "薄清单避免多份行为逻辑漂移。", "DSH 设置页已真实存在，不再是“无原生 UI”。"],
-        "tradeoffs": ["不同宿主的询问工具、路径与自动加载能力不一致，需要适配表。", "宿主数据必须独立存储，旧共享数据只能一次性导入。", "运行数据迁移只对已实现适配器的宿主开放。"],
-        "alternatives": ["MCP Server", "DSH 专属 Cordis 插件", "Claude Code 专属 plugin"],
-        "evidence": ["skills/programmer-workflow/SKILL.md", "kimi.plugin.json", ".claude-plugin/plugin.json"],
+        "why": [
+          "用户的诉求是“各家 AI Agent 可安装”，单一框架插件会绑定宿主。",
+          "Skill 格式已被 DSH、Kimi、Cursor 等直接支持或兼容。",
+          "薄清单避免多份行为逻辑漂移。",
+          "DSH 设置页已真实存在，不再是“无原生 UI”。"
+        ],
+        "tradeoffs": [
+          "不同宿主的询问工具、路径与自动加载能力不一致，需要适配表。",
+          "宿主数据必须独立存储，旧共享数据只能一次性导入。",
+          "运行数据迁移只对已实现适配器的宿主开放。"
+        ],
+        "alternatives": [
+          "MCP Server",
+          "DSH 专属 Cordis 插件",
+          "Claude Code 专属 plugin"
+        ],
+        "evidence": [
+          "skills/programmer-workflow/SKILL.md",
+          "kimi.plugin.json",
+          ".claude-plugin/plugin.json"
+        ],
         "status": "accepted"
       },
       {
         "id": "approval-gate",
         "title": "记忆分成 proposed 与 active 两道状态",
         "choice": "任何推断出的习惯先写 proposed；只有用户明确 accept 或显式“记住”才 active。",
-        "why": ["习惯一旦被全局遵守，错误会持续放大。", "用户要求“交由用户定夺是否保留”。", "保留 rejected 审计，能解释为什么某条没生效。"],
-        "tradeoffs": ["多一次询问与审核成本。", "用户可能嫌烦，因此支持批量通过。"],
-        "alternatives": ["自动写入并允许撤销", "只存不生效的笔记"],
-        "evidence": ["memory.py STATUSES", "boot_text 只读 active"],
+        "why": [
+          "习惯一旦被全局遵守，错误会持续放大。",
+          "用户要求“交由用户定夺是否保留”。",
+          "保留 rejected 审计，能解释为什么某条没生效。"
+        ],
+        "tradeoffs": [
+          "多一次询问与审核成本。",
+          "用户可能嫌烦，因此支持批量通过。"
+        ],
+        "alternatives": [
+          "自动写入并允许撤销",
+          "只存不生效的笔记"
+        ],
+        "evidence": [
+          "memory.py STATUSES",
+          "boot_text 只读 active"
+        ],
         "status": "accepted"
       },
       {
         "id": "file-memory",
         "title": "文件式记忆，不引入数据库或向量库",
         "choice": "每个作用域一个 memory.json + 一份 MEMORY.md，加文件锁与原子替换。",
-        "why": ["可读、可迁移、可审计，不依赖服务。", "跨 Agent 都能读写，不绑定某个运行时。", "体量小，无需向量检索。"],
-        "tradeoffs": ["并发写依赖锁，极端情况下仍可能冲突。", "没有语义检索，靠 kind/tag 与上下文。"],
-        "alternatives": ["SQLite", "MCP memory server", "向量数据库"],
-        "evidence": ["FileLock", "atomic_write_json", "README.md"],
+        "why": [
+          "可读、可迁移、可审计，不依赖服务。",
+          "跨 Agent 都能读写，不绑定某个运行时。",
+          "体量小，无需向量检索。"
+        ],
+        "tradeoffs": [
+          "并发写依赖锁，极端情况下仍可能冲突。",
+          "没有语义检索，靠 kind/tag 与上下文。"
+        ],
+        "alternatives": [
+          "SQLite",
+          "MCP memory server",
+          "向量数据库"
+        ],
+        "evidence": [
+          "FileLock",
+          "atomic_write_json",
+          "README.md"
+        ],
         "status": "accepted"
       },
       {
         "id": "offline-html",
         "title": "文档与原型使用单文件离线 HTML",
         "choice": "所有 CSS/JS/数据内联；评审状态存 localStorage，可导出 JSON 或复制反馈。",
-        "why": ["用户明确要求浏览器打开即可，不要部署。", "断网、无服务器也能评审。", "单文件便于发给同事或归档。"],
-        "tradeoffs": ["页面体积较大。", "评审 JSON 的下载路径无法由 Agent 可靠获知，需要复制反馈兜底。", "原型 HTML 需要清洗脚本以降低风险。"],
-        "alternatives": ["本地静态服务器", "Figma/在线白板", "Markdown 文档"],
-        "evidence": ["docs.html", "review.js", "sanitize_html"],
+        "why": [
+          "用户明确要求浏览器打开即可，不要部署。",
+          "断网、无服务器也能评审。",
+          "单文件便于发给同事或归档。"
+        ],
+        "tradeoffs": [
+          "页面体积较大。",
+          "评审 JSON 的下载路径无法由 Agent 可靠获知，需要复制反馈兜底。",
+          "原型 HTML 需要清洗脚本以降低风险。"
+        ],
+        "alternatives": [
+          "本地静态服务器",
+          "Figma/在线白板",
+          "Markdown 文档"
+        ],
+        "evidence": [
+          "docs.html",
+          "review.js",
+          "sanitize_html"
+        ],
         "status": "accepted"
       },
       {
         "id": "stdlib-only",
         "title": "Python 只依赖标准库",
         "choice": "记忆、扫描、运行、分诊、规格校验与模板组装都用标准库实现。",
-        "why": ["多数 Agent 环境有 Python，但没有项目依赖。", "减少安装失败与供应链风险。", "脚本可直接复制运行。"],
-        "tradeoffs": ["不能使用 Jinja2、jsonschema 等便利库。", "HTML/JSON 校验逻辑需要自己维护。"],
-        "alternatives": ["Node.js + npm 包", "Python + Jinja2/jsonschema"],
-        "evidence": ["companion.py imports", "无 requirements.txt"],
+        "why": [
+          "多数 Agent 环境有 Python，但没有项目依赖。",
+          "减少安装失败与供应链风险。",
+          "脚本可直接复制运行。"
+        ],
+        "tradeoffs": [
+          "不能使用 Jinja2、jsonschema 等便利库。",
+          "HTML/JSON 校验逻辑需要自己维护。"
+        ],
+        "alternatives": [
+          "Node.js + npm 包",
+          "Python + Jinja2/jsonschema"
+        ],
+        "evidence": [
+          "companion.py imports",
+          "无 requirements.txt"
+        ],
         "status": "accepted"
       },
       {
         "id": "consent-run",
         "title": "运行命令必须显式同意，并拦截明显破坏性操作",
         "choice": "run 需要 --yes 或 TTY 交互确认；命中破坏性模式时需 --allow-destructive。",
-        "why": ["调试运行可能改变环境或数据。", "Agent 不应在用户不知情时执行任意命令。", "拦截只是最后一道栏杆，不是沙箱。"],
-        "tradeoffs": ["多一步确认，自动化程度降低。", "模式匹配可能误伤或漏判。"],
-        "alternatives": ["默认直接运行", "完全交给宿主权限系统"],
-        "evidence": ["ConsentRequiredError", "DESTRUCTIVE_PATTERNS"],
+        "why": [
+          "调试运行可能改变环境或数据。",
+          "Agent 不应在用户不知情时执行任意命令。",
+          "拦截只是最后一道栏杆，不是沙箱。"
+        ],
+        "tradeoffs": [
+          "多一步确认，自动化程度降低。",
+          "模式匹配可能误伤或漏判。"
+        ],
+        "alternatives": [
+          "默认直接运行",
+          "完全交给宿主权限系统"
+        ],
+        "evidence": [
+          "ConsentRequiredError",
+          "DESTRUCTIVE_PATTERNS"
+        ],
+        "status": "accepted"
+      },
+      {
+        "id": "local-settings-stdlib",
+        "title": "Kimi 设置页用标准库 HTTP 服务，而不是复用 DSH React Client",
+        "choice": "新增 companion.py settings + lib/settings.py + 静态 settings.html/css/js，只用 Python 标准库监听 127.0.0.1。",
+        "why": [
+          "DSH client.js 依赖专有 ModuleLoader、React 和 settings.section Slot，Kimi 不提供这些运行时。",
+          "Kimi 官方插件清单不支持 settings/configFile/apps/inject 扩展字段。",
+          "纯标准库方案满足 Python 3.8+ 与离线安装约束，也避免引入 Node/MCP/CDN。"
+        ],
+        "tradeoffs": [
+          "需要一个本地浏览器页面和 token 流程",
+          "不能自动嵌入 Kimi UI",
+          "需要自己处理响应式与可访问性"
+        ],
+        "alternatives": [
+          "复刻 dsh-plugin/client.js",
+          "为 Kimi 写原生插件扩展",
+          "只保留 CLI 配置命令"
+        ],
+        "evidence": [
+          "settings.py",
+          "templates/settings.html",
+          "commands/settings.md"
+        ],
+        "status": "accepted"
+      },
+      {
+        "id": "strict-write-tolerant-read",
+        "title": "读保持容错，写严格拒绝",
+        "choice": "CLI 的 load_plugin_config 继续容错读取；设置页保存走 config.validate_config 并返回字段错误。",
+        "why": [
+          "旧安装里的缺失或非法字段不能阻断 boot/docs/prototype。",
+          "设置页必须让用户看到具体错误，不能静默改回默认值。",
+          "加锁后合并保存可避免两个设置页同时保存时丢字段。"
+        ],
+        "tradeoffs": [
+          "同一份配置在 CLI 与设置页可能显示出差异",
+          "旧配置的非法字段会在下一次保存时被要求修正"
+        ],
+        "alternatives": [
+          "所有读取都严格",
+          "保存时静默钳制"
+        ],
+        "evidence": [
+          "config.py",
+          "common.load_plugin_config",
+          "tests/test_settings.py"
+        ],
+        "status": "accepted"
+      },
+      {
+        "id": "managed-cli-host-scope",
+        "title": "managed 插件 CLI 只服务启动它的宿主",
+        "choice": "运行中的 scripts/companion.py 仅在 host 匹配且文件不属于其他宿主 home 时，作为第一阶段 CLI。",
+        "why": [
+          "Kimi 的 /plugins install 把插件放在 plugins/managed，而不是 <KIMI_HOME>/skills。",
+          "如果无条件复用，Kimi 的 CLI 可能被当成 DSH/CodeBuddy 的 CLI，迁移到错误的宿主根。"
+        ],
+        "tradeoffs": [
+          "需要判断 CLI 路径归哪个宿主 home",
+          "仓库内直接运行的 CLI 仍依赖显式 --host"
+        ],
+        "alternatives": [
+          "只允许 host-home 下的 CLI",
+          "只允许 PROGRAMMER_WORKFLOW_CLI"
+        ],
+        "evidence": [
+          "hosts.companion_cli",
+          "hosts.cli_owner",
+          "tests/test_hosts.py"
+        ],
         "status": "accepted"
       }
     ],
@@ -554,7 +1943,10 @@
         "likelihood": "高",
         "mitigation": "维护 hosts.md 适配表；安装器检测目录；SKILL.md 给无结构化询问工具时的编号选项兜底。",
         "owner": "维护者",
-        "evidence": ["references/hosts.md", "install.ps1"]
+        "evidence": [
+          "references/hosts.md",
+          "install.ps1"
+        ]
       },
       {
         "id": "memory-stale",
@@ -564,7 +1956,10 @@
         "likelihood": "中",
         "mitigation": "当前指令优先；冲突时问用户；每条记忆有 updated_at 与来源；支持 forget。",
         "owner": "Agent + 用户",
-        "evidence": ["memory.py", "SKILL.md 冲突规则"]
+        "evidence": [
+          "memory.py",
+          "SKILL.md 冲突规则"
+        ]
       },
       {
         "id": "python-missing",
@@ -574,7 +1969,9 @@
         "likelihood": "中",
         "mitigation": "doctor 检查并给出安装建议；文档保留手动编辑 MEMORY.md 的降级路径；不强制 MCP。",
         "owner": "用户",
-        "evidence": ["cmd_doctor"]
+        "evidence": [
+          "cmd_doctor"
+        ]
       },
       {
         "id": "review-loop",
@@ -584,7 +1981,10 @@
         "likelihood": "中",
         "mitigation": "同时提供“复制反馈”按钮，直接粘贴到对话；评审栏保留 localStorage，可再次导出。",
         "owner": "模板",
-        "evidence": ["review.js export / copy", "SKILL.md 评审回收"]
+        "evidence": [
+          "review.js export / copy",
+          "SKILL.md 评审回收"
+        ]
       },
       {
         "id": "raw-html",
@@ -594,7 +1994,9 @@
         "likelihood": "中",
         "mitigation": "normalize_prototype 移除 script/iframe/on* 与 javascript: URL；模板自身不 eval 数据。",
         "owner": "渲染器",
-        "evidence": ["sanitize_html"]
+        "evidence": [
+          "sanitize_html"
+        ]
       },
       {
         "id": "transcript-privacy",
@@ -604,7 +2006,10 @@
         "likelihood": "中",
         "mitigation": "默认不读；显式开关；本地输出并提示审阅；记忆禁止存密钥。",
         "owner": "用户 + Agent",
-        "evidence": ["scan.py transcripts", "references/safety.md"]
+        "evidence": [
+          "scan.py transcripts",
+          "references/safety.md"
+        ]
       },
       {
         "id": "html-size",
@@ -614,7 +2019,9 @@
         "likelihood": "中",
         "mitigation": "规格限制模块/功能/文件数量；列表分页/筛选；渲染前校验。",
         "owner": "渲染器",
-        "evidence": ["normalize_architecture 上限"]
+        "evidence": [
+          "normalize_architecture 上限"
+        ]
       },
       {
         "id": "dsh-write",
@@ -624,54 +2031,368 @@
         "likelihood": "高",
         "mitigation": "设置页由 Host 侧写配置；全局记忆写入提示用户临时切完全权限；文档给出 PROGRAMMER_WORKFLOW_HOME 降级方案。",
         "owner": "用户 + 插件",
-        "evidence": ["common.py PermissionError", "dsh-plugin 设置页"]
+        "evidence": [
+          "common.py PermissionError",
+          "dsh-plugin 设置页"
+        ]
+      },
+      {
+        "id": "local-settings-surface",
+        "title": "本地设置服务成为额外攻击面",
+        "severity": "high",
+        "impact": "如果绑定 0.0.0.0、不做 token 校验或放开静态文件，可能泄露配置或任意读本地文件。",
+        "likelihood": "中",
+        "mitigation": "只绑定 127.0.0.1；随机 token 仅从 URL fragment 读取并以请求头发送；静态资源白名单；无 CORS；POST 仅 JSON 且限长；CSP/nosniff/no-store；500 不返回 traceback；测试覆盖 403/400/404/405。",
+        "owner": "维护者",
+        "evidence": [
+          "settings.py",
+          "tests/test_settings.py::ServerTests"
+        ]
+      },
+      {
+        "id": "settings-real-host-unverified",
+        "title": "Kimi 本地设置页未在真实 Kimi 会话中验证",
+        "severity": "medium",
+        "impact": "managed 插件路径、Kimi 后台任务和浏览器打开行为可能与本地 CDP 验证不同。",
+        "likelihood": "中",
+        "mitigation": "在 KIMI_HOME 临时目录、managed 插件副本和 CLI host 作用域上做单元测试；用 Edge/Chromium 对本地服务做 4 视口 × 深浅色端到端截图；交付说明明确“真实 Kimi 会话未验证”。",
+        "owner": "维护者",
+        "evidence": [
+          "tests/test_settings.py",
+          "tests/test_hosts.py",
+          "CHANGELOG.md"
+        ]
       }
     ],
     "questions": [
-      { "id": "q-agents", "question": "你最常用哪几个 Agent？要优先保证哪一个的自动加载与询问体验？", "why": "不同宿主的路径、重启要求和询问工具不同，优先适配能减少你每次手动触发。", "default": "DSH + Kimi Code + CodeBuddy" },
-      { "id": "q-memory-share", "question": "工作区记忆要不要提交到 Git，让团队共享？", "why": "共享能统一约定，但可能泄露环境信息与个人习惯。", "default": "默认本地不提交，只共享文档与原型" },
-      { "id": "q-run", "question": "普通调试命令在 Plan 模式下逐条批准，还是切到 full-authority？", "why": "Plan 更可控；full-authority 更高效，但破坏性操作仍需确认。", "default": "默认 plan；明确切换后才用 full-authority" },
-      { "id": "q-language", "question": "文档与原型默认用中文还是中英双语？", "why": "影响生成内容的密度与读者范围。", "default": "中文为主，代码/术语保留英文" },
-      { "id": "q-install", "question": "现在就安装到本机所有检测到的 Agent 吗？", "why": "安装器可先 DryRun；安装会写用户级目录与受管自举块。", "default": "先 DryRun，再按需安装" }
+      {
+        "id": "q-agents",
+        "question": "你最常用哪几个 Agent？要优先保证哪一个的自动加载与询问体验？",
+        "why": "不同宿主的路径、重启要求和询问工具不同，优先适配能减少你每次手动触发。",
+        "default": "DSH + Kimi Code + CodeBuddy"
+      },
+      {
+        "id": "q-memory-share",
+        "question": "工作区记忆要不要提交到 Git，让团队共享？",
+        "why": "共享能统一约定，但可能泄露环境信息与个人习惯。",
+        "default": "默认本地不提交，只共享文档与原型"
+      },
+      {
+        "id": "q-run",
+        "question": "普通调试命令在 Plan 模式下逐条批准，还是切到 full-authority？",
+        "why": "Plan 更可控；full-authority 更高效，但破坏性操作仍需确认。",
+        "default": "默认 plan；明确切换后才用 full-authority"
+      },
+      {
+        "id": "q-language",
+        "question": "文档与原型默认用中文还是中英双语？",
+        "why": "影响生成内容的密度与读者范围。",
+        "default": "中文为主，代码/术语保留英文"
+      },
+      {
+        "id": "q-install",
+        "question": "现在就安装到本机所有检测到的 Agent 吗？",
+        "why": "安装器可先 DryRun；安装会写用户级目录与受管自举块。",
+        "default": "先 DryRun，再按需安装"
+      },
+      {
+        "id": "q-settings-open",
+        "question": "真实 Kimi 会话里由谁打开设置页：宿主内嵌浏览器还是系统默认浏览器？",
+        "why": "决定 settings --open 的默认行为以及是否需要额外的 WebView 适配。",
+        "default": "系统默认浏览器打开 127.0.0.1；宿主禁止时由 Agent 把 URL 交给用户"
+      }
     ],
     "file_index": [
-      { "path": "skills/programmer-workflow/SKILL.md", "module": "skill-protocol", "purpose": "总协议与触发矩阵", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/companion.py", "module": "cli", "purpose": "CLI 入口", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/common.py", "module": "cli", "purpose": "共享工具", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/hosts.py", "module": "hosts", "purpose": "宿主注册表与独立数据根", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/migration.py", "module": "migration", "purpose": "两阶段插件/运行数据迁移", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/plan.py", "module": "plan", "purpose": "计划校验与 md/html 渲染", "lines": 0 },
-      { "path": "skills/programmer-workflow/references/plan.md", "module": "plan", "purpose": "Plan/Full authority 协议", "lines": 0 },
-      { "path": "commands/plan.md", "module": "host-manifests", "purpose": "生成计划命令", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/memory.py", "module": "memory", "purpose": "记忆与审批", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/scan.py", "module": "scan", "purpose": "证据扫描", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/debug.py", "module": "debug", "purpose": "运行与分诊", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/stall.py", "module": "stall", "purpose": "卡壳计数", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/render/spec.py", "module": "renderer", "purpose": "规格校验", "lines": 0 },
-      { "path": "skills/programmer-workflow/scripts/lib/render/pages.py", "module": "renderer", "purpose": "HTML 组装", "lines": 0 },
-      { "path": "skills/programmer-workflow/templates/docs.html", "module": "templates", "purpose": "文档外壳", "lines": 0 },
-      { "path": "skills/programmer-workflow/templates/docs.js", "module": "templates", "purpose": "文档交互", "lines": 0 },
-      { "path": "skills/programmer-workflow/templates/prototype.html", "module": "templates", "purpose": "原型外壳", "lines": 0 },
-      { "path": "skills/programmer-workflow/templates/prototype.js", "module": "templates", "purpose": "原型交互", "lines": 0 },
-      { "path": "skills/programmer-workflow/templates/review.js", "module": "templates", "purpose": "评审控制器", "lines": 0 },
-      { "path": "dsh-plugin/index.js", "module": "dsh-plugin", "purpose": "DSH Host：配置、路由、迁移状态与准备脚本", "lines": 0 },
-      { "path": "dsh-plugin/client.js", "module": "dsh-plugin", "purpose": "DSH 设置页与迁移提示", "lines": 0 },
-      { "path": "dsh-plugin/migration.html", "module": "dsh-plugin", "purpose": "迁移教程", "lines": 0 },
-      { "path": "dsh-plugin/dsh-migration-tools/migrate-dsh-data.bat", "module": "dsh-plugin", "purpose": "内置迁移工具", "lines": 0 },
-      { "path": "dsh-plugin/dsh-migration-tools/rollback-dsh-data.bat", "module": "dsh-plugin", "purpose": "内置回滚工具", "lines": 0 },
-      { "path": "docs/Install.html", "module": "host-manifests", "purpose": "三端安装教程", "lines": 0 },
-      { "path": "kimi.plugin.json", "module": "host-manifests", "purpose": "Kimi 插件清单", "lines": 0 },
-      { "path": ".claude-plugin/plugin.json", "module": "host-manifests", "purpose": "Claude 插件清单", "lines": 0 },
-      { "path": "install.ps1", "module": "installers", "purpose": "Windows 安装器", "lines": 0 },
-      { "path": "install.sh", "module": "installers", "purpose": "Unix 安装器", "lines": 0 }
+      {
+        "path": "skills/programmer-workflow/SKILL.md",
+        "module": "skill-protocol",
+        "purpose": "总协议与触发矩阵",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/companion.py",
+        "module": "cli",
+        "purpose": "CLI 入口",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/common.py",
+        "module": "cli",
+        "purpose": "共享工具",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/hosts.py",
+        "module": "hosts",
+        "purpose": "宿主注册表与独立数据根",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/migration.py",
+        "module": "migration",
+        "purpose": "两阶段插件/运行数据迁移",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/plan.py",
+        "module": "plan",
+        "purpose": "计划校验与 md/html 渲染",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/references/plan.md",
+        "module": "plan",
+        "purpose": "Plan/Full authority 协议",
+        "lines": 0
+      },
+      {
+        "path": "commands/plan.md",
+        "module": "host-manifests",
+        "purpose": "生成计划命令",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/memory.py",
+        "module": "memory",
+        "purpose": "记忆与审批",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/scan.py",
+        "module": "scan",
+        "purpose": "证据扫描",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/debug.py",
+        "module": "debug",
+        "purpose": "运行与分诊",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/stall.py",
+        "module": "stall",
+        "purpose": "卡壳计数",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/render/spec.py",
+        "module": "renderer",
+        "purpose": "规格校验",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/render/pages.py",
+        "module": "renderer",
+        "purpose": "HTML 组装",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/docs.html",
+        "module": "templates",
+        "purpose": "文档外壳",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/docs.js",
+        "module": "templates",
+        "purpose": "文档交互",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/prototype.html",
+        "module": "templates",
+        "purpose": "原型外壳",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/prototype.js",
+        "module": "templates",
+        "purpose": "原型交互",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/review.js",
+        "module": "templates",
+        "purpose": "评审控制器",
+        "lines": 0
+      },
+      {
+        "path": "dsh-plugin/index.js",
+        "module": "dsh-plugin",
+        "purpose": "DSH Host：配置、路由、迁移状态与准备脚本",
+        "lines": 0
+      },
+      {
+        "path": "dsh-plugin/client.js",
+        "module": "dsh-plugin",
+        "purpose": "DSH 设置页与迁移提示",
+        "lines": 0
+      },
+      {
+        "path": "dsh-plugin/migration.html",
+        "module": "dsh-plugin",
+        "purpose": "迁移教程",
+        "lines": 0
+      },
+      {
+        "path": "dsh-plugin/dsh-migration-tools/migrate-dsh-data.bat",
+        "module": "dsh-plugin",
+        "purpose": "内置迁移工具",
+        "lines": 0
+      },
+      {
+        "path": "dsh-plugin/dsh-migration-tools/rollback-dsh-data.bat",
+        "module": "dsh-plugin",
+        "purpose": "内置回滚工具",
+        "lines": 0
+      },
+      {
+        "path": "docs/Install.html",
+        "module": "host-manifests",
+        "purpose": "三端安装教程",
+        "lines": 0
+      },
+      {
+        "path": "kimi.plugin.json",
+        "module": "host-manifests",
+        "purpose": "Kimi 插件清单",
+        "lines": 0
+      },
+      {
+        "path": ".claude-plugin/plugin.json",
+        "module": "host-manifests",
+        "purpose": "Claude 插件清单",
+        "lines": 0
+      },
+      {
+        "path": "install.ps1",
+        "module": "installers",
+        "purpose": "Windows 安装器",
+        "lines": 0
+      },
+      {
+        "path": "install.sh",
+        "module": "installers",
+        "purpose": "Unix 安装器",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/config.py",
+        "module": "config",
+        "purpose": "严格配置读写、合并保存与恢复默认",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/settings.py",
+        "module": "settings",
+        "purpose": "本地设置页状态与 HTTP API",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/settings.html",
+        "module": "settings-ui",
+        "purpose": "本地设置页结构",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/settings.css",
+        "module": "settings-ui",
+        "purpose": "设计令牌与响应式样式",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/templates/settings.js",
+        "module": "settings-ui",
+        "purpose": "设置页交互与状态机",
+        "lines": 0
+      },
+      {
+        "path": "commands/settings.md",
+        "module": "settings",
+        "purpose": "/programmer-workflow:settings 命令说明",
+        "lines": 0
+      },
+      {
+        "path": "tests/test_settings.py",
+        "module": "tests",
+        "purpose": "本地设置页、配置与 API 测试",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/environment.py",
+        "module": "environment",
+        "purpose": "环境探测/缓存/命令检查",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/lib/screenshot.py",
+        "module": "screenshot",
+        "purpose": "截图/大模型识别/剪贴板",
+        "lines": 0
+      },
+      {
+        "path": "skills/programmer-workflow/scripts/platform/windows_capture.ps1",
+        "module": "platform-tools",
+        "purpose": "Windows GDI/UTF-8/PNG 剪贴板",
+        "lines": 0
+      },
+      {
+        "path": "scripts/kimi_settings_hook.py",
+        "module": "kimi-quick-config",
+        "purpose": "Kimi SessionStart hook",
+        "lines": 0
+      },
+      {
+        "path": "package.json",
+        "module": "dsh-package",
+        "purpose": "DSH 根包清单",
+        "lines": 0
+      },
+      {
+        "path": "locales/zh-CN.json",
+        "module": "host-manifests",
+        "purpose": "Kimi 界面本地化",
+        "lines": 0
+      }
     ],
     "glossary": [
-      { "term": "active", "definition": "已由用户确认、会被 Agent 遵守的记忆条目。" },
-      { "term": "proposed", "definition": "候选记忆，只展示给用户审核，不生效。" },
-      { "term": "卡壳计数", "definition": "同一会话连续失败轮次的轻量状态，用于触发升级询问。" },
-      { "term": "TRIAGE", "definition": "把日志压缩成错误签名、首次现场与可验证假设的报告。" },
-      { "term": "spec_hash", "definition": "规格内容哈希，用于判断旧评审是否仍对应当前文档。" },
-      { "term": "受管块", "definition": "安装器写入 AGENTS.md/CLAUDE.md 的标记区间，可安全更新与卸载。" }
+      {
+        "term": "active",
+        "definition": "已由用户确认、会被 Agent 遵守的记忆条目。"
+      },
+      {
+        "term": "proposed",
+        "definition": "候选记忆，只展示给用户审核，不生效。"
+      },
+      {
+        "term": "卡壳计数",
+        "definition": "同一会话连续失败轮次的轻量状态，用于触发升级询问。"
+      },
+      {
+        "term": "TRIAGE",
+        "definition": "把日志压缩成错误签名、首次现场与可验证假设的报告。"
+      },
+      {
+        "term": "spec_hash",
+        "definition": "规格内容哈希，用于判断旧评审是否仍对应当前文档。"
+      },
+      {
+        "term": "受管块",
+        "definition": "安装器写入 AGENTS.md/CLAUDE.md 的标记区间，可安全更新与卸载。"
+      },
+      {
+        "term": "本地设置页",
+        "definition": "由 companion.py settings 在 127.0.0.1 启动、带 token 的 Python 设置界面，用于没有 DSH Slot 的宿主。"
+      },
+      {
+        "term": "managed 插件",
+        "definition": "Kimi /plugins install 安装到 plugins/managed 下的插件副本；它自己的 companion.py 可以为本宿主准备第一阶段脚本。"
+      },
+      {
+        "term": "prepared / completed",
+        "definition": "prepared 只表示迁移或回滚脚本已生成；completed 必须由链接或真实落盘校验证明。"
+      }
     ]
   },
   "features": {
@@ -679,69 +2400,1592 @@
       "name": "程序员工作流 / Programmer Workflow",
       "tagline": "跨 Agent 的记忆、调试与评审工作流",
       "summary": "把用户的 8 条工作流需求落成可安装的 Skill/Plugin：记忆审批、卡壳升级、调试闭环、工程文档、设计原型与统一询问协议。",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "generated_at": "",
       "language": "zh-CN",
       "confidence": "high",
       "source": "需求映射 + 代码实现"
     },
     "domains": [
-      { "id": "memory", "name": "记忆", "description": "用户习惯、工作区事实与“记住”指令。" },
-      { "id": "guidance", "name": "协作引导", "description": "卡壳、模糊需求、行业做法与询问格式。" },
-      { "id": "debugging", "name": "调试", "description": "日志埋点、自动运行、分诊与硬件协作。" },
-      { "id": "docs", "name": "工程文档", "description": "架构与功能总结、交互式 HTML 与评审。" },
-      { "id": "design", "name": "设计原型", "description": "UI、美术、模型方向的视觉原型与评审。" },
-      { "id": "workflow", "name": "计划与执行", "description": "Plan 模式、Full authority、计划审核与执行边界。" },
-      { "id": "distribution", "name": "分发与安装", "description": "多 Agent 安装、清单、命令与自检。" }
+      {
+        "id": "memory",
+        "name": "记忆",
+        "description": "用户习惯、工作区事实与“记住”指令。"
+      },
+      {
+        "id": "guidance",
+        "name": "协作引导",
+        "description": "卡壳、模糊需求、行业做法与询问格式。"
+      },
+      {
+        "id": "debugging",
+        "name": "调试",
+        "description": "日志埋点、自动运行、分诊与硬件协作。"
+      },
+      {
+        "id": "docs",
+        "name": "工程文档",
+        "description": "架构与功能总结、交互式 HTML 与评审。"
+      },
+      {
+        "id": "design",
+        "name": "设计原型",
+        "description": "UI、美术、模型方向的视觉原型与评审。"
+      },
+      {
+        "id": "workflow",
+        "name": "计划与执行",
+        "description": "Plan 模式、Full authority、计划审核与执行边界。"
+      },
+      {
+        "id": "distribution",
+        "name": "分发与安装",
+        "description": "多 Agent 安装、清单、命令与自检。"
+      },
+      {
+        "id": "tools",
+        "name": "本机工具",
+        "description": "截图/大模型识别/剪贴板、环境预检与账号余额"
+      }
     ],
     "features": [
-      { "id": "f-habit", "name": "用户习惯采集与审批", "domain": "memory", "status": "implemented", "priority": "P0", "summary": "从工程证据与（可选）对话记录归纳习惯，逐条写入 proposed，由用户保留/修改/拒绝后才 active。", "user_value": "不用重复交代写作与协作偏好，同时保留最终控制权。", "entry_points": ["companion.py scan", "companion.py memory propose", "companion.py memory review"], "user_flow": ["Agent 说明要采集什么", "用户同意", "扫描并列出候选", "用户逐条定夺", "写入生效记忆"], "inputs": ["工程文件", "可选对话记录", "用户决定"], "outputs": ["scan.json", "MEMORY.md"], "dependencies": [], "tests": ["tests/test_companion.py::test_memory_approval"], "evidence": ["memory.py", "scan.py"], "confidence": "high" },
-      { "id": "f-workspace-memory", "name": "工作区记忆", "domain": "memory", "status": "implemented", "priority": "P0", "summary": "按工程保存环境、约定、决策与事实；与全局用户记忆分开，可提升为用户级候选。", "user_value": "换项目不串味，项目事实可复用。", "entry_points": ["companion.py memory --scope workspace", "companion.py env set"], "user_flow": ["进入工作区", "boot 读取工作区记忆", "按需新增/提升"], "inputs": ["工作区路径", "用户说明"], "outputs": [".programmer-workflow/MEMORY.md"], "dependencies": ["f-habit"], "tests": ["tests/test_companion.py::MemoryTests::test_approval_gate_and_boot"], "evidence": ["MemoryStore(scope='workspace')"], "confidence": "high" },
-      { "id": "f-remember", "name": "“记住”范围确认", "domain": "memory", "status": "implemented", "priority": "P0", "summary": "用户说记住但未说明用户级/工作区级时，先问范围；显式指令可直接 active 并复述。", "user_value": "避免把临时项目偏好写进全局。", "entry_points": ["SKILL.md 记忆协议", "commands/remember.md"], "user_flow": ["识别记住", "问范围", "写入", "复述与删除方法"], "inputs": ["用户语句"], "outputs": ["记忆条目"], "dependencies": ["f-workspace-memory"], "tests": [], "evidence": ["references/ask.md", "memory add"], "confidence": "high" },
-      { "id": "f-stall", "name": "三轮卡壳升级", "domain": "guidance", "status": "implemented", "priority": "P0", "summary": "连续 3 轮未满意或 2 次修复失败时暂停试错，给出行业做法/调试/静态分析等选项。", "user_value": "避免无限打转，快速换策略。", "entry_points": ["companion.py stall", "SKILL.md 卡壳协议"], "user_flow": ["记录失败", "到阈值", "询问", "选择方向", "执行并验证"], "inputs": ["失败轮次", "用户不满意信号"], "outputs": ["询问卡", "新计划"], "dependencies": [], "tests": ["tests/test_companion.py::StallTests::test_threshold_and_reset"], "evidence": ["stall.py", "references/satisfaction.md"], "confidence": "high" },
-      { "id": "f-industry", "name": "行业做法与模糊需求解释卡", "domain": "guidance", "status": "implemented", "priority": "P0", "summary": "行业不明时先问；模糊时先总结“我理解的目标/假设/非目标/验收”，再给 2–3 条路线让用户选。", "user_value": "把“感觉不对”变成可确认的具体差异。", "entry_points": ["references/satisfaction.md", "询问卡"], "user_flow": ["识别模糊", "写解释卡", "用户确认/修正", "再执行"], "inputs": ["历史提问", "工程线索"], "outputs": ["解释卡", "行业路线"], "dependencies": ["f-stall"], "tests": [], "evidence": ["satisfaction.md"], "confidence": "high" },
-      { "id": "f-ask", "name": "统一询问协议", "domain": "guidance", "status": "implemented", "priority": "P0", "summary": "优先用宿主的选项工具；每个问题 2–4 个具体选项 + “其他（我来说明）”，最多 3 个问题，推荐项在前。", "user_value": "少打字、可比较、保留自由回答。", "entry_points": ["references/ask.md"], "user_flow": ["识别需要拍板", "生成选项", "用户选择或自由回答", "复述决定"], "inputs": ["决策点"], "outputs": ["用户决定"], "dependencies": [], "tests": [], "evidence": ["ask.md", "DSH ask_user_question 适配"], "confidence": "high" },
-      { "id": "f-run", "name": "受控调试运行", "domain": "debugging", "status": "implemented", "priority": "P0", "summary": "用户批准后运行命令，捕获完整日志与元数据，超时杀进程树，日志有大小上限。", "user_value": "把“你那边跑一下”变成可复现的本地证据。", "entry_points": ["companion.py run"], "user_flow": ["Agent 提议", "用户批准", "运行", "得到日志路径与尾部"], "inputs": ["命令", "超时"], "outputs": ["debug-logs/*/combined.log", "meta.json"], "dependencies": [], "tests": ["tests/test_companion.py::DebugTests::test_run_and_triage"], "evidence": ["run_command", "ConsentRequiredError"], "confidence": "high" },
-      { "id": "f-triage", "name": "日志分诊", "domain": "debugging", "status": "implemented", "priority": "P0", "summary": "识别错误签名、异常栈、DBG 标记与 12 类根因，输出 TRIAGE.md 与验证顺序。", "user_value": "把几万行日志压缩成几个可验证假设。", "entry_points": ["companion.py triage"], "user_flow": ["运行后分诊", "按假设加一条日志", "再运行对比"], "inputs": ["combined.log"], "outputs": ["TRIAGE.md", "TRIAGE.json"], "dependencies": ["f-run"], "tests": ["tests/test_companion.py::DebugTests::test_run_and_triage"], "evidence": ["triage_log", "HYPOTHESES"], "confidence": "high" },
-      { "id": "f-devonly", "name": "纯开发/无硬件直接加日志", "domain": "debugging", "status": "implemented", "priority": "P0", "summary": "用户声明工作区是纯开发、无部署环境/硬件时，直接加最小可回滚日志并给定位步骤，同时把环境事实写入工作区记忆。", "user_value": "不再为“没有硬件”反复卡住。", "entry_points": ["companion.py env set --dev-only --no-hardware", "SKILL.md 调试协议"], "user_flow": ["识别声明", "写环境记忆", "加日志", "给运行/定位命令"], "inputs": ["用户声明"], "outputs": ["环境记忆", "日志与定位步骤"], "dependencies": ["f-workspace-memory"], "tests": ["tests/test_companion.py::MemoryTests::test_env_set_via_cli"], "evidence": ["cmd_env set", "references/debugging.md"], "confidence": "high" },
-      { "id": "f-hardware", "name": "硬件协作清单", "domain": "debugging", "status": "implemented", "priority": "P1", "summary": "需要实机时给出设备、连接、权限、固件、复现步骤与要回传的日志清单，而不是让 Agent 假装能操作。", "user_value": "人机分工清楚，减少无效尝试。", "entry_points": ["references/debugging.md"], "user_flow": ["识别硬件依赖", "列清单", "用户操作并回传", "Agent 继续分析"], "inputs": ["工程线索", "用户环境"], "outputs": ["操作清单", "回传日志"], "dependencies": ["f-triage"], "tests": [], "evidence": ["debugging.md 硬件章节", "env hints"], "confidence": "high" },
-      { "id": "f-arch", "name": "Architecture.html", "domain": "docs", "status": "implemented", "priority": "P0", "summary": "从模块、流程、决策、风险、文件证据生成可搜索/筛选/看依赖图的交互文档。", "user_value": "快速建立工程心智模型，并把不确定点变成评审意见。", "entry_points": ["companion.py docs", "commands/architecture.md"], "user_flow": ["触发总结", "收集证据", "写 spec", "渲染", "浏览器评审"], "inputs": ["工程源码", "spec.json"], "outputs": ["docs/Architecture.html"], "dependencies": [], "tests": ["tests/test_render.py::RenderTests::test_docs_render"], "evidence": ["docs.js", "normalize_architecture"], "confidence": "high" },
-      { "id": "f-features", "name": "Features.html", "domain": "docs", "status": "implemented", "priority": "P0", "summary": "按领域/状态组织功能，展示入口、用户路径、依赖、测试与证据，并支持覆盖矩阵。", "user_value": "知道“有什么、做到哪、怎么验证”。", "entry_points": ["companion.py docs"], "user_flow": ["同架构文档"], "inputs": ["spec.json"], "outputs": ["docs/Features.html"], "dependencies": [], "tests": ["tests/test_render.py::RenderTests::test_docs_render"], "evidence": ["normalize_features", "docs.js featuresTab"], "confidence": "high" },
-      { "id": "f-review", "name": "页面内评审与导出", "domain": "docs", "status": "implemented", "priority": "P0", "summary": "文档与原型底部可添加意见、通过/请求修改、导出 JSON、复制 Markdown 反馈。", "user_value": "不用另开文档，评审结果能回到 Agent。", "entry_points": ["review.js", "docs/Prototype 底部评审栏"], "user_flow": ["浏览", "加意见/标注", "导出或复制", "Agent 读取"], "inputs": ["用户评审"], "outputs": ["review JSON", "Markdown"], "dependencies": [], "tests": ["tests/test_render.py::RenderTests::test_docs_render"], "evidence": ["Review 控制器"], "confidence": "high" },
-      { "id": "f-proto", "name": "Prototype.html", "domain": "design", "status": "implemented", "priority": "P0", "summary": "2–3 个设计方向 + 桌面/平板/手机视口 + 画布标注 + 评审导出，单文件离线。", "user_value": "先看方向再投入实现，减少返工。", "entry_points": ["companion.py prototype", "commands/prototype.md"], "user_flow": ["澄清", "方向", "渲染", "标注/评审", "迭代"], "inputs": ["design.json"], "outputs": ["Prototype.html"], "dependencies": ["f-review"], "tests": ["tests/test_render.py::RenderTests::test_prototype_render_and_sanitize"], "evidence": ["prototype.js", "normalize_prototype"], "confidence": "high" },
-      { "id": "f-art", "name": "美术/模型方向说明", "domain": "design", "status": "implemented", "priority": "P1", "summary": "用色板、字体、材质、光感、轮廓与风格板表达方向，明确“这是视觉方向，不是成品资产”。", "user_value": "把审美讨论变成可指认的元素。", "entry_points": ["references/prototype.md"], "user_flow": ["收集参考", "生成风格板", "用户指认保留/删除", "形成资产清单"], "inputs": ["需求", "参考"], "outputs": ["风格板", "资产说明"], "dependencies": ["f-proto"], "tests": [], "evidence": ["prototype.md 美术章节"], "confidence": "medium" },
-      { "id": "f-kimi", "name": "Kimi Plugin 清单", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "kimi.plugin.json 声明 skills、systemPrompt、sessionStart 与命令，可 /plugins install 本地目录。", "user_value": "Kimi Code 一键安装、会话自动加载。", "entry_points": ["kimi.plugin.json", "SYSTEM.md"], "user_flow": ["/plugins install <path>", "reload", "自动加载 skill"], "inputs": ["插件目录"], "outputs": ["已安装插件"], "dependencies": ["f-arch"], "tests": ["tests/test_manifests.py"], "evidence": ["kimi.plugin.json"], "confidence": "high" },
-      { "id": "f-claude", "name": "Claude Code Plugin 清单", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": ".claude-plugin/plugin.json + skills/ + commands/，可通过本地 marketplace 安装。", "user_value": "Claude Code 用户获得同样的 Skill 与斜杠命令。", "entry_points": [".claude-plugin/plugin.json", "commands/*.md"], "user_flow": ["/plugin marketplace add", "/plugin install"], "inputs": ["插件目录"], "outputs": ["已安装插件"], "dependencies": ["f-arch"], "tests": ["tests/test_manifests.py"], "evidence": [".claude-plugin/plugin.json"], "confidence": "high" },
-      { "id": "f-install", "name": "多 Agent 安装器", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "检测 ~/.agents、~/.claude、~/.kimi-code、~/.dsh、项目 .agents 与 .codebuddy 等目录，支持 DryRun、备份、Force、卸载与自举块。", "user_value": "一次安装到现有工具，不用记六套路径。", "entry_points": ["install.ps1", "install.sh"], "user_flow": ["DryRun", "选目标", "安装", "重启/新会话", "doctor 验证"], "inputs": ["目标参数"], "outputs": ["已安装 Skill", "受管自举块"], "dependencies": ["f-kimi"], "tests": ["tests/test_manifests.py::ManifestTests::test_installer_dry_run"], "evidence": ["install.ps1"], "confidence": "high" },
-      { "id": "f-codebuddy", "name": "CodeBuddy 适配", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "安装到项目 .codebuddy/skills，写入 CODEBUDDY.md 作为启动自举；CodeBuddy 先读 CODEBUDDY.md，再回退 AGENTS.md。", "user_value": "CodeBuddy 用户不用手动复制 Skill，也不会丢启动记忆。", "entry_points": ["install.ps1 -Targets codebuddy", ".codebuddy/skills", "CODEBUDDY.md"], "user_flow": ["在项目里运行 codebuddy target", "新开会话", "CodeBuddy 发现 Skill 并读取自举块", "boot 读取记忆"], "inputs": ["项目路径"], "outputs": ["已安装 Skill", "CODEBUDDY.md 受管块"], "dependencies": ["f-install"], "tests": ["tests/test_manifests.py::ManifestTests::test_installer_dry_run"], "evidence": ["install.ps1 codebuddy target", "references/hosts.md"], "confidence": "high" },
-      { "id": "f-dsh-settings", "name": "按宿主独立的设置页", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "DSH 设置页按宿主切换各自独立的 config.json、记忆路径和迁移状态；写入严格校验，旧 requireRunConsent 只做安全读取兼容并默认 plan；「恢复默认」只重置当前宿主，promptMigration 对应 shell.overlay 里的第一阶段提示。", "user_value": "三端不再共享配置；切换标签看到的是对应宿主的真实数据。", "entry_points": ["设置 → 程序员工作流", "GET/POST /programmer-workflow/config?host=", "/programmer-workflow/status?host="], "user_flow": ["选择宿主", "读取该宿主配置", "修改", "严格校验并保存", "CLI 读取"], "inputs": ["设置页表单", "host"], "outputs": ["per-host config.json", "workflowMode"], "dependencies": ["hosts", "dsh-plugin"], "tests": ["tests/test_hosts.py", "tests/test_companion.py::ConfigTests"], "evidence": ["dsh-plugin/index.js config route", "dsh-plugin/client.js host tabs"], "confidence": "high" },
-      { "id": "f-plan-mode", "name": "workflowMode 与 Plan 审核", "domain": "workflow", "status": "implemented", "priority": "P0", "summary": "workflowMode=plan/full-authority 控制插件审核；plan 写 plan.md/html 等待执行，full-authority 普通运行不逐条批准；破坏性命令始终拦截。", "user_value": "先审核再执行，同时避免 Full authority 被无意义批准打断。", "entry_points": ["companion.py plan", "companion.py run --yes/--full-authority", "设置 workflowMode"], "user_flow": ["收集证据", "生成计划", "用户执行", "运行/验证"], "inputs": ["plan spec", "workflowMode"], "outputs": ["plan.md/html", "run log"], "dependencies": ["plan", "debugging"], "tests": ["tests/test_plan.py", "tests/test_companion.py::DebugTests", "tests/test_companion.py::ConfigTests"], "evidence": ["lib/plan.py", "lib/debug.py", "boot workflow payload"], "confidence": "high" },
-      { "id": "f-host-adapters", "name": "宿主注册表与隔离", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "DSH/Kimi/CodeBuddy/Claude/Cursor/Codex/generic 各自解析独立数据根；DSH_HOME 只影响 DSH，PROGRAMMER_WORKFLOW_GLOBAL/HOME 对当前宿主统一生效（Host 与 CLI 同一目录）；未知宿主一律报错、不回退 DSH；第一阶段能力取决于该宿主是否安装了 Skill CLI（或 PROGRAMMER_WORKFLOW_CLI）。", "user_value": "不会因为装了多个 Agent 而把记忆写串。", "entry_points": ["--host", "PROGRAMMER_WORKFLOW_HOST", "status.hosts"], "user_flow": ["选择/传入宿主", "解析独立根", "读写该宿主配置", "报告 override"], "inputs": ["host ID", "宿主环境变量"], "outputs": ["pluginRoot", "memoryRoot", "override 状态"], "dependencies": ["hosts"], "tests": ["tests/test_hosts.py"], "evidence": ["hosts.py", "dsh-plugin HOSTS"], "confidence": "high" },
-      { "id": "f-kimi-migration", "name": "Kimi Code 插件与运行数据适配", "domain": "distribution", "status": "partial", "priority": "P0", "summary": "Kimi 插件数据使用 <KIMI_HOME>/programmer-workflow；运行数据适配器目录必须同时含 migrate/rollback 脚本，迁移脚本还要遵循 KIMI_MIG_SRC，否则自定义 KIMI_HOME 时标记不可用；目标根由 KIMI_MIG_DEST 传入、不重复拼接；不共享 DSH 记忆。", "user_value": "Kimi 数据根与 DSH 分开，工具路径按机器配置。", "entry_points": ["设置 → Kimi", "migrate-plugin --host kimi", "runtimeMigration"], "user_flow": ["配置工具路径", "完成第一阶段", "准备第二阶段"], "inputs": ["kimiMigrationTools", "target"], "outputs": ["Kimi 插件迁移状态", "第二阶段 launcher"], "dependencies": ["hosts", "migration"], "tests": ["tests/test_hosts.py", "tests/test_migration.py"], "evidence": ["dsh-plugin runtimeMigrationForHost", "migration.py adapter matrix"], "confidence": "medium" },
-      { "id": "f-migration", "name": "两阶段插件/运行数据迁移", "domain": "distribution", "status": "partial", "priority": "P0", "summary": "第一阶段只迁移当前宿主插件数据，带清单、SHA-256、独立备份、冲突保护、真实 memory/memory.json 校验与失败恢复；第二阶段必须等第一阶段 completed+verified 且适配器成对可用，生成迁移与回滚两个 launcher，目标根不重复拼接；回滚顺序强制先二后一。状态区分 prepared（仅脚本）与 completed（链接指向记录目标 + 验证时间，或真实落盘不在系统盘即 C: 只是映射），外部链接只提示不伪造验证；已完成时设置页显示“无需再次操作”，默认动作改为用户主动确认的“迁移到新地址”，二次迁移从当前链接读取最新数据并重新预检。嵌套 Junction 仅在目标根相同时接受，跨根拒绝，按清单重建尚未实现（部分支持）。", "user_value": "插件记忆和编辑器数据不再混为一谈，回滚不会静默丢新增记忆。", "entry_points": ["migrate-plugin prepare/apply/rollback", "设置第一阶段/第二阶段", "docs/Migration.html"], "user_flow": ["预检", "备份", "复制校验", "切换 Junction", "验证", "按相反顺序回滚"], "inputs": ["host", "target root"], "outputs": ["plugin-state/runtime-state", "备份清单", "launcher"], "dependencies": ["migration", "hosts", "dsh-plugin"], "tests": ["tests/test_migration.py", "tests/test_hosts.py", "tests/host_plugin_test.mjs", "tests/client_plugin_test.mjs"], "evidence": ["lib/migration.py", "临时目录 Junction 测试", "rollback 返回码检查"], "confidence": "medium" },
-      { "id": "f-path-policy", "name": "工作区路径约束", "domain": "distribution", "status": "implemented", "priority": "P0", "summary": "工作区产物路径必须是相对路径且不能包含 ..；绝对路径会被 Host 与 Python 双层拒绝/回退，全局数据固定在 DSH Home。", "user_value": "避免把工作区产物写到 C: 或工作区外。", "entry_points": ["safe_workspace_relative", "safeRelative", "config.json"], "user_flow": ["设置路径", "保存校验", "CLI 读取"], "inputs": ["路径字段"], "outputs": ["安全相对路径"], "dependencies": ["f-dsh-settings"], "tests": ["tests/test_companion.py::ConfigTests::test_path_safety"], "evidence": ["common.py safe_workspace_relative", "dsh-plugin/index.js safeRelative"], "confidence": "high" },
-      { "id": "f-install-guide", "name": "三端安装教程", "domain": "distribution", "status": "implemented", "priority": "P1", "summary": "提供 DSH / Kimi Code / CodeBuddy 的交互式安装教程，包含命令复制、验证清单和注意事项。", "user_value": "不用猜安装路径和命令。", "entry_points": ["docs/Install.html"], "user_flow": ["打开教程", "选宿主", "复制命令", "验证"], "inputs": ["宿主"], "outputs": ["安装步骤"], "dependencies": ["f-dsh-settings", "f-codebuddy"], "tests": [], "evidence": ["docs/Install.html"], "confidence": "high" },
-      { "id": "f-doctor", "name": "自检 doctor", "domain": "distribution", "status": "implemented", "priority": "P1", "summary": "检查 Python、模板、记忆与各 Agent 安装位置，给出缺失项。", "user_value": "安装后知道哪里没生效。", "entry_points": ["companion.py doctor"], "user_flow": ["运行", "按缺失项修复"], "inputs": ["环境"], "outputs": ["检查表"], "dependencies": ["f-install"], "tests": ["tests/test_companion.py::CliSmokeTests::test_boot_and_doctor"], "evidence": ["cmd_doctor"], "confidence": "high" },
-      { "id": "f-tests", "name": "回归测试", "domain": "distribution", "status": "implemented", "priority": "P1", "summary": "记忆状态机、扫描、运行/分诊、规格校验、HTML 输出、清单与安装 DryRun。", "user_value": "改动工作流时不破坏已有承诺。", "entry_points": ["tests/run_tests.py"], "user_flow": ["运行测试", "看失败项", "修复"], "inputs": ["代码"], "outputs": ["测试报告"], "dependencies": [], "tests": [], "evidence": ["tests 目录"], "confidence": "high" },
-      { "id": "f-mcp", "name": "MCP Server（未实现）", "domain": "distribution", "status": "planned", "priority": "P3", "summary": "为不支持 shell 的宿主提供记忆与渲染工具接口；当前用 CLI 即可，暂不引入。", "user_value": "扩大兼容面。", "entry_points": [], "user_flow": [], "inputs": [], "outputs": [], "dependencies": ["f-install"], "tests": [], "evidence": ["设计权衡"], "confidence": "low", "notes": "刻意不做：增加安装复杂度，且多数编码 Agent 能执行 shell。" }
+      {
+        "id": "f-habit",
+        "name": "用户习惯采集与审批",
+        "domain": "memory",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "从工程证据与（可选）对话记录归纳习惯，逐条写入 proposed，由用户保留/修改/拒绝后才 active。",
+        "user_value": "不用重复交代写作与协作偏好，同时保留最终控制权。",
+        "entry_points": [
+          "companion.py scan",
+          "companion.py memory propose",
+          "companion.py memory review"
+        ],
+        "user_flow": [
+          "Agent 说明要采集什么",
+          "用户同意",
+          "扫描并列出候选",
+          "用户逐条定夺",
+          "写入生效记忆"
+        ],
+        "inputs": [
+          "工程文件",
+          "可选对话记录",
+          "用户决定"
+        ],
+        "outputs": [
+          "scan.json",
+          "MEMORY.md"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_companion.py::test_memory_approval"
+        ],
+        "evidence": [
+          "memory.py",
+          "scan.py"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-workspace-memory",
+        "name": "工作区记忆",
+        "domain": "memory",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "按工程保存环境、约定、决策与事实；与全局用户记忆分开，可提升为用户级候选。",
+        "user_value": "换项目不串味，项目事实可复用。",
+        "entry_points": [
+          "companion.py memory --scope workspace",
+          "companion.py env set"
+        ],
+        "user_flow": [
+          "进入工作区",
+          "boot 读取工作区记忆",
+          "按需新增/提升"
+        ],
+        "inputs": [
+          "工作区路径",
+          "用户说明"
+        ],
+        "outputs": [
+          ".programmer-workflow/MEMORY.md"
+        ],
+        "dependencies": [
+          "f-habit"
+        ],
+        "tests": [
+          "tests/test_companion.py::MemoryTests::test_approval_gate_and_boot"
+        ],
+        "evidence": [
+          "MemoryStore(scope='workspace')"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-remember",
+        "name": "“记住”范围确认",
+        "domain": "memory",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "用户说记住但未说明用户级/工作区级时，先问范围；显式指令可直接 active 并复述。",
+        "user_value": "避免把临时项目偏好写进全局。",
+        "entry_points": [
+          "SKILL.md 记忆协议",
+          "commands/remember.md"
+        ],
+        "user_flow": [
+          "识别记住",
+          "问范围",
+          "写入",
+          "复述与删除方法"
+        ],
+        "inputs": [
+          "用户语句"
+        ],
+        "outputs": [
+          "记忆条目"
+        ],
+        "dependencies": [
+          "f-workspace-memory"
+        ],
+        "tests": [],
+        "evidence": [
+          "references/ask.md",
+          "memory add"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-stall",
+        "name": "三轮卡壳升级",
+        "domain": "guidance",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "连续 3 轮未满意或 2 次修复失败时暂停试错，给出行业做法/调试/静态分析等选项。",
+        "user_value": "避免无限打转，快速换策略。",
+        "entry_points": [
+          "companion.py stall",
+          "SKILL.md 卡壳协议"
+        ],
+        "user_flow": [
+          "记录失败",
+          "到阈值",
+          "询问",
+          "选择方向",
+          "执行并验证"
+        ],
+        "inputs": [
+          "失败轮次",
+          "用户不满意信号"
+        ],
+        "outputs": [
+          "询问卡",
+          "新计划"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_companion.py::StallTests::test_threshold_and_reset"
+        ],
+        "evidence": [
+          "stall.py",
+          "references/satisfaction.md"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-industry",
+        "name": "行业做法与模糊需求解释卡",
+        "domain": "guidance",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "行业不明时先问；模糊时先总结“我理解的目标/假设/非目标/验收”，再给 2–3 条路线让用户选。",
+        "user_value": "把“感觉不对”变成可确认的具体差异。",
+        "entry_points": [
+          "references/satisfaction.md",
+          "询问卡"
+        ],
+        "user_flow": [
+          "识别模糊",
+          "写解释卡",
+          "用户确认/修正",
+          "再执行"
+        ],
+        "inputs": [
+          "历史提问",
+          "工程线索"
+        ],
+        "outputs": [
+          "解释卡",
+          "行业路线"
+        ],
+        "dependencies": [
+          "f-stall"
+        ],
+        "tests": [],
+        "evidence": [
+          "satisfaction.md"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-ask",
+        "name": "统一询问协议",
+        "domain": "guidance",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "优先用宿主的选项工具；每个问题 2–4 个具体选项 + “其他（我来说明）”，最多 3 个问题，推荐项在前。",
+        "user_value": "少打字、可比较、保留自由回答。",
+        "entry_points": [
+          "references/ask.md"
+        ],
+        "user_flow": [
+          "识别需要拍板",
+          "生成选项",
+          "用户选择或自由回答",
+          "复述决定"
+        ],
+        "inputs": [
+          "决策点"
+        ],
+        "outputs": [
+          "用户决定"
+        ],
+        "dependencies": [],
+        "tests": [],
+        "evidence": [
+          "ask.md",
+          "DSH ask_user_question 适配"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-run",
+        "name": "受控调试运行",
+        "domain": "debugging",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "用户批准后运行命令，捕获完整日志与元数据，超时杀进程树，日志有大小上限。",
+        "user_value": "把“你那边跑一下”变成可复现的本地证据。",
+        "entry_points": [
+          "companion.py run"
+        ],
+        "user_flow": [
+          "Agent 提议",
+          "用户批准",
+          "运行",
+          "得到日志路径与尾部"
+        ],
+        "inputs": [
+          "命令",
+          "超时"
+        ],
+        "outputs": [
+          "debug-logs/*/combined.log",
+          "meta.json"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_companion.py::DebugTests::test_run_and_triage"
+        ],
+        "evidence": [
+          "run_command",
+          "ConsentRequiredError"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-triage",
+        "name": "日志分诊",
+        "domain": "debugging",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "识别错误签名、异常栈、DBG 标记与 12 类根因，输出 TRIAGE.md 与验证顺序。",
+        "user_value": "把几万行日志压缩成几个可验证假设。",
+        "entry_points": [
+          "companion.py triage"
+        ],
+        "user_flow": [
+          "运行后分诊",
+          "按假设加一条日志",
+          "再运行对比"
+        ],
+        "inputs": [
+          "combined.log"
+        ],
+        "outputs": [
+          "TRIAGE.md",
+          "TRIAGE.json"
+        ],
+        "dependencies": [
+          "f-run"
+        ],
+        "tests": [
+          "tests/test_companion.py::DebugTests::test_run_and_triage"
+        ],
+        "evidence": [
+          "triage_log",
+          "HYPOTHESES"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-devonly",
+        "name": "纯开发/无硬件直接加日志",
+        "domain": "debugging",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "用户声明工作区是纯开发、无部署环境/硬件时，直接加最小可回滚日志并给定位步骤，同时把环境事实写入工作区记忆。",
+        "user_value": "不再为“没有硬件”反复卡住。",
+        "entry_points": [
+          "companion.py env set --dev-only --no-hardware",
+          "SKILL.md 调试协议"
+        ],
+        "user_flow": [
+          "识别声明",
+          "写环境记忆",
+          "加日志",
+          "给运行/定位命令"
+        ],
+        "inputs": [
+          "用户声明"
+        ],
+        "outputs": [
+          "环境记忆",
+          "日志与定位步骤"
+        ],
+        "dependencies": [
+          "f-workspace-memory"
+        ],
+        "tests": [
+          "tests/test_companion.py::MemoryTests::test_env_set_via_cli"
+        ],
+        "evidence": [
+          "cmd_env set",
+          "references/debugging.md"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-hardware",
+        "name": "硬件协作清单",
+        "domain": "debugging",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "需要实机时给出设备、连接、权限、固件、复现步骤与要回传的日志清单，而不是让 Agent 假装能操作。",
+        "user_value": "人机分工清楚，减少无效尝试。",
+        "entry_points": [
+          "references/debugging.md"
+        ],
+        "user_flow": [
+          "识别硬件依赖",
+          "列清单",
+          "用户操作并回传",
+          "Agent 继续分析"
+        ],
+        "inputs": [
+          "工程线索",
+          "用户环境"
+        ],
+        "outputs": [
+          "操作清单",
+          "回传日志"
+        ],
+        "dependencies": [
+          "f-triage"
+        ],
+        "tests": [],
+        "evidence": [
+          "debugging.md 硬件章节",
+          "env hints"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-arch",
+        "name": "Architecture.html",
+        "domain": "docs",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "从模块、流程、决策、风险、文件证据生成可搜索/筛选/看依赖图的交互文档。",
+        "user_value": "快速建立工程心智模型，并把不确定点变成评审意见。",
+        "entry_points": [
+          "companion.py docs",
+          "commands/architecture.md"
+        ],
+        "user_flow": [
+          "触发总结",
+          "收集证据",
+          "写 spec",
+          "渲染",
+          "浏览器评审"
+        ],
+        "inputs": [
+          "工程源码",
+          "spec.json"
+        ],
+        "outputs": [
+          "docs/Architecture.html"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_render.py::RenderTests::test_docs_render"
+        ],
+        "evidence": [
+          "docs.js",
+          "normalize_architecture"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-features",
+        "name": "Features.html",
+        "domain": "docs",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "按领域/状态组织功能，展示入口、用户路径、依赖、测试与证据，并支持覆盖矩阵。",
+        "user_value": "知道“有什么、做到哪、怎么验证”。",
+        "entry_points": [
+          "companion.py docs"
+        ],
+        "user_flow": [
+          "同架构文档"
+        ],
+        "inputs": [
+          "spec.json"
+        ],
+        "outputs": [
+          "docs/Features.html"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_render.py::RenderTests::test_docs_render"
+        ],
+        "evidence": [
+          "normalize_features",
+          "docs.js featuresTab"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-review",
+        "name": "页面内评审与导出",
+        "domain": "docs",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "文档与原型底部可添加意见、通过/请求修改、导出 JSON、复制 Markdown 反馈。",
+        "user_value": "不用另开文档，评审结果能回到 Agent。",
+        "entry_points": [
+          "review.js",
+          "docs/Prototype 底部评审栏"
+        ],
+        "user_flow": [
+          "浏览",
+          "加意见/标注",
+          "导出或复制",
+          "Agent 读取"
+        ],
+        "inputs": [
+          "用户评审"
+        ],
+        "outputs": [
+          "review JSON",
+          "Markdown"
+        ],
+        "dependencies": [],
+        "tests": [
+          "tests/test_render.py::RenderTests::test_docs_render"
+        ],
+        "evidence": [
+          "Review 控制器"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-proto",
+        "name": "Prototype.html",
+        "domain": "design",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "2–3 个设计方向 + 桌面/平板/手机视口 + 画布标注 + 评审导出，单文件离线。",
+        "user_value": "先看方向再投入实现，减少返工。",
+        "entry_points": [
+          "companion.py prototype",
+          "commands/prototype.md"
+        ],
+        "user_flow": [
+          "澄清",
+          "方向",
+          "渲染",
+          "标注/评审",
+          "迭代"
+        ],
+        "inputs": [
+          "design.json"
+        ],
+        "outputs": [
+          "Prototype.html"
+        ],
+        "dependencies": [
+          "f-review"
+        ],
+        "tests": [
+          "tests/test_render.py::RenderTests::test_prototype_render_and_sanitize"
+        ],
+        "evidence": [
+          "prototype.js",
+          "normalize_prototype"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-art",
+        "name": "美术/模型方向说明",
+        "domain": "design",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "用色板、字体、材质、光感、轮廓与风格板表达方向，明确“这是视觉方向，不是成品资产”。",
+        "user_value": "把审美讨论变成可指认的元素。",
+        "entry_points": [
+          "references/prototype.md"
+        ],
+        "user_flow": [
+          "收集参考",
+          "生成风格板",
+          "用户指认保留/删除",
+          "形成资产清单"
+        ],
+        "inputs": [
+          "需求",
+          "参考"
+        ],
+        "outputs": [
+          "风格板",
+          "资产说明"
+        ],
+        "dependencies": [
+          "f-proto"
+        ],
+        "tests": [],
+        "evidence": [
+          "prototype.md 美术章节"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "id": "f-kimi",
+        "name": "Kimi Plugin 清单",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "kimi.plugin.json 使用最新官方字段（skills/sessionStart/commands/interface.locales/hooks），并保留本地/托管安装兼容。",
+        "user_value": "Kimi Code 一键安装、会话自动加载。",
+        "entry_points": [
+          "kimi.plugin.json",
+          "SYSTEM.md",
+          "/programmer-workflow:settings"
+        ],
+        "user_flow": [
+          "/plugins install <path>",
+          "reload",
+          "自动加载 skill"
+        ],
+        "inputs": [
+          "插件目录"
+        ],
+        "outputs": [
+          "已安装插件"
+        ],
+        "dependencies": [
+          "f-arch",
+          "f-kimi-settings"
+        ],
+        "tests": [
+          "tests/test_manifests.py"
+        ],
+        "evidence": [
+          "kimi.plugin.json"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-claude",
+        "name": "Claude Code Plugin 清单",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": ".claude-plugin/plugin.json + skills/ + commands/，可通过本地 marketplace 安装。",
+        "user_value": "Claude Code 用户获得同样的 Skill 与斜杠命令。",
+        "entry_points": [
+          ".claude-plugin/plugin.json",
+          "commands/*.md"
+        ],
+        "user_flow": [
+          "/plugin marketplace add",
+          "/plugin install"
+        ],
+        "inputs": [
+          "插件目录"
+        ],
+        "outputs": [
+          "已安装插件"
+        ],
+        "dependencies": [
+          "f-arch"
+        ],
+        "tests": [
+          "tests/test_manifests.py"
+        ],
+        "evidence": [
+          ".claude-plugin/plugin.json"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-install",
+        "name": "多 Agent 安装器",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "检测 ~/.agents、~/.claude、~/.kimi-code、~/.dsh、项目 .agents 与 .codebuddy 等目录，支持 DryRun、备份、Force、卸载与自举块。",
+        "user_value": "一次安装到现有工具，不用记六套路径。",
+        "entry_points": [
+          "install.ps1",
+          "install.sh"
+        ],
+        "user_flow": [
+          "DryRun",
+          "选目标",
+          "安装",
+          "重启/新会话",
+          "doctor 验证"
+        ],
+        "inputs": [
+          "目标参数"
+        ],
+        "outputs": [
+          "已安装 Skill",
+          "受管自举块"
+        ],
+        "dependencies": [
+          "f-kimi"
+        ],
+        "tests": [
+          "tests/test_manifests.py::ManifestTests::test_installer_dry_run"
+        ],
+        "evidence": [
+          "install.ps1"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-codebuddy",
+        "name": "CodeBuddy 适配",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "安装到项目 .codebuddy/skills，写入 CODEBUDDY.md 作为启动自举；CodeBuddy 先读 CODEBUDDY.md，再回退 AGENTS.md。",
+        "user_value": "CodeBuddy 用户不用手动复制 Skill，也不会丢启动记忆。",
+        "entry_points": [
+          "install.ps1 -Targets codebuddy",
+          ".codebuddy/skills",
+          "CODEBUDDY.md"
+        ],
+        "user_flow": [
+          "在项目里运行 codebuddy target",
+          "新开会话",
+          "CodeBuddy 发现 Skill 并读取自举块",
+          "boot 读取记忆"
+        ],
+        "inputs": [
+          "项目路径"
+        ],
+        "outputs": [
+          "已安装 Skill",
+          "CODEBUDDY.md 受管块"
+        ],
+        "dependencies": [
+          "f-install"
+        ],
+        "tests": [
+          "tests/test_manifests.py::ManifestTests::test_installer_dry_run"
+        ],
+        "evidence": [
+          "install.ps1 codebuddy target",
+          "references/hosts.md"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-dsh-settings",
+        "name": "按宿主独立的设置页",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "设置 → 程序员工作流：按宿主读写 config.json，含 workflowMode、记忆开关、环境/截图开关、余额显示与刷新间隔、两阶段迁移；只准备脚本，不执行迁移。",
+        "user_value": "三端不再共享配置；切换标签看到的是对应宿主的真实数据。",
+        "entry_points": [
+          "设置 → 程序员工作流",
+          "GET/POST /programmer-workflow/config?host=",
+          "/programmer-workflow/status?host="
+        ],
+        "user_flow": [
+          "选择宿主",
+          "读取该宿主配置",
+          "修改",
+          "严格校验并保存",
+          "CLI 读取"
+        ],
+        "inputs": [
+          "设置页表单",
+          "host"
+        ],
+        "outputs": [
+          "per-host config.json",
+          "workflowMode"
+        ],
+        "dependencies": [
+          "hosts",
+          "config",
+          "dsh-plugin"
+        ],
+        "tests": [
+          "tests/test_hosts.py",
+          "tests/test_companion.py::ConfigTests"
+        ],
+        "evidence": [
+          "dsh-plugin/index.js config route",
+          "dsh-plugin/client.js host tabs",
+          "config.py shared contract"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-plan-mode",
+        "name": "workflowMode 与 Plan 审核",
+        "domain": "workflow",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "workflowMode=plan/full-authority 控制插件审核；plan 写 plan.md/html 等待执行，full-authority 普通运行不逐条批准；破坏性命令始终拦截。",
+        "user_value": "先审核再执行，同时避免 Full authority 被无意义批准打断。",
+        "entry_points": [
+          "companion.py plan",
+          "companion.py run --yes/--full-authority",
+          "设置 workflowMode"
+        ],
+        "user_flow": [
+          "收集证据",
+          "生成计划",
+          "用户执行",
+          "运行/验证"
+        ],
+        "inputs": [
+          "plan spec",
+          "workflowMode"
+        ],
+        "outputs": [
+          "plan.md/html",
+          "run log"
+        ],
+        "dependencies": [
+          "plan",
+          "debugging"
+        ],
+        "tests": [
+          "tests/test_plan.py",
+          "tests/test_companion.py::DebugTests",
+          "tests/test_companion.py::ConfigTests"
+        ],
+        "evidence": [
+          "lib/plan.py",
+          "lib/debug.py",
+          "boot workflow payload"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-host-adapters",
+        "name": "宿主注册表与隔离",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "DSH/Kimi/CodeBuddy/Claude/Cursor/Codex/generic 各自解析独立数据根；DSH_HOME 只影响 DSH，PROGRAMMER_WORKFLOW_GLOBAL/HOME 对当前宿主统一生效（Host 与 CLI 同一目录）；未知宿主一律报错、不回退 DSH；第一阶段能力取决于该宿主是否安装了 Skill CLI（或 PROGRAMMER_WORKFLOW_CLI）。",
+        "user_value": "不会因为装了多个 Agent 而把记忆写串。",
+        "entry_points": [
+          "--host",
+          "PROGRAMMER_WORKFLOW_HOST",
+          "status.hosts"
+        ],
+        "user_flow": [
+          "选择/传入宿主",
+          "解析独立根",
+          "读写该宿主配置",
+          "报告 override"
+        ],
+        "inputs": [
+          "host ID",
+          "宿主环境变量"
+        ],
+        "outputs": [
+          "pluginRoot",
+          "memoryRoot",
+          "override 状态"
+        ],
+        "dependencies": [
+          "hosts"
+        ],
+        "tests": [
+          "tests/test_hosts.py"
+        ],
+        "evidence": [
+          "hosts.py",
+          "dsh-plugin HOSTS"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-kimi-migration",
+        "name": "Kimi Code 插件与运行数据适配",
+        "domain": "distribution",
+        "status": "partial",
+        "priority": "P0",
+        "summary": "Kimi 插件数据使用 <KIMI_HOME>/programmer-workflow；本地设置页可准备第一阶段 launcher，脚本使用真实 companion.py + --host kimi。第二阶段适配器必须同时含 migrate/rollback，遵循 KIMI_MIG_SRC，目标根由 KIMI_MIG_DEST 传入且不重复拼接；prepared 不等于 completed。",
+        "user_value": "Kimi 数据根与 DSH 分开，工具路径按机器配置。",
+        "entry_points": [
+          "/programmer-workflow:settings → 数据迁移",
+          "migrate-plugin --host kimi",
+          "runtimeMigration"
+        ],
+        "user_flow": [
+          "配置工具路径",
+          "完成第一阶段",
+          "准备第二阶段"
+        ],
+        "inputs": [
+          "kimiMigrationTools",
+          "target"
+        ],
+        "outputs": [
+          "Kimi 插件迁移状态",
+          "第二阶段 launcher"
+        ],
+        "dependencies": [
+          "hosts",
+          "migration",
+          "settings"
+        ],
+        "tests": [
+          "tests/test_hosts.py",
+          "tests/test_migration.py",
+          "tests/test_settings.py"
+        ],
+        "evidence": [
+          "migration.py prepare_plugin_migration/prepare_runtime_migration",
+          "settings.py migration routes",
+          "templates/settings.html"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "id": "f-migration",
+        "name": "两阶段插件/运行数据迁移",
+        "domain": "distribution",
+        "status": "partial",
+        "priority": "P0",
+        "summary": "第一阶段只迁移当前宿主插件数据，带清单、SHA-256、独立备份、冲突保护、真实 memory/memory.json 校验与失败恢复；第二阶段必须等第一阶段 completed+verified 且适配器成对可用，生成迁移与回滚两个 launcher，目标根不重复拼接；回滚顺序强制先二后一。状态区分 prepared（仅脚本）与 completed（链接指向记录目标 + 验证时间，或真实落盘不在系统盘即 C: 只是映射），外部链接只提示不伪造验证；已完成时设置页显示“无需再次操作”，默认动作改为用户主动确认的“迁移到新地址”，二次迁移从当前链接读取最新数据并重新预检。嵌套 Junction 仅在目标根相同时接受，跨根拒绝，按清单重建尚未实现（部分支持）。",
+        "user_value": "插件记忆和编辑器数据不再混为一谈，回滚不会静默丢新增记忆。",
+        "entry_points": [
+          "migrate-plugin prepare/apply/rollback",
+          "设置第一阶段/第二阶段",
+          "docs/Migration.html"
+        ],
+        "user_flow": [
+          "预检",
+          "备份",
+          "复制校验",
+          "切换 Junction",
+          "验证",
+          "按相反顺序回滚"
+        ],
+        "inputs": [
+          "host",
+          "target root"
+        ],
+        "outputs": [
+          "plugin-state/runtime-state",
+          "备份清单",
+          "launcher"
+        ],
+        "dependencies": [
+          "migration",
+          "hosts",
+          "dsh-plugin"
+        ],
+        "tests": [
+          "tests/test_migration.py",
+          "tests/test_hosts.py",
+          "tests/host_plugin_test.mjs",
+          "tests/client_plugin_test.mjs"
+        ],
+        "evidence": [
+          "lib/migration.py",
+          "临时目录 Junction 测试",
+          "rollback 返回码检查"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "id": "f-path-policy",
+        "name": "工作区路径约束",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "工作区产物路径必须是相对路径且不能包含 ..；绝对路径会被 Host 与 Python 双层拒绝/回退，全局数据固定在 DSH Home。",
+        "user_value": "避免把工作区产物写到 C: 或工作区外。",
+        "entry_points": [
+          "safe_workspace_relative",
+          "safeRelative",
+          "config.json"
+        ],
+        "user_flow": [
+          "设置路径",
+          "保存校验",
+          "CLI 读取"
+        ],
+        "inputs": [
+          "路径字段"
+        ],
+        "outputs": [
+          "安全相对路径"
+        ],
+        "dependencies": [
+          "f-dsh-settings"
+        ],
+        "tests": [
+          "tests/test_companion.py::ConfigTests::test_path_safety"
+        ],
+        "evidence": [
+          "common.py safe_workspace_relative",
+          "dsh-plugin/index.js safeRelative"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-install-guide",
+        "name": "三端安装教程",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "提供 DSH / Kimi Code / CodeBuddy 的交互式安装教程，包含命令复制、验证清单和注意事项。",
+        "user_value": "不用猜安装路径和命令。",
+        "entry_points": [
+          "docs/Install.html"
+        ],
+        "user_flow": [
+          "打开教程",
+          "选宿主",
+          "复制命令",
+          "验证"
+        ],
+        "inputs": [
+          "宿主"
+        ],
+        "outputs": [
+          "安装步骤"
+        ],
+        "dependencies": [
+          "f-dsh-settings",
+          "f-codebuddy"
+        ],
+        "tests": [],
+        "evidence": [
+          "docs/Install.html"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-doctor",
+        "name": "自检 doctor",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "检查 Python、模板、记忆与各 Agent 安装位置，给出缺失项。",
+        "user_value": "安装后知道哪里没生效。",
+        "entry_points": [
+          "companion.py doctor"
+        ],
+        "user_flow": [
+          "运行",
+          "按缺失项修复"
+        ],
+        "inputs": [
+          "环境"
+        ],
+        "outputs": [
+          "检查表"
+        ],
+        "dependencies": [
+          "f-install"
+        ],
+        "tests": [
+          "tests/test_companion.py::CliSmokeTests::test_boot_and_doctor"
+        ],
+        "evidence": [
+          "cmd_doctor"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-tests",
+        "name": "回归测试",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "记忆状态机、扫描、运行/分诊、规格校验、HTML 输出、清单、安装 DryRun、本地设置页 API 与托管 CLI 作用域。",
+        "user_value": "改动工作流时不破坏已有承诺。",
+        "entry_points": [
+          "tests/run_tests.py"
+        ],
+        "user_flow": [
+          "运行测试",
+          "看失败项",
+          "修复"
+        ],
+        "inputs": [
+          "代码"
+        ],
+        "outputs": [
+          "测试报告"
+        ],
+        "dependencies": [],
+        "tests": [],
+        "evidence": [
+          "tests 目录",
+          "tests/test_settings.py"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-mcp",
+        "name": "MCP Server（未实现）",
+        "domain": "distribution",
+        "status": "planned",
+        "priority": "P3",
+        "summary": "为不支持 shell 的宿主提供记忆与渲染工具接口；当前用 CLI 即可，暂不引入。",
+        "user_value": "扩大兼容面。",
+        "entry_points": [],
+        "user_flow": [],
+        "inputs": [],
+        "outputs": [],
+        "dependencies": [
+          "f-install"
+        ],
+        "tests": [],
+        "evidence": [
+          "设计权衡"
+        ],
+        "confidence": "low",
+        "notes": "刻意不做：增加安装复杂度，且多数编码 Agent 能执行 shell。"
+      },
+      {
+        "id": "f-kimi-settings",
+        "name": "Kimi Code 本地设置页",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "Kimi 没有 DSH settings.section：Windows 用户双击 Open-Settings.vbs，复用或隐藏启动本地服务后直接打开设置页；/programmer-workflow:settings 仍作为回退。配置读写 <KIMI_HOME>/programmer-workflow/config.json。",
+        "user_value": "Kimi 用户不用输入命令、不用手改 JSON，也不会与 DSH 共享配置。",
+        "entry_points": [
+          "插件根目录 → 双击 Open-Settings.vbs",
+          "/programmer-workflow:settings",
+          "companion.py settings --host kimi --workspace . --open",
+          "GET /api/config?host=kimi"
+        ],
+        "user_flow": [
+          "双击 VBS 启动器",
+          "复用已有服务或隐藏启动新服务",
+          "选择/修改字段并保存",
+          "CLI boot 读取同一 config.json"
+        ],
+        "inputs": [
+          "设置页表单",
+          "host",
+          "workspace（仅启动时）"
+        ],
+        "outputs": [
+          "per-host config.json",
+          "迁移/回滚 launcher",
+          "字段级错误"
+        ],
+        "dependencies": [
+          "hosts",
+          "config",
+          "settings",
+          "migration"
+        ],
+        "tests": [
+          "tests/test_settings.py",
+          "tests/test_hosts.py",
+          "tests/test_manifests.py"
+        ],
+        "evidence": [
+          "settings.py",
+          "templates/settings.*",
+          "Open-Settings.vbs",
+          "commands/settings.md"
+        ],
+        "confidence": "high",
+        "notes": "Kimi 的更多操作不支持插件自定义配置；Windows 双击 VBS 是主要点击入口。"
+      },
+      {
+        "id": "f-env-probe",
+        "name": "环境探测与缓存",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "首次 boot/env probe 探测本机 OS、shell、命令、截图/剪贴板工具，写入 environment.json 和一条 active 工作区记忆；后续会话复用，不重复探测。",
+        "user_value": "减少每次会话重复试命令的 token 与时间消耗。",
+        "entry_points": [
+          "companion.py env probe",
+          "companion.py boot 的环境行",
+          ".programmer-workflow/environment.json"
+        ],
+        "user_flow": [
+          "boot 读缓存",
+          "缺失时探测一次",
+          "写入记忆",
+          "后续会话直接复用"
+        ],
+        "inputs": [
+          "workspace",
+          "PATH"
+        ],
+        "outputs": [
+          "environment.json",
+          "environment memory entry",
+          "boot 摘要"
+        ],
+        "dependencies": [
+          "environment",
+          "memory"
+        ],
+        "tests": [
+          "tests/test_companion.py"
+        ],
+        "evidence": [
+          "environment.py",
+          "memory.py boot_payload"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-env-preflight",
+        "name": "命令执行前检查",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "run 在 consent/spawn 前检查第一个可执行文件；缺失时返回已安装替代，不创建日志、不重试。跨 OS 目标直接拒绝。",
+        "user_value": "避免 command not found 反复消耗工具轮次。",
+        "entry_points": [
+          "companion.py run",
+          "companion.py env check",
+          "run --target-os"
+        ],
+        "user_flow": [
+          "构造命令",
+          "preflight",
+          "缺失→替代/安装",
+          "存在→正常执行"
+        ],
+        "inputs": [
+          "command",
+          "target OS"
+        ],
+        "outputs": [
+          "found/alternatives/hint",
+          "run 结果"
+        ],
+        "dependencies": [
+          "environment",
+          "debug"
+        ],
+        "tests": [
+          "tests/test_companion.py"
+        ],
+        "evidence": [
+          "debug.py run_command",
+          "environment.py check_command"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-cross-os",
+        "name": "跨系统命令保护",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "用户明确指出 Windows/Linux 但与本机不同时，只输出目标系统命令，不在本机执行；run/env check 都拒绝。",
+        "user_value": "避免在错误系统上执行命令或给出不可用指令。",
+        "entry_points": [
+          "run --target-os",
+          "env check --target-os",
+          "SKILL.md §0.5"
+        ],
+        "user_flow": [
+          "识别目标 OS",
+          "与本机比较",
+          "不同→输出目标命令"
+        ],
+        "inputs": [
+          "target_os"
+        ],
+        "outputs": [
+          "拒绝原因与目标命令提示"
+        ],
+        "dependencies": [
+          "environment"
+        ],
+        "tests": [
+          "tests/test_companion.py"
+        ],
+        "evidence": [
+          "environment.py assert_local_target"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-screenshot",
+        "name": "/screenshot 与 /截图",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "指定窗口标题/进程名或屏幕，捕获并复制 PNG；Agent 使用大模型自身的视觉能力识别文字，不调用本机 OCR。DSH 直接命令负责捕获/复制，随后可由 Agent 读取图片。",
+        "user_value": "把软件画面安全地交给大模型识别，中文结果不经过本地 OCR 编码链路。",
+        "entry_points": [
+          "/screenshot",
+          "/截图",
+          "companion.py screenshot --target"
+        ],
+        "user_flow": [
+          "输入目标",
+          "确认",
+          "捕获并复制 PNG",
+          "大模型读取图片",
+          "返回识别文本与路径"
+        ],
+        "inputs": [
+          "target",
+          "copy mode"
+        ],
+        "outputs": [
+          "PNG",
+          "模型识别文本",
+          "剪贴板图片"
+        ],
+        "dependencies": [
+          "screenshot",
+          "environment"
+        ],
+        "tests": [
+          "tests/test_screenshot.py",
+          "Windows 中文窗口枚举验证",
+          "DSH UTF-8 分块解码回归"
+        ],
+        "evidence": [
+          "screenshot.py",
+          "windows_capture.ps1",
+          "commands/screenshot.md",
+          "tests/host_plugin_test.mjs"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-screenshot-switch",
+        "name": "截图功能开关",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "screenshotEnabled 同时出现在 DSH 设置页和本地设置页；关闭后 CLI/命令直接拒绝，不后台截图。",
+        "user_value": "不需要截图能力时可完全关闭敏感权限。",
+        "entry_points": [
+          "DSH 设置 → 程序员工作流",
+          "Kimi 本地设置页"
+        ],
+        "user_flow": [
+          "关闭开关",
+          "保存",
+          "命令返回已关闭"
+        ],
+        "inputs": [
+          "screenshotEnabled"
+        ],
+        "outputs": [
+          "config.json"
+        ],
+        "dependencies": [
+          "config",
+          "settings-ui",
+          "screenshot"
+        ],
+        "tests": [
+          "tests/test_settings.py"
+        ],
+        "evidence": [
+          "client.js",
+          "settings.html",
+          "config.py"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-balance",
+        "name": "左下角账号余额",
+        "domain": "tools",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "sidebar.footer.action 的余额条位于账号栏上方；Host 路由调用 deepseekAccount.getBalance，30 秒缓存，页面隐藏时暂停轮询，点击立即刷新。",
+        "user_value": "不用打开账号页就能看到余额。",
+        "entry_points": [
+          "DSH 左下角余额条",
+          "GET /programmer-workflow/balance"
+        ],
+        "user_flow": [
+          "页面加载",
+          "轮询",
+          "显示币种/金额",
+          "点击刷新"
+        ],
+        "inputs": [
+          "balanceDisplay",
+          "balanceRefreshSeconds"
+        ],
+        "outputs": [
+          "余额条",
+          "钱包 JSON"
+        ],
+        "dependencies": [
+          "dsh-plugin",
+          "config"
+        ],
+        "tests": [
+          "真实 DSH 路由返回余额"
+        ],
+        "evidence": [
+          "client.js BalanceChip",
+          "index.js getBalancePayload"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-dsh-install",
+        "name": "DSH 根包 GitHub 安装",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P0",
+        "summary": "根 package.json 提供 dsh.bundle/dsh.client/exports/files，支持 dsh plugin add github:owner/repo 或本地根目录；无需先装 Skill。",
+        "user_value": "和 dsh-plugin-whale-pet 一样一条命令安装。",
+        "entry_points": [
+          "dsh plugin --profile web add github:xukirito/programmer-workflow",
+          "dsh plugin --profile web add ."
+        ],
+        "user_flow": [
+          "执行 dsh plugin add",
+          "重启/刷新",
+          "插件与内置 Skill 就绪"
+        ],
+        "inputs": [
+          "package.json"
+        ],
+        "outputs": [
+          "profile 依赖",
+          "loader entry",
+          "内置 Skill"
+        ],
+        "dependencies": [
+          "dsh-package",
+          "dsh-plugin"
+        ],
+        "tests": [
+          "plugin_manager install_bundle application=applied"
+        ],
+        "evidence": [
+          "package.json",
+          "dsh-plugin/package.json"
+        ],
+        "confidence": "high"
+      },
+      {
+        "id": "f-kimi-quick-config",
+        "name": "Kimi 双击快捷配置",
+        "domain": "distribution",
+        "status": "implemented",
+        "priority": "P1",
+        "summary": "Windows 用户双击插件根目录的 Open-Settings.vbs；启动器复用 /quick 服务或隐藏启动新服务，不需要命令或模型额度。",
+        "user_value": "不用理解 hook，也不依赖 Kimi 是否显示插件主页链接。",
+        "entry_points": [
+          "Open-Settings.vbs",
+          "http://127.0.0.1:8765/quick?host=kimi"
+        ],
+        "user_flow": [
+          "双击启动器",
+          "复用或启动本地服务",
+          "打开设置页",
+          "保存配置"
+        ],
+        "inputs": [
+          "VBS launcher",
+          "本地设置服务"
+        ],
+        "outputs": [
+          "设置页",
+          "config.json"
+        ],
+        "dependencies": [
+          "kimi-quick-config",
+          "settings"
+        ],
+        "tests": [
+          "Windows wscript 启动验证",
+          "tests/test_manifests.py"
+        ],
+        "evidence": [
+          "Open-Settings.vbs",
+          "settings.py /quick"
+        ],
+        "confidence": "high",
+        "notes": "homepage/websiteURL 虽为官方字段，但自定义插件详情可能不渲染；不再把它当作可用入口。"
+      }
     ],
     "journeys": [
-      { "id": "j-first", "name": "第一次安装并确认生效", "feature_ids": ["f-install", "f-kimi", "f-doctor", "f-habit"], "steps": ["在项目页选择目标 Agent", "DryRun 看路径", "安装并新开会话", "运行 doctor", "加载 skill 并 boot", "看到空的待审核记忆"] },
-      { "id": "j-memory", "name": "让 Agent 记住写作习惯", "feature_ids": ["f-habit", "f-workspace-memory", "f-remember", "f-ask"], "steps": ["Agent 说明采集范围", "用户同意", "扫描并给出 3–8 条候选", "用户逐条保留/修改", "写入 active", "下次会话 boot 自动带上"] },
-      { "id": "j-bug", "name": "一个修不好的 bug", "feature_ids": ["f-stall", "f-run", "f-triage", "f-devonly", "f-hardware"], "steps": ["两三次修复失败", "Agent 提出加日志/行业做法/静态分析", "用户选加日志并批准运行", "得到 TRIAGE", "按假设验证", "修复并清理日志"] },
-      { "id": "j-docs", "name": "接手一个陌生工程", "feature_ids": ["f-arch", "f-features", "f-review"], "steps": ["说“总结架构和功能”", "Agent 收集证据", "生成两页 HTML", "浏览器里搜索/看图/提意见", "导出 JSON", "Agent 按意见修订"] },
-      { "id": "j-design", "name": "设计一个工具界面", "feature_ids": ["f-proto", "f-art", "f-review", "f-ask"], "steps": ["说想要的感觉与平台", "Agent 给 2–3 个方向", "打开 Prototype.html", "切换视口并标注", "通过或请求修改", "Agent 收敛方向"] }
+      {
+        "id": "j-first",
+        "name": "第一次安装并确认生效",
+        "feature_ids": [
+          "f-install",
+          "f-kimi",
+          "f-doctor",
+          "f-habit"
+        ],
+        "steps": [
+          "在项目页选择目标 Agent",
+          "DryRun 看路径",
+          "安装并新开会话",
+          "运行 doctor",
+          "加载 skill 并 boot",
+          "看到空的待审核记忆"
+        ]
+      },
+      {
+        "id": "j-memory",
+        "name": "让 Agent 记住写作习惯",
+        "feature_ids": [
+          "f-habit",
+          "f-workspace-memory",
+          "f-remember",
+          "f-ask"
+        ],
+        "steps": [
+          "Agent 说明采集范围",
+          "用户同意",
+          "扫描并给出 3–8 条候选",
+          "用户逐条保留/修改",
+          "写入 active",
+          "下次会话 boot 自动带上"
+        ]
+      },
+      {
+        "id": "j-bug",
+        "name": "一个修不好的 bug",
+        "feature_ids": [
+          "f-stall",
+          "f-run",
+          "f-triage",
+          "f-devonly",
+          "f-hardware"
+        ],
+        "steps": [
+          "两三次修复失败",
+          "Agent 提出加日志/行业做法/静态分析",
+          "用户选加日志并批准运行",
+          "得到 TRIAGE",
+          "按假设验证",
+          "修复并清理日志"
+        ]
+      },
+      {
+        "id": "j-docs",
+        "name": "接手一个陌生工程",
+        "feature_ids": [
+          "f-arch",
+          "f-features",
+          "f-review"
+        ],
+        "steps": [
+          "说“总结架构和功能”",
+          "Agent 收集证据",
+          "生成两页 HTML",
+          "浏览器里搜索/看图/提意见",
+          "导出 JSON",
+          "Agent 按意见修订"
+        ]
+      },
+      {
+        "id": "j-design",
+        "name": "设计一个工具界面",
+        "feature_ids": [
+          "f-proto",
+          "f-art",
+          "f-review",
+          "f-ask"
+        ],
+        "steps": [
+          "说想要的感觉与平台",
+          "Agent 给 2–3 个方向",
+          "打开 Prototype.html",
+          "切换视口并标注",
+          "通过或请求修改",
+          "Agent 收敛方向"
+        ]
+      }
     ],
     "questions": [
-      { "id": "q-priority", "question": "这 8 条需求里，哪一条最需要先做到“无感自动化”？", "why": "决定下一版优先做 hooks 还是保持手动触发。", "default": "记忆启动与卡壳升级" },
-      { "id": "q-false-positive", "question": "卡壳触发宁可早一点还是晚一点？", "why": "早了会打断，晚了会绕圈。", "default": "3 轮，且用户明确表达不满意才触发" },
-      { "id": "q-art", "question": "美术/模型原型你更希望看到风格板，还是可交互的界面？", "why": "两者产出不同，评审方式也不同。", "default": "先风格板 + 关键界面两张" }
+      {
+        "id": "q-priority",
+        "question": "这 8 条需求里，哪一条最需要先做到“无感自动化”？",
+        "why": "决定下一版优先做 hooks 还是保持手动触发。",
+        "default": "记忆启动与卡壳升级"
+      },
+      {
+        "id": "q-false-positive",
+        "question": "卡壳触发宁可早一点还是晚一点？",
+        "why": "早了会打断，晚了会绕圈。",
+        "default": "3 轮，且用户明确表达不满意才触发"
+      },
+      {
+        "id": "q-art",
+        "question": "美术/模型原型你更希望看到风格板，还是可交互的界面？",
+        "why": "两者产出不同，评审方式也不同。",
+        "default": "先风格板 + 关键界面两张"
+      }
     ],
     "glossary": [
-      { "term": "P0", "definition": "没有它这套工作流就不成立的核心能力。" },
-      { "term": "部分实现", "definition": "主路径可用，但边界、宿主或验证还不完整。" },
-      { "term": "解释卡", "definition": "在需求模糊时，Agent 先写出目标、假设、非目标与验收标准，供用户确认。" },
-      { "term": "覆盖矩阵", "definition": "领域 × 实现状态的分布，用来发现空白与过度规划。" }
+      {
+        "term": "P0",
+        "definition": "没有它这套工作流就不成立的核心能力。"
+      },
+      {
+        "term": "部分实现",
+        "definition": "主路径可用，但边界、宿主或验证还不完整。"
+      },
+      {
+        "term": "解释卡",
+        "definition": "在需求模糊时，Agent 先写出目标、假设、非目标与验收标准，供用户确认。"
+      },
+      {
+        "term": "覆盖矩阵",
+        "definition": "领域 × 实现状态的分布，用来发现空白与过度规划。"
+      }
     ]
   }
 }

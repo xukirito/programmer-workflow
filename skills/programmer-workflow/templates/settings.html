@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="referrer" content="no-referrer">
+<title>程序员工作流 · 设置</title>
+<link rel="stylesheet" href="/settings.css">
+</head>
+<body>
+<a class="pwf-skip" href="#pwf-content">跳到配置内容</a>
+
+<div id="pwf-app" class="pwf-app">
+  <div id="pwf-loading" class="pwf-loading" role="status" aria-live="polite">
+    <div class="pwf-skeleton pwf-skeleton--bar"></div>
+    <div class="pwf-skeleton pwf-skeleton--tabs"></div>
+    <div class="pwf-skeleton-grid">
+      <div class="pwf-skeleton pwf-skeleton--card"></div>
+      <div class="pwf-skeleton pwf-skeleton--card"></div>
+      <div class="pwf-skeleton pwf-skeleton--card"></div>
+    </div>
+    <span class="pwf-visually-hidden">正在载入本地设置…</span>
+  </div>
+
+  <div id="pwf-error" class="pwf-error-panel" role="alert" hidden>
+    <h1 class="pwf-error-title">无法加载设置</h1>
+    <p class="pwf-error-text" id="pwf-error-message"></p>
+    <div class="pwf-error-actions">
+      <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-retry">重试</button>
+    </div>
+  </div>
+
+  <div id="pwf-main" class="pwf-main" hidden>
+    <header class="pwf-product">
+      <div class="pwf-brand">
+        <span class="pwf-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="32" height="32" focusable="false" aria-hidden="true">
+            <rect width="32" height="32" rx="9" fill="currentColor"></rect>
+            <path d="M12.5 11 8 16l4.5 5M19.5 11 24 16l-4.5 5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <div class="pwf-brand-text">
+          <div class="pwf-brand-line">
+            <h1 class="pwf-title">程序员工作流</h1>
+            <span class="pwf-version" id="pwf-version">v0.1.0</span>
+          </div>
+          <p class="pwf-subtitle">记忆、工作流、调试与数据迁移设置</p>
+        </div>
+      </div>
+      <div class="pwf-chips" aria-label="本地配置状态">
+        <span class="pwf-chip" id="pwf-chip-host">Kimi Code · 本地配置</span>
+        <span class="pwf-chip pwf-chip--live"><span class="pwf-live-dot" aria-hidden="true"></span>本地服务运行中</span>
+      </div>
+    </header>
+
+    <section class="pwf-host" aria-labelledby="pwf-host-title">
+      <div class="pwf-host-head">
+        <h2 class="pwf-host-title" id="pwf-host-title">当前宿主</h2>
+        <p class="pwf-host-hint">每个宿主使用独立的 config.json 与记忆根，不会互相回退。</p>
+      </div>
+      <div id="pwf-host-tabs" class="pwf-host-tabs" role="group" aria-label="选择宿主">
+        <button type="button" class="pwf-host-tab" data-host="dsh" aria-pressed="false">
+          <span class="pwf-host-name">DeepSeek Harness</span>
+          <span class="pwf-host-meta" data-host-meta>未检测</span>
+        </button>
+        <button type="button" class="pwf-host-tab" data-host="kimi" aria-pressed="false">
+          <span class="pwf-host-name">Kimi Code</span>
+          <span class="pwf-host-meta" data-host-meta>未检测</span>
+        </button>
+        <button type="button" class="pwf-host-tab" data-host="codebuddy" aria-pressed="false">
+          <span class="pwf-host-name">CodeBuddy</span>
+          <span class="pwf-host-meta" data-host-meta>未检测</span>
+        </button>
+      </div>
+      <p class="pwf-host-summary" id="pwf-host-summary" aria-live="polite"></p>
+    </section>
+
+    <div class="pwf-layout">
+      <nav id="pwf-section-nav" class="pwf-section-nav" aria-label="配置分组">
+        <a class="pwf-nav-link" href="#pwf-section-data" data-section-link="data" aria-current="location">插件数据</a>
+        <a class="pwf-nav-link" href="#pwf-section-workspace" data-section-link="workspace">工作区输出</a>
+        <a class="pwf-nav-link" href="#pwf-section-memory" data-section-link="memory">记忆</a>
+        <a class="pwf-nav-link" href="#pwf-section-workflow" data-section-link="workflow">工作流与调试</a>
+        <a class="pwf-nav-link" href="#pwf-section-docs" data-section-link="docs">文档与原型</a>
+        <a class="pwf-nav-link" href="#pwf-section-migration" data-section-link="migration">数据迁移</a>
+      </nav>
+
+      <main id="pwf-content" class="pwf-content" tabindex="-1">
+        <section class="pwf-card" id="pwf-section-data" data-section="data" aria-labelledby="pwf-h-data">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-data">插件数据</h2>
+              <p class="pwf-card-desc">只读路径；迁移只覆盖当前宿主的插件目录，工作区数据不在此列。</p>
+            </div>
+            <span class="pwf-badge pwf-badge--info" id="pwf-data-badge">当前宿主真实路径</span>
+          </header>
+          <ul class="pwf-path-list" aria-label="插件数据路径">
+            <li class="pwf-path-row" data-path="globalRoot">
+              <span class="pwf-path-label">插件数据根</span>
+              <code class="pwf-path-value" data-path-value="globalRoot">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="globalRoot" aria-label="复制插件数据根路径">复制</button>
+            </li>
+            <li class="pwf-path-row" data-path="realGlobalRoot">
+              <span class="pwf-path-label">真实落盘路径</span>
+              <code class="pwf-path-value" data-path-value="realGlobalRoot">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="realGlobalRoot" aria-label="复制真实落盘路径">复制</button>
+            </li>
+            <li class="pwf-path-row" data-path="memoryRoot">
+              <span class="pwf-path-label">记忆根目录</span>
+              <code class="pwf-path-value" data-path-value="memoryRoot">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="memoryRoot" aria-label="复制记忆根目录路径">复制</button>
+            </li>
+            <li class="pwf-path-row" data-path="configPath">
+              <span class="pwf-path-label">配置文件</span>
+              <code class="pwf-path-value" data-path-value="configPath">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="configPath" aria-label="复制配置文件路径">复制</button>
+            </li>
+            <li class="pwf-path-row" data-path="externalGlobalOverride" hidden>
+              <span class="pwf-path-label">外部插件根 override</span>
+              <code class="pwf-path-value" data-path-value="externalGlobalOverride">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="externalGlobalOverride" aria-label="复制外部插件根路径">复制</button>
+            </li>
+            <li class="pwf-path-row" data-path="externalMemoryOverride" hidden>
+              <span class="pwf-path-label">外部记忆 override</span>
+              <code class="pwf-path-value" data-path-value="externalMemoryOverride">—</code>
+              <button type="button" class="pwf-copy" data-copy-path="externalMemoryOverride" aria-label="复制外部记忆路径">复制</button>
+            </li>
+          </ul>
+          <div id="pwf-data-notices" class="pwf-notices"></div>
+        </section>
+
+        <section class="pwf-card" id="pwf-section-workspace" data-section="workspace" aria-labelledby="pwf-h-workspace">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-workspace">工作区输出</h2>
+              <p class="pwf-card-desc">全部是相对工作区根目录的路径；绝对路径、空值和 .. 会在保存时被拒绝。</p>
+            </div>
+          </header>
+          <div class="pwf-field-grid">
+            <div class="pwf-field" data-field="workspaceDataDir">
+              <label class="pwf-label" for="f-workspaceDataDir">工作区数据目录</label>
+              <input class="pwf-input" id="f-workspaceDataDir" data-field-input="workspaceDataDir" type="text" spellcheck="false" autocomplete="off" aria-describedby="help-workspaceDataDir err-workspaceDataDir">
+              <p class="pwf-help" id="help-workspaceDataDir">记忆、扫描和计划等状态保存在该目录下。</p>
+              <p class="pwf-field-error" id="err-workspaceDataDir" data-field-error="workspaceDataDir" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="debugLogDir">
+              <label class="pwf-label" for="f-debugLogDir">调试日志目录</label>
+              <input class="pwf-input" id="f-debugLogDir" data-field-input="debugLogDir" type="text" spellcheck="false" autocomplete="off" aria-describedby="help-debugLogDir err-debugLogDir">
+              <p class="pwf-help" id="help-debugLogDir">run 捕获的日志与 TRIAGE.md 写到这里。</p>
+              <p class="pwf-field-error" id="err-debugLogDir" data-field-error="debugLogDir" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="docsDir">
+              <label class="pwf-label" for="f-docsDir">文档输出目录</label>
+              <input class="pwf-input" id="f-docsDir" data-field-input="docsDir" type="text" spellcheck="false" autocomplete="off" aria-describedby="help-docsDir err-docsDir">
+              <p class="pwf-help" id="help-docsDir">Architecture.html 与 Features.html 的输出位置。</p>
+              <p class="pwf-field-error" id="err-docsDir" data-field-error="docsDir" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="prototypeFile">
+              <label class="pwf-label" for="f-prototypeFile">原型文件</label>
+              <input class="pwf-input" id="f-prototypeFile" data-field-input="prototypeFile" type="text" spellcheck="false" autocomplete="off" aria-describedby="help-prototypeFile err-prototypeFile">
+              <p class="pwf-help" id="help-prototypeFile">面向设计评审的单文件 HTML，默认放在工作区根目录。</p>
+              <p class="pwf-field-error" id="err-prototypeFile" data-field-error="prototypeFile" hidden></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="pwf-card" id="pwf-section-memory" data-section="memory" aria-labelledby="pwf-h-memory">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-memory">记忆</h2>
+              <p class="pwf-card-desc">只控制是否加载；记忆文件本身由 memory 命令管理。</p>
+            </div>
+          </header>
+          <div class="pwf-toggle-list">
+            <div class="pwf-toggle-row" data-field="userMemoryEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-userMemoryEnabled">加载用户记忆</h3>
+                <p class="pwf-toggle-desc">跨项目的用户习惯、偏好和长期规则；关闭后 boot 不再读取。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="userMemoryEnabled" aria-labelledby="lbl-userMemoryEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+            <div class="pwf-toggle-row" data-field="workspaceMemoryEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-workspaceMemoryEnabled">加载工作区记忆</h3>
+                <p class="pwf-toggle-desc">只属于当前项目的约定、环境事实与决策。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="workspaceMemoryEnabled" aria-labelledby="lbl-workspaceMemoryEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+          </div>
+          <p class="pwf-footnote">已有记忆不会因关闭开关而删除；它们仍保存在各自的 memory.json / MEMORY.md 中。</p>
+        </section>
+
+        <section class="pwf-card" id="pwf-section-workflow" data-section="workflow" aria-labelledby="pwf-h-workflow">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-workflow">工作流与调试</h2>
+              <p class="pwf-card-desc">Plan / Full authority 是插件策略；阈值和保留天数只影响插件行为。</p>
+            </div>
+          </header>
+          <div class="pwf-field-grid">
+            <div class="pwf-field" data-field="workflowMode">
+              <label class="pwf-label" for="f-workflowMode">workflowMode</label>
+              <select class="pwf-select" id="f-workflowMode" data-field-input="workflowMode" aria-describedby="help-workflowMode err-workflowMode">
+                <option value="plan">Plan：先给计划，等“执行”</option>
+                <option value="full-authority">Full authority：例行操作直接执行</option>
+              </select>
+              <p class="pwf-help pwf-help--policy" id="help-workflowMode">这是插件策略，不会改变 <span id="pwf-policy-host">Kimi</span> 的宿主权限。</p>
+              <p class="pwf-field-error" id="err-workflowMode" data-field-error="workflowMode" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="planFormat">
+              <label class="pwf-label" for="f-planFormat">计划文件格式</label>
+              <select class="pwf-select" id="f-planFormat" data-field-input="planFormat" aria-describedby="help-planFormat err-planFormat">
+                <option value="md">plan.md</option>
+                <option value="html">plan.html</option>
+              </select>
+              <p class="pwf-help" id="help-planFormat">只影响 plan 命令的默认输出。</p>
+              <p class="pwf-field-error" id="err-planFormat" data-field-error="planFormat" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="satisfactionThreshold">
+              <label class="pwf-label" for="f-satisfactionThreshold">满意阈值</label>
+              <input class="pwf-input" id="f-satisfactionThreshold" data-field-input="satisfactionThreshold" type="number" min="1" max="10" step="1" inputmode="numeric" aria-describedby="help-satisfactionThreshold err-satisfactionThreshold">
+              <p class="pwf-help" id="help-satisfactionThreshold">连续未满足达到该轮数后触发卡壳升级，范围 1–10。</p>
+              <p class="pwf-field-error" id="err-satisfactionThreshold" data-field-error="satisfactionThreshold" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="bugfixThreshold">
+              <label class="pwf-label" for="f-bugfixThreshold">缺陷阈值</label>
+              <input class="pwf-input" id="f-bugfixThreshold" data-field-input="bugfixThreshold" type="number" min="1" max="10" step="1" inputmode="numeric" aria-describedby="help-bugfixThreshold err-bugfixThreshold">
+              <p class="pwf-help" id="help-bugfixThreshold">同一缺陷修复失败达到该次数后触发，范围 1–10。</p>
+              <p class="pwf-field-error" id="err-bugfixThreshold" data-field-error="bugfixThreshold" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="retentionDays">
+              <label class="pwf-label" for="f-retentionDays">保留天数</label>
+              <input class="pwf-input" id="f-retentionDays" data-field-input="retentionDays" type="number" min="1" max="365" step="1" inputmode="numeric" aria-describedby="help-retentionDays err-retentionDays">
+              <p class="pwf-help" id="help-retentionDays">全局 artifacts / logs 的保留天数，范围 1–365。</p>
+              <p class="pwf-field-error" id="err-retentionDays" data-field-error="retentionDays" hidden></p>
+            </div>
+            <div class="pwf-field" data-field="language">
+              <label class="pwf-label" for="f-language">文档语言</label>
+              <input class="pwf-input" id="f-language" data-field-input="language" type="text" maxlength="20" spellcheck="false" autocomplete="off" aria-describedby="help-language err-language">
+              <p class="pwf-help" id="help-language">生成文档时的默认语言，例如 zh-CN 或 en。</p>
+              <p class="pwf-field-error" id="err-language" data-field-error="language" hidden></p>
+            </div>
+          </div>
+          <div class="pwf-toggle-list pwf-toggle-list--single">
+            <div class="pwf-toggle-row" data-field="devOnlyAutoInstrument">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-devOnlyAutoInstrument">纯开发 / 无硬件时自动加日志</h3>
+                <p class="pwf-toggle-desc">只在 boot 同时报告 devOnlyDirect=true 时生效；否则仍先询问。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="devOnlyAutoInstrument" aria-labelledby="lbl-devOnlyAutoInstrument"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="pwf-card" id="pwf-section-docs" data-section="docs" aria-labelledby="pwf-h-docs">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-docs">文档与原型</h2>
+              <p class="pwf-card-desc">关闭后对应命令会拒绝生成，但不会删除已有产物。</p>
+            </div>
+          </header>
+          <div class="pwf-toggle-list">
+            <div class="pwf-toggle-row" data-field="docsEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-docsEnabled">生成架构与功能文档</h3>
+                <p class="pwf-toggle-desc">Architecture.html、Features.html 与评审导出。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="docsEnabled" aria-labelledby="lbl-docsEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+            <div class="pwf-toggle-row" data-field="prototypeEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-prototypeEnabled">生成 UI / 美术原型</h3>
+                <p class="pwf-toggle-desc">用于设计评审，不直接修改项目最终 UI。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="prototypeEnabled" aria-labelledby="lbl-prototypeEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+            <div class="pwf-toggle-row" data-field="screenshotEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-screenshotEnabled">截图 / 大模型识别 / 剪贴板</h3>
+                <p class="pwf-toggle-desc">允许 /截图 或 /screenshot 捕获指定窗口并复制 PNG；图中文字由大模型读取，不调用本机 OCR。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="screenshotEnabled" aria-labelledby="lbl-screenshotEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+          </div>
+          <p class="pwf-help">截图会读取屏幕内容并写入本机剪贴板；关闭开关后命令直接拒绝，不会后台截图。</p>
+        </section>
+
+        <section class="pwf-card" id="pwf-section-migration" data-section="migration" aria-labelledby="pwf-h-migration">
+          <header class="pwf-card-head">
+            <div class="pwf-card-heading">
+              <h2 class="pwf-card-title" id="pwf-h-migration">数据迁移</h2>
+              <p class="pwf-card-desc">页面只准备迁移与回滚脚本，不执行迁移、回滚或外部 batch 文件。</p>
+            </div>
+            <span class="pwf-badge pwf-badge--muted" id="pwf-migration-badge">先插件数据，再运行数据</span>
+          </header>
+
+          <div class="pwf-toggle-list pwf-toggle-list--single pwf-toggle-list--flush">
+            <div class="pwf-toggle-row" data-field="migrationActionEnabled">
+              <div class="pwf-toggle-text">
+                <h3 class="pwf-toggle-title" id="lbl-migrationActionEnabled">允许准备迁移脚本</h3>
+                <p class="pwf-toggle-desc">关闭后仍可查看状态和备份，但两个阶段的准备按钮都不可用。</p>
+              </div>
+              <button type="button" class="pwf-switch" role="switch" aria-checked="true" data-switch="migrationActionEnabled" aria-labelledby="lbl-migrationActionEnabled"><span class="pwf-switch-knob" aria-hidden="true"></span></button>
+            </div>
+          </div>
+
+          <article class="pwf-step" data-step="plugin" aria-labelledby="pwf-step-plugin-title">
+            <header class="pwf-step-head">
+              <span class="pwf-step-num" aria-hidden="true">1</span>
+              <div class="pwf-step-heading">
+                <h3 class="pwf-step-title" id="pwf-step-plugin-title">第一阶段 · 插件数据</h3>
+                <p class="pwf-step-desc">只移动当前宿主的 programmer-workflow 目录，并保留独立备份与校验。</p>
+              </div>
+              <span class="pwf-badge" id="pwf-plugin-badge">未开始</span>
+            </header>
+            <ul class="pwf-path-list pwf-path-list--compact" aria-label="第一阶段路径">
+              <li class="pwf-path-row" data-path="pluginSource">
+                <span class="pwf-path-label">源目录</span>
+                <code class="pwf-path-value" data-path-value="pluginSource">—</code>
+                <button type="button" class="pwf-copy" data-copy-path="pluginSource" aria-label="复制第一阶段源目录路径">复制</button>
+              </li>
+              <li class="pwf-path-row" data-path="pluginTarget">
+                <span class="pwf-path-label">目标目录</span>
+                <code class="pwf-path-value" data-path-value="pluginTarget">—</code>
+                <button type="button" class="pwf-copy" data-copy-path="pluginTarget" aria-label="复制第一阶段目标目录路径">复制</button>
+              </li>
+              <li class="pwf-path-row" data-path="pluginBackup">
+                <span class="pwf-path-label">备份目录</span>
+                <code class="pwf-path-value" data-path-value="pluginBackup">—</code>
+                <button type="button" class="pwf-copy" data-copy-path="pluginBackup" aria-label="复制第一阶段备份目录路径">复制</button>
+              </li>
+            </ul>
+            <p class="pwf-step-reason" id="pwf-plugin-reason" hidden></p>
+            <div class="pwf-step-actions">
+              <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-plugin-expand" hidden>迁移到新地址</button>
+              <div class="pwf-target" id="pwf-plugin-target-wrap">
+                <div class="pwf-field" data-field="pluginMigrationTargetRoot">
+                  <label class="pwf-label" for="f-pluginMigrationTargetRoot">第一阶段目标根</label>
+                  <input class="pwf-input" id="f-pluginMigrationTargetRoot" data-field-input="pluginMigrationTargetRoot" type="text" spellcheck="false" autocomplete="off" placeholder="例如 D:\AgentData" aria-describedby="help-pluginMigrationTargetRoot err-pluginMigrationTargetRoot">
+                  <p class="pwf-help" id="help-pluginMigrationTargetRoot">实际目标是 <code id="pwf-plugin-target-preview">—</code>。</p>
+                  <p class="pwf-field-error" id="err-pluginMigrationTargetRoot" data-field-error="pluginMigrationTargetRoot" hidden></p>
+                </div>
+                <div class="pwf-step-buttons">
+                  <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-plugin-prepare">准备迁移脚本</button>
+                  <button type="button" class="pwf-btn pwf-btn--ghost" id="pwf-plugin-cancel" hidden>取消</button>
+                </div>
+              </div>
+            </div>
+            <p class="pwf-step-feedback" id="pwf-plugin-feedback" role="status" aria-live="polite"></p>
+            <details class="pwf-advanced">
+              <summary>高级信息与回滚</summary>
+              <ul class="pwf-path-list pwf-path-list--compact" aria-label="第一阶段脚本路径">
+                <li class="pwf-path-row" data-path="pluginLauncher">
+                  <span class="pwf-path-label">迁移脚本</span>
+                  <code class="pwf-path-value" data-path-value="pluginLauncher">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="pluginLauncher" aria-label="复制第一阶段迁移脚本路径">复制</button>
+                </li>
+                <li class="pwf-path-row" data-path="pluginRollbackLauncher">
+                  <span class="pwf-path-label">回滚脚本</span>
+                  <code class="pwf-path-value" data-path-value="pluginRollbackLauncher">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="pluginRollbackLauncher" aria-label="复制第一阶段回滚脚本路径">复制</button>
+                </li>
+                <li class="pwf-path-row" data-path="pluginState">
+                  <span class="pwf-path-label">状态文件</span>
+                  <code class="pwf-path-value" data-path-value="pluginState">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="pluginState" aria-label="复制第一阶段状态文件路径">复制</button>
+                </li>
+              </ul>
+              <p class="pwf-help">回滚顺序：先回滚第二阶段运行数据，再回滚第一阶段插件数据。迁移脚本必须在完全退出目标编辑器后运行；.old 目录至少保留到稳定使用一天之后。</p>
+            </details>
+          </article>
+
+          <article class="pwf-step" data-step="runtime" aria-labelledby="pwf-step-runtime-title">
+            <header class="pwf-step-head">
+              <span class="pwf-step-num" aria-hidden="true">2</span>
+              <div class="pwf-step-heading">
+                <h3 class="pwf-step-title" id="pwf-step-runtime-title">第二阶段 · 编辑器运行数据</h3>
+                <p class="pwf-step-desc">必须等第一阶段完成并校验；适配器要同时提供 migrate 与 rollback。</p>
+              </div>
+              <span class="pwf-badge" id="pwf-runtime-badge">未开始</span>
+            </header>
+            <ul class="pwf-path-list pwf-path-list--compact" aria-label="第二阶段路径">
+              <li class="pwf-path-row" data-path="runtimeSource">
+                <span class="pwf-path-label">源目录</span>
+                <code class="pwf-path-value" data-path-value="runtimeSource">—</code>
+                <button type="button" class="pwf-copy" data-copy-path="runtimeSource" aria-label="复制第二阶段源目录路径">复制</button>
+              </li>
+              <li class="pwf-path-row" data-path="runtimeTarget">
+                <span class="pwf-path-label">目标目录</span>
+                <code class="pwf-path-value" data-path-value="runtimeTarget">—</code>
+                <button type="button" class="pwf-copy" data-copy-path="runtimeTarget" aria-label="复制第二阶段目标目录路径">复制</button>
+              </li>
+              <li class="pwf-path-row" data-path="runtimeBackup">
+                <span class="pwf-path-label">备份目录</span>
+                <code class="pwf-path-value" data-path-value="runtimeBackup">由适配器在运行时创建</code>
+                <span class="pwf-path-note">运行脚本后以输出为准</span>
+              </li>
+            </ul>
+            <p class="pwf-step-reason" id="pwf-runtime-reason" hidden></p>
+            <div class="pwf-step-actions">
+              <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-runtime-expand" hidden>迁移到新地址</button>
+              <div class="pwf-target" id="pwf-runtime-target-wrap">
+                <div class="pwf-field" data-field="runtimeMigrationTargetRoot">
+                  <label class="pwf-label" for="f-runtimeMigrationTargetRoot">第二阶段目标根</label>
+                  <input class="pwf-input" id="f-runtimeMigrationTargetRoot" data-field-input="runtimeMigrationTargetRoot" type="text" spellcheck="false" autocomplete="off" placeholder="例如 D:\AgentData" aria-describedby="help-runtimeMigrationTargetRoot err-runtimeMigrationTargetRoot">
+                  <p class="pwf-help" id="help-runtimeMigrationTargetRoot">实际目标是 <code id="pwf-runtime-target-preview">—</code>；必须与第一阶段共用同一目标根。</p>
+                  <p class="pwf-field-error" id="err-runtimeMigrationTargetRoot" data-field-error="runtimeMigrationTargetRoot" hidden></p>
+                </div>
+                <div class="pwf-field" data-field="kimiMigrationTools" data-host-only="kimi">
+                  <label class="pwf-label" for="f-kimiMigrationTools">Kimi 迁移工具目录</label>
+                  <input class="pwf-input" id="f-kimiMigrationTools" data-field-input="kimiMigrationTools" type="text" spellcheck="false" autocomplete="off" placeholder="包含 migrate-kimi-data.bat 与 rollback-kimi-data.bat" aria-describedby="help-kimiMigrationTools err-kimiMigrationTools">
+                  <p class="pwf-help" id="help-kimiMigrationTools">目录必须同时包含迁移与回滚脚本，并且适配器要读取 KIMI_MIG_SRC。</p>
+                  <p class="pwf-field-error" id="err-kimiMigrationTools" data-field-error="kimiMigrationTools" hidden></p>
+                </div>
+                <div class="pwf-step-buttons">
+                  <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-runtime-prepare">准备迁移脚本</button>
+                  <button type="button" class="pwf-btn pwf-btn--ghost" id="pwf-runtime-cancel" hidden>取消</button>
+                </div>
+              </div>
+            </div>
+            <p class="pwf-step-feedback" id="pwf-runtime-feedback" role="status" aria-live="polite"></p>
+            <details class="pwf-advanced">
+              <summary>高级信息与回滚</summary>
+              <ul class="pwf-path-list pwf-path-list--compact" aria-label="第二阶段脚本路径">
+                <li class="pwf-path-row" data-path="runtimeTools">
+                  <span class="pwf-path-label">适配器目录</span>
+                  <code class="pwf-path-value" data-path-value="runtimeTools">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="runtimeTools" aria-label="复制适配器目录路径">复制</button>
+                </li>
+                <li class="pwf-path-row" data-path="runtimeLauncher">
+                  <span class="pwf-path-label">迁移启动器</span>
+                  <code class="pwf-path-value" data-path-value="runtimeLauncher">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="runtimeLauncher" aria-label="复制第二阶段迁移启动器路径">复制</button>
+                </li>
+                <li class="pwf-path-row" data-path="runtimeRollbackLauncher">
+                  <span class="pwf-path-label">回滚启动器</span>
+                  <code class="pwf-path-value" data-path-value="runtimeRollbackLauncher">—</code>
+                  <button type="button" class="pwf-copy" data-copy-path="runtimeRollbackLauncher" aria-label="复制第二阶段回滚启动器路径">复制</button>
+                </li>
+              </ul>
+              <p class="pwf-help">启动器会传递 <code>KIMI_MIG_SRC</code> / <code>KIMI_MIG_DEST</code> 或对应的 DSH 变量。prepared 只代表脚本已生成；只有链接或真实落盘校验通过才算完成。</p>
+            </details>
+          </article>
+
+          <div class="pwf-legacy" id="pwf-legacy" hidden>
+            <div class="pwf-legacy-text">
+              <h3 class="pwf-legacy-title">发现旧共享记忆</h3>
+              <p class="pwf-legacy-desc" id="pwf-legacy-desc"></p>
+            </div>
+            <div class="pwf-legacy-actions">
+              <button type="button" class="pwf-btn pwf-btn--outline" id="pwf-legacy-import">导入旧记忆</button>
+            </div>
+          </div>
+        </section>
+
+        <p class="pwf-page-note">本页不读取任意本地文件，也不执行迁移/回滚。所有写入都落在当前宿主的独立 config.json。</p>
+      </main>
+    </div>
+
+    <footer id="pwf-savebar" class="pwf-savebar">
+      <div class="pwf-savebar-info">
+        <span class="pwf-savebar-host" id="pwf-savebar-host">当前宿主：Kimi Code</span>
+        <span class="pwf-save-state" id="pwf-save-state" role="status" aria-live="polite">正在读取配置…</span>
+      </div>
+      <div class="pwf-savebar-actions">
+        <button type="button" class="pwf-btn pwf-btn--ghost" id="pwf-reload">重新读取</button>
+        <button type="button" class="pwf-btn pwf-btn--ghost" id="pwf-reset">恢复默认</button>
+        <button type="button" class="pwf-btn pwf-btn--primary" id="pwf-save" disabled>保存设置</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<dialog id="pwf-confirm" class="pwf-dialog" aria-labelledby="pwf-confirm-title" aria-describedby="pwf-confirm-text">
+  <h2 class="pwf-dialog-title" id="pwf-confirm-title">确认操作</h2>
+  <p class="pwf-dialog-text" id="pwf-confirm-text"></p>
+  <div class="pwf-dialog-actions">
+    <button type="button" class="pwf-btn pwf-btn--ghost" id="pwf-confirm-cancel">取消</button>
+    <button type="button" class="pwf-btn pwf-btn--primary" id="pwf-confirm-ok">继续</button>
+  </div>
+</dialog>
+
+<div id="pwf-toast" class="pwf-toast" role="status" aria-live="polite" hidden></div>
+
+<noscript>
+  <p class="pwf-noscript">这个设置页需要 JavaScript 才能读取和保存配置。请从命令行运行 settings 命令并允许脚本执行。</p>
+</noscript>
+
+<script src="/settings.js"></script>
+</body>
+</html>

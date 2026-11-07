@@ -1,9 +1,9 @@
 {
-  "name": "@local/programmer-workflow",
-  "version": "0.1.0",
+  "name": "dsh-plugin-programmer-workflow",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
-  "description": "Programmer Workflow settings, migration guidance and global data root for DeepSeek Harness.",
+  "description": "Programmer Workflow Host/Client for DeepSeek Harness: settings, environment preflight, screenshot command, account balance and migration guidance.",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",

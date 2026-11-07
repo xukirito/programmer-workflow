@@ -32,11 +32,22 @@ const sandbox = {
         registrations.push(spec)
       },
     },
+    addEventListener() {},
+    removeEventListener() {},
   },
   console,
   fetch: (...args) => fetchImpl(...args),
   navigator: { clipboard: { writeText: async () => {} } },
-  document: { createElement: () => ({ select() {}, remove() {} }), body: { appendChild() {} }, execCommand() {} },
+  document: {
+    createElement: () => ({ select() {}, remove() {} }),
+    body: { appendChild() {} },
+    execCommand() {},
+    visibilityState: 'visible',
+    addEventListener() {},
+    removeEventListener() {},
+  },
+  setTimeout: () => 0,
+  clearTimeout: () => {},
 }
 vm.runInNewContext(source, sandbox, { filename: 'dsh-plugin/client.js' })
 
@@ -254,6 +265,8 @@ assert.match(notStarted, /准备第一阶段脚本/, 'a fresh profile offers the
 assert.doesNotMatch(notStarted, /无需再次操作/, 'a fresh profile must not claim a completed migration')
 assert.doesNotMatch(notStarted, /读取配置失败/, 'the page must not fall into its error state')
 assert.match(notStarted, /迁移教程与支持矩阵/, 'the settings page links to the migration guide')
+assert.match(notStarted, /截图 \/ 大模型识别 \/ 剪贴板/, 'the screenshot switch is on the DSH settings page')
+assert.match(notStarted, /左下角显示账号余额/, 'the balance switch is on the DSH settings page')
 
 // Verified stage 1: no repeated prompt, the default action is "move to a new address".
 const completed = await renderPage(statusWith({
@@ -344,5 +357,37 @@ const external = await renderPage(statusWith({
 }))
 assert.match(external, /检测到已有迁移链接/)
 assert.doesNotMatch(external, /已迁移，无需再次操作/)
+
+// Balance chip: registered above the account bar and renders the formatted wallet.
+const balanceRegistration = registered.find((item) => item.options && item.options.name === 'sidebar.footer.action')
+assert.ok(balanceRegistration, 'the balance chip must register in sidebar.footer.action')
+assert.ok(injected.includes('sidebar.footer.action'), 'the balance chip must wait for the sidebar footer slot')
+resetStores()
+fetchImpl = async (url) => {
+  assert.match(String(url), /\/programmer-workflow\/balance\?host=dsh/)
+  return {
+    ok: true,
+    json: async () => ({
+      ok: true,
+      status: 'ready',
+      wallets: [{ currency: 'CNY', balance: '73.4507153200000000' }],
+      bonusWallets: [{ currency: 'CNY', balance: '0' }],
+      refreshSeconds: 60,
+      at: '2026-11-07T05:55:20.119Z',
+    }),
+  }
+}
+const balanceComponent = balanceRegistration.component
+assert.equal(renderComponent(balanceComponent, { wide: true }), null, 'the chip renders nothing before data arrives')
+const balanceStore = storeOf(balanceComponent)
+for (const effect of balanceStore.effects) {
+  if (effect) await effect()
+}
+await new Promise((resolve) => setTimeout(resolve, 0))
+const balanceTree = renderComponent(balanceComponent, { wide: true })
+const balanceText = collect(balanceTree, []).join(' ')
+assert.match(balanceText, /余额/)
+assert.match(balanceText, /¥73\.45/)
+assert.doesNotMatch(balanceText, /\+¥0/, 'zero bonus must not render')
 
 console.log('client plugin tests ok')

@@ -35,6 +35,47 @@ On Windows use `python` or the bundled runtime; quote paths with spaces. If Pyth
 4. If pending proposals exist, mention the count once and offer to review them; do not block the current task.
 5. Apply active entries silently unless they conflict with the current request.
 
+## 0.5 Environment and commands
+
+`boot` now includes a compact environment line from the workspace cache. The cache is
+`<workspace>/.programmer-workflow/environment.json` and is mirrored into one active workspace
+`environment` memory entry. It records the local OS, shell, GUI availability, and installed
+commands; it never executes the probed commands.
+
+- First time in a workspace, run `env probe` once (boot does it automatically when the cache is
+  missing). Do not probe every turn.
+- Before constructing a command, run `env check <command>` (or let `run` preflight it). If the
+  command is missing, do **not** retry it: use an installed alternative printed by the check,
+  install it, or ask the user.
+- `run` checks the executable **before** consent/spawn, so a missing tool never creates a log
+  directory or a failed retry loop.
+- If the user explicitly names a different OS (Windows vs Linux), never execute that command on
+  the local machine. Output the target OS's commands; `run --target-os <os>` and
+  `env check --target-os <os>` refuse cross-OS execution.
+- Environment facts are workspace memory, not global user memory: switch projects and the cache
+  does not follow.
+
+## 0.6 Screenshot / model vision / clipboard
+
+Triggers: `/screenshot` (DSH direct command), `/截图` (Kimi/chat), or the user asks to read text from a specific app/window/screen.
+
+> DSH's slash-command parser only accepts `[a-z][a-z0-9_-]*`; use `/screenshot` there. Kimi/command-file
+> hosts can expose the Chinese command, and a plain “截图” message is handled by this skill.
+
+1. If the user explicitly invoked the command and named the target, consent is already given.
+   If you inferred the need, ask once: “是否截图并把图片复制到剪贴板？”.
+2. Run:
+   `python "<skill>/scripts/companion.py" screenshot --host <host> --target "<window title or 屏幕>" --yes`
+   Add `--list` when the window name is unknown. The command captures the target and copies the PNG.
+   It never invokes Windows OCR, Tesseract or another local OCR engine.
+3. In an Agent-driven flow, read the saved PNG with the host's image/media tool and transcribe the
+   requested text with the model. Preserve languages and punctuation; mark uncertain text instead of
+   guessing. DSH's direct command only performs capture/copy; ask the Agent to read that PNG for text.
+4. Return the saved path, model recognition result when available, and clipboard status. Do not repeat
+   the capture on failure; report the available window list or the missing capture/clipboard tool.
+5. The `screenshotEnabled` setting switches the whole feature off. It is on by default; each run
+   still needs consent (`--yes`).
+
 ## 1. Asking the user
 
 Use this shape for every decision that needs the user:
@@ -191,16 +232,28 @@ Triggers: UI, UX, layout, visual style, logo, icon, theme, art direction, moodbo
 - If a step was skipped (no browser, no hardware, no Python), say so and give the manual fallback.
 - Close the loop: what the user decided, what is now active memory, what remains proposed.
 
-## 8. DSH settings and data migration
+## 8. Settings pages and data migration
 
-When running inside DeepSeek Harness, the Host plugin adds **设置 → 程序员工作流**:
+**DSH**: the Host plugin adds **设置 → 程序员工作流**.
+
+**Kimi Code / CodeBuddy / other CLI hosts**: use the local settings page. The Agent locates `companion.py` from the loaded skill (a `/plugins install` managed copy is valid) and starts it as a host background task:
+
+```bash
+python "<skill>/scripts/companion.py" settings --host kimi --workspace . --open
+```
+
+The command prints `http://127.0.0.1:<port>/?host=<id>#token=...`, listens on loopback only, and keeps running until the background task is stopped. Do not wrap it in `companion.py run` with a fixed timeout.
+
+Both settings surfaces manage the same per-host file, `<host-home>/programmer-workflow/config.json`:
 
 - workspace data / debug log / docs / prototype paths (must stay inside the workspace);
 - memory load switches, stall thresholds, `workflowMode` (`plan`/`full-authority`), `devOnlyAutoInstrument`, `planFormat`, docs/prototype switches, retention and language;
 - per-host plugin-data root/target and the two migration stages;
 - `kimiMigrationTools` when the Kimi adapter is used.
 
-The Host writes the effective values to that host's own `<host-home>/programmer-workflow/config.json`; `boot`, `docs`, `prototype`, `run` and `stall` read that mirror after `--host`/`PROGRAMMER_WORKFLOW_HOST` selects the host. If the page and CLI disagree, the file is the source the CLI uses; ask the user to save again in Settings.
+The local API (`GET /api/config`, `GET /api/status`, `POST /api/config`, `/api/migration/*`) requires an explicit `host` and the startup token. Unknown hosts and invalid fields are rejected; the page never falls back to DSH. It only **prepares** migration and rollback scripts — it never executes a migration, rollback or external batch file.
+
+`boot`, `docs`, `prototype`, `run` and `stall` read the saved mirror after `--host`/`PROGRAMMER_WORKFLOW_HOST` selects the host. If the page and CLI disagree, the file is the source the CLI uses; ask the user to save again in Settings.
 
 Never move the workspace outputs outside the workspace. The CLI rejects absolute or `..` output paths. Global data belongs to one host; do not imply that Kimi/CodeBuddy share DSH's memory. Workspace memory is project data and never moves with an application/plugin migration.
 
@@ -229,10 +282,14 @@ python "<skill>/scripts/companion.py" memory propose --host dsh --scope user --k
 python "<skill>/scripts/companion.py" memory accept <id> --host dsh --scope user
 python "<skill>/scripts/companion.py" scan --host dsh --workspace . --out .programmer-workflow/scan.json
 python "<skill>/scripts/companion.py" env set --host dsh --dev-only --no-hardware --reason "..."
+python "<skill>/scripts/companion.py" env probe --host dsh --workspace .
+python "<skill>/scripts/companion.py" env check pnpm --host dsh --workspace .
+python "<skill>/scripts/companion.py" screenshot --host dsh --target "微信" --yes
 python "<skill>/scripts/companion.py" stall bump --host dsh --track bugfix
 python "<skill>/scripts/companion.py" run --host dsh --label repro --timeout 120 --yes -- python app.py
 python "<skill>/scripts/companion.py" triage debug-logs/<dir>/combined.log --host dsh
 python "<skill>/scripts/companion.py" map --host dsh --workspace .
 python "<skill>/scripts/companion.py" docs --host dsh --spec docs/spec.json --out docs
 python "<skill>/scripts/companion.py" prototype --host dsh --spec design.json --out Prototype.html
+python "<skill>/scripts/companion.py" settings --host kimi --workspace . --open
 ```

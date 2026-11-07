@@ -43,10 +43,11 @@ python examples/build_prototype_spec.py
 
 ## Package layout
 
-- `skills/programmer-workflow/scripts/companion.py` — CLI entry.
-- `skills/programmer-workflow/scripts/lib/` — memory, scan, debug, stall, render.
-- `skills/programmer-workflow/templates/` — `base.css`, `docs.*`, `prototype.*`, `review.js`.
-- `kimi.plugin.json` + `SYSTEM.md` + `commands/` — Kimi plugin surface.
+- `skills/programmer-workflow/scripts/companion.py` — CLI entry (including `settings`).
+- `skills/programmer-workflow/scripts/lib/` — memory, scan, debug, stall, render, strict `config.py`, local `settings.py`, environment preflight and model-vision `screenshot.py` capture.
+- `skills/programmer-workflow/scripts/platform/` — Windows capture helper; writes UTF-8 and requires a UTF-8 BOM for Windows PowerShell 5.
+- `skills/programmer-workflow/templates/` — `base.css`, `docs.*`, `prototype.*`, `review.js`, `settings.html/css/js`.
+- `kimi.plugin.json` + `SYSTEM.md` + `commands/` + `scripts/kimi_settings_hook.py` + `Open-Settings.vbs` — Kimi plugin surface; Windows users double-click the VBS launcher, while `settings.md` remains the fallback.
 - `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` — Claude Code plugin surface.
 - `dsh-plugin/` — DeepSeek Harness Host/Client plugin: per-host Settings, config/status, two-stage migration preparation and `migration.html`.
 - `dsh-plugin/dsh-migration-tools/` — bundled DSH runtime migration/rollback scripts, generated into target-bound launchers by Settings.

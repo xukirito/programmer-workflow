@@ -24,7 +24,7 @@
   <div class="eyebrow">Programmer Workflow · Install</div>
   <h1>安装与验证</h1>
   <p class="lead">同一个 Skill 可以装到多个 Agent/编辑器；它们的数据目录彼此独立。安装完成后的第一件事是用对应宿主的 <code>--host</code> 运行 <code>doctor</code>。</p>
-  <div class="warnbox"><strong>当前为 v0.1.0 测试版：</strong>只提供源码安装，暂不发布 GitHub Release。先克隆仓库再执行下面的命令：<code>git clone https://github.com/xukirito/programmer-workflow.git</code>。真实宿主的迁移尚未由本插件验证，详见 <a href="Migration.html">Migration.html</a>。</div>
+  <div class="warnbox"><strong>当前为 v0.1.1 测试版：</strong>DSH 支持根包 GitHub 安装；Kimi 仍用官方 <code>/plugins install</code>。真实宿主的迁移尚未由本插件验证，详见 <a href="Migration.html">Migration.html</a>。</div>
 
   <h2>先选宿主</h2>
   <div class="card">
@@ -42,21 +42,17 @@
 
   <h2>DSH</h2>
   <div class="card">
-    <div class="grid">
-      <div>
-        <h3>1. 安装 Skill 与启动块</h3>
-        <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap">复制</button></div>
-        <p>项目级安装用 <code>-Targets project -HostId dsh -Bootstrap</code>；启动块会带 <code>--host dsh</code>。</p>
-      </div>
-      <div>
-        <h3>2. 安装 DSH 插件</h3>
-        <p>在 DSH 插件管理器中从本仓库的 <code>dsh-plugin</code> 目录安装本地 bundle。安装后「设置 → 程序员工作流」出现。</p>
-        <div class="cmd"><code>node --check dsh-plugin\index.js</code><button class="copy" data-copy="node --check dsh-plugin\index.js">复制</button></div>
-      </div>
-    </div>
+    <h3>1. 默认方式：根包安装</h3>
+    <div class="cmd"><code>dsh plugin --profile web add github:xukirito/programmer-workflow</code><button class="copy" data-copy="dsh plugin --profile web add github:xukirito/programmer-workflow">复制</button></div>
+    <p>在仓库根目录也可执行 <code>dsh plugin --profile web add .</code>。根 <code>package.json</code> 声明 <code>dsh.bundle.patch</code>、<code>dsh.client</code> 和 <code>exports</code>，包内包含 Skill、命令和 Host/Client；首次加载会把内置 Skill 复制到 <code>&lt;DSH_HOME&gt;/skills/programmer-workflow</code>（已存在则保留）。</p>
+    <p>如果此前装过旧的 <code>@local/programmer-workflow</code> 本地组合包，先卸载旧包，避免同一个 loader entry 被两个包声明。</p>
+    <h3>2. 可选：受管启动块</h3>
+    <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets dsh -HostId dsh -Bootstrap">复制</button></div>
+    <p>需要把 boot 块写入 <code>AGENTS.md</code> 或做离线安装时使用；项目级用 <code>-Targets project -HostId dsh -Bootstrap</code>。</p>
     <h3>3. 验证</h3>
     <div class="cmd"><code>python "%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py" doctor --host dsh --workspace .</code><button class="copy" data-copy="python &quot;%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py&quot; doctor --host dsh --workspace .">复制</button></div>
-    <p>设置页会分别显示应用数据、插件数据、工作区数据和两个迁移阶段，不再用“整个 .dsh 是 Junction”推断插件迁移完成。</p>
+    <div class="cmd"><code>python "%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py" env probe --host dsh --workspace .</code><button class="copy" data-copy="python &quot;%USERPROFILE%\.dsh\skills\programmer-workflow\scripts\companion.py&quot; env probe --host dsh --workspace .">复制</button></div>
+    <p>设置页会分别显示应用数据、插件数据、工作区数据和两个迁移阶段；左下角账号栏上方会显示余额（可在设置中关闭），<code>/screenshot</code> 或 <code>/截图</code> 会捕获并复制 PNG，再由大模型读取图中文字，不使用本机 OCR。</p>
   </div>
 
   <h2>Kimi Code</h2>
@@ -66,6 +62,10 @@
     <h3>用户级 / 项目级安装</h3>
     <div class="cmd"><code>powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets kimi -HostId kimi -Bootstrap</code><button class="copy" data-copy="powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Targets kimi -HostId kimi -Bootstrap">复制</button></div>
     <div class="cmd"><code>python "%USERPROFILE%\.kimi-code\skills\programmer-workflow\scripts\companion.py" doctor --host kimi --workspace .</code><button class="copy" data-copy="python &quot;%USERPROFILE%\.kimi-code\skills\programmer-workflow\scripts\companion.py&quot; doctor --host kimi --workspace .">复制</button></div>
+    <h3>打开本地设置页</h3>
+    <p>插件启用后，官方 manifest 的 <code>hooks.SessionStart</code> 会在本机幂等启动 <code>127.0.0.1:8765</code>；在“我的插件”里打开该插件的详情，点击“主页”即可通过 <code>/quick</code> 跳到带 token 的设置页，不需要输入命令或消耗模型额度。Kimi 1.3.2 的“更多操作”菜单目前只有卸载，因此快捷入口使用官方支持的 homepage 字段；如果当前版本没有渲染主页链接，直接在浏览器打开 <code>http://127.0.0.1:8765/quick?host=kimi</code>。</p>
+    <div class="cmd"><code>python "&lt;skill&gt;/scripts/companion.py" settings --host kimi --workspace . --open</code><button class="copy" data-copy="python &quot;&lt;skill&gt;/scripts/companion.py&quot; settings --host kimi --workspace . --open">复制</button></div>
+    <div class="note">在 Kimi 中也可以直接执行 <code>/programmer-workflow:settings</code> 作为回退。Agent 会从当前加载的 Skill 定位 CLI；通过 <code>/plugins install</code> 安装时运行的是 <code>plugins/managed</code> 下的副本，不要写死 <code>~/.kimi-code/skills</code>。页面只监听 <code>127.0.0.1</code>，URL 以 <code>#token=...</code> 携带令牌；它只准备迁移/回滚脚本，不执行迁移。</div>
     <div class="note">Kimi 插件数据根是 <code>~/.kimi-code/programmer-workflow</code>，不是 DSH 的 <code>.dsh</code>。Kimi 运行数据迁移要求 <code>kimiMigrationTools</code> 目录同时含迁移与回滚脚本，且适配器读取 <code>KIMI_MIG_SRC</code>；否则显示“未配置/不可用”，不会成“已验证”。</div>
   </div>
 

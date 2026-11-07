@@ -1,0 +1,7 @@
+{
+  "displayName": "程序员工作流",
+  "shortDescription": "记忆、环境预检、截图与大模型识别、调试、工程文档与设计原型",
+  "longDescription": "按宿主独立的记忆与审批门、环境预检、截图复制与大模型视觉识别、卡壳升级、调试闭环、架构/功能文档与设计原型；全部本地运行。",
+  "developerName": "Programmer Workflow Contributors",
+  "websiteURL": "http://127.0.0.1:8765/quick?host=kimi"
+}

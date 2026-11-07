@@ -12,6 +12,7 @@ Examples:
     python companion.py triage debug-logs/20261031-120000-repro/combined.log
     python companion.py docs --spec docs/spec.json --out docs
     python companion.py prototype --spec design.json --out Prototype.html
+    python companion.py settings --host kimi --workspace . --open
 """
 from __future__ import annotations
 
@@ -29,10 +30,13 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from lib import debug as debuglib  # noqa: E402
+from lib import environment as envlib  # noqa: E402
 from lib import hosts as hostslib  # noqa: E402
 from lib import migration as migrationlib  # noqa: E402
 from lib import plan as planlib  # noqa: E402
 from lib import scan as scanlib  # noqa: E402
+from lib import screenshot as screenshotlib  # noqa: E402
+from lib import settings as settingslib  # noqa: E402
 from lib import stall as stalllib  # noqa: E402
 from lib.common import (  # noqa: E402
     SCHEMA_VERSION,
@@ -72,7 +76,7 @@ from lib.memory import (  # noqa: E402
 from lib.render import pages as pagelib  # noqa: E402
 from lib.render import spec as speclib  # noqa: E402
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 
 # --------------------------------------------------------------------------
@@ -366,15 +370,54 @@ def cmd_map(args: argparse.Namespace) -> int:
 
 def cmd_env(args: argparse.Namespace) -> int:
     root = _root(args)
+    if args.env_action == "probe":
+        cache, probed = envlib.ensure_cached(root, force=True, record=True)
+        summary = envlib.summary(cache, root)
+        payload = {
+            "workspace": str(root),
+            "probed": probed,
+            "environment": summary,
+            "cache": str(envlib.workspace_cache_path(root)),
+            "memoryError": cache.get("memoryError"),
+        }
+        if args.json:
+            emit_json(payload)
+        else:
+            emit(f"环境已探测：{summary.get('osLabel')} · {summary.get('shell')} · {summary.get('probedAt')}")
+            flags = summary.get("key") or {}
+            emit("关键命令：" + " · ".join(f"{name}={'✓' if ok else '✗'}" for name, ok in flags.items()))
+            emit(f"截图工具：{', '.join(summary.get('capture') or []) or '未找到'}")
+            emit("截图识别：由大模型读取 PNG，不探测本机 OCR")
+            emit(f"缓存：{payload['cache']}")
+            if payload["memoryError"]:
+                warn(f"工作区记忆写入失败：{payload['memoryError']}")
+            else:
+                emit("已写入工作区记忆（active）；后续会话由 boot 读取，不再重复探测。")
+            emit("运行前用 env check <命令> 检查；缺失时不要原样重试。")
+        return 0
+    if args.env_action == "check":
+        result = envlib.check_command(args.command, root, target_os=args.target_os)
+        if args.json:
+            emit_json({**result, "workspace": str(root)})
+        else:
+            emit(envlib.format_check(result))
+        return 0 if result.get("found") or result.get("deferred") else 1
     if args.env_action == "show":
         facts = scanlib.env_facts(root)
         store = MemoryStore("workspace", workspace=root)
         env_entries = [e for e in store.entries(status="active") if e.get("kind") == "environment"]
-        payload = {"facts": facts, "memory": env_entries}
+        cache = envlib.load_cached(root)
+        payload = {
+            "facts": facts,
+            "memory": env_entries,
+            "environment": envlib.summary(cache, root),
+            "bootLine": envlib.boot_line(cache, root),
+        }
         if args.json:
             emit_json(payload)
         else:
             emit(f"工作区：{root}")
+            emit(payload["bootLine"])
             emit(f"硬件线索：{'有' if facts['hardware']['likely_hardware'] else '无'}")
             for hit in facts["hardware"]["hits"][:10]:
                 emit(f"- {hit['path']} — {hit['reason']}")
@@ -468,6 +511,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         assume_yes=args.yes,
         full_authority=args.full_authority,
         allow_destructive=args.allow_destructive,
+        target_os=args.target_os,
     )
     if args.json:
         emit_json(result)
@@ -481,6 +525,40 @@ def cmd_run(args: argparse.Namespace) -> int:
     if args.propagate_exit and result.get("exit_code") is not None:
         return int(result["exit_code"])
     return 0
+
+
+def cmd_screenshot(args: argparse.Namespace) -> int:
+    root = _root(args)
+    cfg = load_plugin_config(root)
+    if not cfg.get("screenshotEnabled", True):
+        return fail("screenshot is disabled in the Programmer Workflow settings page")
+    try:
+        envlib.assert_local_target(args.target_os)
+    except envlib.CrossOsTargetError as error:
+        return fail(str(error))
+    if args.list:
+        result = screenshotlib.list_windows(root)
+        if args.json:
+            emit_json(result)
+        else:
+            if not result.get("ok"):
+                emit(f"无法列出窗口：{result.get('error')}")
+            else:
+                emit("可用窗口：")
+                for item in result.get("windows") or []:
+                    title = item.get("title") if isinstance(item, dict) else str(item)
+                    emit(f"- {title}")
+        return 0 if result.get("ok") else 1
+    if not args.yes:
+        return fail("截图/剪贴板操作需要用户确认；用户明确要求或确认后加 --yes")
+    target = (args.target or "screen").strip()
+    out = screenshotlib.screenshot_path(root, args.out)
+    result = screenshotlib.capture(root, target, out=out, copy_mode=args.copy)
+    if args.json:
+        emit_json({**result, "target": target, "workspace": str(root)})
+    else:
+        emit(screenshotlib.format_result(result, target))
+    return 0 if result.get("ok") else 1
 
 
 def cmd_triage(args: argparse.Namespace) -> int:
@@ -709,6 +787,16 @@ def cmd_migrate_plugin(args: argparse.Namespace) -> int:
     return 0 if payload.get("ok", True) else 2
 
 
+def cmd_settings(args: argparse.Namespace) -> int:
+    root = _root(args)
+    return settingslib.serve(
+        args.host or "",
+        root,
+        port=args.port,
+        open_browser=args.open,
+    )
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     home = user_home()
     skill = skill_root()
@@ -895,6 +983,16 @@ def build_parser() -> argparse.ArgumentParser:
     add_workspace(q)
     q.add_argument("--json", action="store_true")
     q.set_defaults(func=cmd_env)
+    q = env_sub.add_parser("probe", help="detect the local OS, shell and installed commands once, then cache in workspace memory")
+    add_workspace(q)
+    q.add_argument("--json", action="store_true")
+    q.set_defaults(func=cmd_env)
+    q = env_sub.add_parser("check", help="check one command without running it")
+    add_workspace(q)
+    q.add_argument("command")
+    q.add_argument("--target-os", help="windows|linux|macos; a different target is never executed locally")
+    q.add_argument("--json", action="store_true")
+    q.set_defaults(func=cmd_env)
     q = env_sub.add_parser("set", help="record dev-only/no-hardware in workspace memory")
     add_workspace(q)
     q.add_argument("--dev-only", action="store_true")
@@ -922,10 +1020,22 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--full-authority", action="store_true", help="host is in Full authority; skip plan-mode consent")
     p.add_argument("--allow-destructive", action="store_true")
     p.add_argument("--shell", action="store_true")
+    p.add_argument("--target-os", help="windows|linux|macos; a different target is never executed locally")
     p.add_argument("--propagate-exit", action="store_true")
     p.add_argument("--json", action="store_true")
     p.add_argument("command", nargs=argparse.REMAINDER)
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("screenshot", help="capture and copy a PNG for model-based visual recognition")
+    add_workspace(p)
+    p.add_argument("--target", default="screen", help="window title/process substring, or screen/全屏/桌面")
+    p.add_argument("--out", default="", help="workspace-relative output path; default under the workspace data directory")
+    p.add_argument("--copy", choices=["auto", "image", "none"], default="auto")
+    p.add_argument("--list", action="store_true", help="list capturable windows")
+    p.add_argument("--yes", action="store_true", help="the user confirmed the screenshot and clipboard write")
+    p.add_argument("--target-os", help="windows|linux|macos; a different target is never executed locally")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_screenshot)
 
     p = sub.add_parser("plan", help="render plan.md or plan.html for user review")
     add_workspace(p)
@@ -974,6 +1084,12 @@ def build_parser() -> argparse.ArgumentParser:
         q.add_argument("--json", action="store_true")
         q.set_defaults(func=cmd_migrate_plugin)
 
+    p = sub.add_parser("settings", help="start the local per-host settings page")
+    add_workspace(p)
+    p.add_argument("--port", type=int, default=0, help="127.0.0.1 port; 0 picks a free random port")
+    p.add_argument("--open", action="store_true", help="open the settings URL in the default browser")
+    p.set_defaults(func=cmd_settings)
+
     p = sub.add_parser("doctor", help="check installation and templates")
     add_workspace(p)
     p.add_argument("--json", action="store_true")
@@ -1009,6 +1125,10 @@ def main(argv: list[str] | None = None) -> int:
     except debuglib.ConsentRequiredError as exc:
         return fail(str(exc))
     except debuglib.DestructiveCommandError as exc:
+        return fail(str(exc))
+    except envlib.CommandNotFoundError as exc:
+        return fail(str(exc))
+    except envlib.CrossOsTargetError as exc:
         return fail(str(exc))
     except KeyboardInterrupt:
         return 130

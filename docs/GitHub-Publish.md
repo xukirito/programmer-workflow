@@ -1,7 +1,7 @@
-# 发布到 GitHub（v0.1.0 测试版，不建 Release）
+# 发布到 GitHub（v0.1.1 测试版，不建 Release）
 
 本文是**本仓库**的发布操作指南：把源码推到公开仓库，让别人可以 `git clone` 后按 README 安装。
-当前版本是 `v0.1.0` 测试版，**不创建 GitHub Release，也不打 tag**；等真实迁移和宿主兼容性验证
+当前版本是 `v0.1.1` 测试版，**不创建 GitHub Release，也不打 tag**；等真实迁移和宿主兼容性验证
 差不多后再走发布流程。
 
 目标仓库：`https://github.com/xukirito/programmer-workflow`（公开）。
@@ -20,7 +20,7 @@ python skills\programmer-workflow\scripts\companion.py docs --host dsh --spec do
 确认：
 
 - `VERSION`、`kimi.plugin.json`、`.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json`、
-  `dsh-plugin/package.json`、`skills/programmer-workflow/scripts/companion.py` 的版本都是 `0.1.0`。
+  `dsh-plugin/package.json`、`skills/programmer-workflow/scripts/companion.py` 的版本都是 `0.1.1`。
 - 没有 `.tmp-tests/`、`.agents/`、`.programmer-workflow/`、`debug-logs/`、`node_modules/` 进入暂存区。
 - 没有 token、密码、私钥、真实记忆、客户数据或完整个人路径。示例路径统一用
   `C:\Users\example`、`D:\AgentData` 这类占位。
@@ -57,7 +57,7 @@ cd "F:\C++\programme\AI_Skill-Plugin"
 
 git init -b main
 git add .
-git commit -m "chore: publish v0.1.0 preview"
+git commit -m "chore: publish v0.1.1 preview"
 ```
 
 如果本机 Git 还没配置身份：

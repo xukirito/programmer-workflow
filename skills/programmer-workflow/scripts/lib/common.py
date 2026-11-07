@@ -124,6 +124,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "language": "zh-CN",
     "promptMigration": True,
     "planFormat": "md",
+    "screenshotEnabled": True,
+    "balanceDisplay": True,
+    "balanceRefreshSeconds": 60,
 }
 
 

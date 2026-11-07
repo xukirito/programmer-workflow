@@ -89,7 +89,7 @@ class ManifestTests(unittest.TestCase):
     def test_dsh_plugin_manifest(self) -> None:
         plugin = ROOT / "dsh-plugin"
         pkg = json.loads((plugin / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(pkg["name"], "@local/programmer-workflow")
+        self.assertEqual(pkg["name"], "dsh-plugin-programmer-workflow")
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
         self.assertEqual(pkg["version"], version)
         self.assertEqual(pkg["dsh"]["bundle"]["patch"], "./cordis.patch.yml")
@@ -118,7 +118,7 @@ class ManifestTests(unittest.TestCase):
         self.assertIn("unknown host", host)
         patch = (plugin / "cordis.patch.yml").read_text(encoding="utf-8")
         self.assertIn("id: programmer-workflow", patch)
-        self.assertIn("@local/programmer-workflow", patch)
+        self.assertIn("dsh-plugin-programmer-workflow", patch)
         migration = (plugin / "migration.html").read_text(encoding="utf-8")
         self.assertIn("dsh-migration-tools", migration)
         self.assertNotIn("https://", migration)
@@ -152,7 +152,7 @@ class ManifestTests(unittest.TestCase):
         self.assertTrue(pkg["dsh"]["client"].get("immediately"), "client must load at boot")
         self.assertIn('"./client"', json.dumps(pkg["exports"]))
         self.assertTrue(client.startswith("window.__ModuleLoader__.load({"), "client bundle must register a factory")
-        self.assertIn("id: '@local/programmer-workflow'", client)
+        self.assertIn("id: 'dsh-plugin-programmer-workflow'", client)
         self.assertIn("factory(require)", client)
         self.assertIn("require('react')", client)
         self.assertNotIn("from 'react'", client)
@@ -186,6 +186,92 @@ class ManifestTests(unittest.TestCase):
         check_index = block.index('if not exist "%SRC%\\"')
         self.assertLess(set_index, check_index, "SRC must be assigned before the existence check")
         self.assertIn("rollback-dsh-log.txt", text)
+
+    def test_dsh_root_package(self) -> None:
+        pkg = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(pkg["name"], "dsh-plugin-programmer-workflow")
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        self.assertEqual(pkg["version"], version)
+        self.assertEqual(pkg["dsh"]["bundle"]["patch"], "./dsh-plugin/cordis.patch.yml")
+        self.assertEqual(pkg["dsh"]["client"]["platform"], "web")
+        self.assertIn('"./client"', json.dumps(pkg["exports"]))
+        self.assertIn("dsh-plugin/**", pkg["files"])
+        self.assertIn("skills/programmer-workflow/**", pkg["files"])
+        self.assertIn("commands/**", pkg["files"])
+        self.assertIn("Open-Settings.vbs", pkg["files"])
+        self.assertTrue((ROOT / "Open-Settings.vbs").is_file())
+        self.assertTrue((ROOT / "dsh-plugin" / "client.js").is_file())
+        client = (ROOT / "dsh-plugin" / "client.js").read_text(encoding="utf-8")
+        self.assertIn("sidebar.footer.action", client)
+        self.assertIn("BalanceChip", client)
+        self.assertIn("screenshotEnabled", client)
+        host = (ROOT / "dsh-plugin" / "index.js").read_text(encoding="utf-8")
+        self.assertIn("/programmer-workflow/balance", host)
+        self.assertIn("screenshotCommand", host)
+        self.assertIn("ensureBundledSkill", host)
+
+    def test_kimi_settings_surface(self) -> None:
+        manifest = json.loads((ROOT / "kimi.plugin.json").read_text(encoding="utf-8"))
+        for forbidden in ("settings", "configFile", "apps", "inject"):
+            self.assertNotIn(forbidden, manifest, f"Kimi manifest must not extend with {forbidden}")
+        self.assertTrue(manifest.get("hooks"), "Kimi SessionStart hook starts the quick settings server")
+        self.assertEqual(manifest["hooks"][0]["event"], "SessionStart")
+        self.assertIn("kimi_settings_hook.py", manifest["hooks"][0]["command"])
+        self.assertIn("127.0.0.1:8765/quick", manifest.get("homepage", ""))
+        self.assertEqual(manifest["interface"]["defaultLocale"], "zh-CN")
+        self.assertTrue((ROOT / str(manifest["interface"]["locales"]).strip("./") / "zh-CN.json").is_file())
+
+        command = ROOT / "commands" / "settings.md"
+        self.assertTrue(command.is_file())
+        text = command.read_text(encoding="utf-8")
+        self.assertIn("description:", text)
+        self.assertIn("companion.py", text)
+        self.assertIn("settings --host kimi", text)
+        self.assertIn("--workspace .", text)
+        self.assertIn("--open", text)
+        self.assertIn("plugins/managed", text)
+        self.assertIn("后台", text)
+        self.assertNotIn("~/.kimi-code/skills", text)
+
+        templates = SKILL / "templates"
+        for name in ("settings.html", "settings.css", "settings.js"):
+            self.assertTrue((templates / name).is_file(), name)
+
+        html = (templates / "settings.html").read_text(encoding="utf-8")
+        for dom_id in (
+            'id="pwf-app"', 'id="pwf-host-tabs"', 'id="pwf-section-nav"',
+            'id="pwf-content"', 'id="pwf-savebar"',
+        ):
+            self.assertIn(dom_id, html)
+        for marker in ('role="switch"', 'aria-checked', 'aria-pressed', 'aria-live', 'data-section=', 'data-field='):
+            self.assertIn(marker, html)
+        self.assertNotIn(" onclick=", html)
+        self.assertNotIn("<script>", html)
+        self.assertNotIn("https://", html)
+        self.assertNotIn("http://", html)
+
+        css = (templates / "settings.css").read_text(encoding="utf-8")
+        for token in ("#F6F7FB", "#0F1420", "#4F46E5", "#818CF8", "prefers-color-scheme", "prefers-reduced-motion", ":focus-visible"):
+            self.assertIn(token, css)
+        self.assertNotIn("linear-gradient", css)
+        self.assertNotIn("url(http", css)
+        self.assertNotIn("backdrop-filter", css)
+
+        script = (templates / "settings.js").read_text(encoding="utf-8")
+        self.assertIn("X-Programmer-Workflow-Token", script)
+        self.assertIn("location.hash", script)
+        self.assertIn("aria-checked", script)
+        self.assertIn("未保存修改", script)
+        self.assertNotIn("eval(", script)
+        self.assertNotIn("document.write", script)
+        self.assertNotIn("innerHTML", script)
+        self.assertNotIn("http://", script)
+        self.assertNotIn("https://", script)
+
+        node = os.environ.get("WC_NODE")
+        if node:
+            proc = subprocess.run([node, "--check", str(templates / "settings.js")], capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
 
     @unittest.skipUnless(os.name == "nt", "PowerShell installer is Windows-only")
     def test_installer_dry_run(self) -> None:

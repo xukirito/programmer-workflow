@@ -7,6 +7,7 @@ neutral `generic` host is the only anonymous destination.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -189,20 +190,92 @@ def path_within(child: Path, parent: Path) -> bool:
 CLI_ENV = "PROGRAMMER_WORKFLOW_CLI"
 
 
-def companion_cli(host: str | None = None) -> Path | None:
+def running_host() -> str | None:
+    """The host this process was started for, if one was selected."""
+    return normalize_host(os.environ.get("PROGRAMMER_WORKFLOW_HOST"))
+
+
+def running_companion_cli(current: str | os.PathLike[str] | None = None) -> Path | None:
+    """Return this process's ``scripts/companion.py`` when it is being run.
+
+    Kimi installs the skill under its managed plugin directory, not under
+    ``<KIMI_HOME>/skills``. The settings server therefore has to accept the CLI
+    that is actually executing — but only for the host that started it. Tests
+    can pass ``current`` instead of relying on ``sys.argv``.
+    """
+    if current is None:
+        candidates = []
+        if sys.argv:
+            candidates.append(sys.argv[0])
+        main = sys.modules.get("__main__")
+        candidates.append(getattr(main, "__file__", None))
+        for candidate in candidates:
+            if not candidate:
+                continue
+            try:
+                path = Path(candidate).expanduser().resolve()
+            except (OSError, ValueError):
+                continue
+            if path.name == "companion.py" and path.is_file():
+                return path
+        return None
+    try:
+        path = Path(current).expanduser().resolve()
+    except (OSError, ValueError):
+        return None
+    if path.name != "companion.py" or not path.is_file():
+        return None
+    return path
+
+
+def cli_owner(path: Path) -> str | None:
+    """Which host home owns this CLI path, if any.
+
+    A managed Kimi plugin copy lives under ``<KIMI_HOME>``; accepting it for DSH
+    merely because the process environment was changed would let one host run
+    another host's CLI. ``None`` means the path is outside every registered
+    host home (for example a repository checkout), where the startup host is the
+    only available signal.
+    """
+    try:
+        resolved = Path(path).resolve()
+    except (OSError, ValueError):
+        return None
+    for host_id in HOSTS:
+        try:
+            resolved.relative_to(host_home(host_id).resolve())
+        except (ValueError, OSError):
+            continue
+        return host_id
+    return None
+
+
+def companion_cli(host: str | None = None, current: str | os.PathLike[str] | None = None) -> Path | None:
     """Resolve the Skill CLI that can run stage 1 for this host.
 
     ``PROGRAMMER_WORKFLOW_CLI`` wins (custom/portable installs, CodeBuddy
     project trees); otherwise the host's own ``skills/programmer-workflow``
-    directory is probed. A missing CLI is an explicit "unavailable", never an
-    assumed capability.
+    directory is probed. Finally, the CLI currently running is accepted *only*
+    when the process host matches the requested host and the file does not live
+    under a different host's home — a Kimi managed-plugin CLI must never be
+    reused for DSH/CodeBuddy. A missing CLI is an explicit "unavailable", never
+    an assumed capability.
     """
+    host_id = resolve_host(host)
     override = os.environ.get(CLI_ENV)
     if override:
         candidate = Path(override).expanduser()
         return candidate.resolve() if candidate.exists() else None
-    candidate = host_home(host) / "skills" / "programmer-workflow" / "scripts" / "companion.py"
-    return candidate.resolve() if candidate.exists() else None
+    candidate = host_home(host_id) / "skills" / "programmer-workflow" / "scripts" / "companion.py"
+    if candidate.exists():
+        return candidate.resolve()
+    running = running_companion_cli(current)
+    if running is None or running_host() != host_id:
+        return None
+    owner = cli_owner(running)
+    if owner is not None and owner != host_id:
+        return None
+    return running
 
 
 def plugin_migration_capability(host: str | None = None) -> dict[str, Any]:

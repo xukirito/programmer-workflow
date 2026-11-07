@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: '@local/programmer-workflow',
+  id: 'dsh-plugin-programmer-workflow',
   factory(require) {
     const React = require('react')
     const h = React.createElement
@@ -28,6 +28,9 @@ window.__ModuleLoader__.load({
       kimiMigrationTarget: '',
       kimiMigrationTools: '',
       planFormat: 'md',
+      screenshotEnabled: true,
+      balanceDisplay: true,
+      balanceRefreshSeconds: 60,
       pluginMigrationTargetRoot: '',
       runtimeMigrationTargetRoot: '',
     }
@@ -434,6 +437,28 @@ window.__ModuleLoader__.load({
           h('p', { className: 'pwf-help' }, '原型用于界面设计与评审，不会生成或修改项目的最终界面代码。'),
         ]),
 
+        h('section', { key: 'tools', className: 'pwf-card' }, [
+          h('h2', null, '截图与左下角余额'),
+          h('p', { className: 'pwf-desc' }, '这两项都在本机执行：截图会读取屏幕内容并写入剪贴板；余额只查询当前 DeepSeek 账号的官方余额接口。'),
+          host === 'dsh' ? h('div', { className: 'pwf-row', key: 'balance' }, [
+            h('div', { key: 't', className: 'pwf-rowtext' }, [h('b', null, '左下角显示账号余额'), h('span', null, '显示在账号栏上方；点击可立即刷新，页面不可见时暂停轮询。')]),
+            h(Switch, { key: 's', label: '左下角显示账号余额', checked: !!value('balanceDisplay'), disabled: busy, onChange: function (v) { setValue('balanceDisplay', v) } }),
+          ]) : null,
+          host === 'dsh' ? h(Field, {
+            key: 'balanceRefresh', id: 'pwf-balance-refresh', label: '余额刷新间隔（秒）',
+            hint: '15–600 秒；默认 60 秒。余额查询不消耗模型 token。',
+          }, h('input', {
+            id: 'pwf-balance-refresh', type: 'number', min: 15, max: 600, className: 'pwf-input',
+            value: value('balanceRefreshSeconds'), disabled: busy,
+            onChange: function (e) { setValue('balanceRefreshSeconds', Number(e.target.value)) },
+          })) : null,
+          h('div', { className: 'pwf-row', key: 'shot' }, [
+            h('div', { key: 't', className: 'pwf-rowtext' }, [h('b', null, '截图 / 大模型识别 / 剪贴板'), h('span', null, '允许 /截图 或 /screenshot 捕获指定软件或屏幕；图片由大模型识别，不调用本机 OCR。关闭后命令直接拒绝。')]),
+            h(Switch, { key: 's', label: '截图 / 大模型识别 / 剪贴板', checked: !!value('screenshotEnabled'), disabled: busy, onChange: function (v) { setValue('screenshotEnabled', v) } }),
+          ]),
+          h('p', { className: 'pwf-help' }, '截图每次仍需要用户确认；剪贴板接收 PNG 图片，识别文本由支持图片的大模型生成。'),
+        ]),
+
         h('section', { key: 'migration', className: 'pwf-card' }, [
           h('h2', null, '数据迁移（两个阶段）'),
           h('p', { className: 'pwf-desc' }, '两个阶段按顺序进行。设置页只准备脚本，不会在 DSH 运行期间自动迁移。'),
@@ -638,6 +663,14 @@ window.__ModuleLoader__.load({
     .pwf-btn:hover:not(:disabled) { border-color:var(--pwf-primary); color:var(--pwf-primary); }
     .pwf-btn:focus-visible { outline:2px solid var(--pwf-primary); outline-offset:2px; }
     .pwf-btn:disabled { opacity:.45; cursor:default; }
+    .pwf-balance { display:flex; align-items:center; gap:6px; width:100%; min-width:0; margin:0 0 6px; padding:7px 10px; border:1px solid var(--pwf-border); border-radius:8px; background:var(--pwf-subtle); color:var(--pwf-text); font:12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif; text-align:left; cursor:pointer; }
+    .pwf-balance:hover { background:var(--pwf-bg); }
+    .pwf-balance-label { flex:0 0 auto; color:var(--pwf-muted); }
+    .pwf-balance-value { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; font-variant-numeric:tabular-nums; }
+    .pwf-balance-bonus { flex:0 0 auto; color:var(--pwf-ok); font-size:11px; white-space:nowrap; }
+    .pwf-balance.is-rail { justify-content:center; padding:6px 4px; border-color:transparent; background:transparent; }
+    .pwf-balance.is-rail .pwf-balance-label, .pwf-balance.is-rail .pwf-balance-bonus { display:none; }
+    .pwf-balance.is-rail .pwf-balance-value { font-size:10px; }
     .pwf-btn-primary { background:var(--pwf-primary); border-color:var(--pwf-primary); color:#fff; }
     .pwf-btn-primary:hover:not(:disabled) { color:#fff; filter:brightness(1.06); }
     .pwf-btn-quiet { border-color:var(--pwf-border); background:transparent; color:var(--pwf-muted); }
@@ -676,7 +709,6 @@ window.__ModuleLoader__.load({
       .pwf-savebar-actions { margin-left:0; }
     }
     `
-    function Style() { return h('style', null, css) }
     function Style() { return h('style', null, css) }
 
     const bannerCss = `
@@ -723,6 +755,92 @@ window.__ModuleLoader__.load({
       ])
     }
 
+    function walletText(wallets) {
+      const list = Array.isArray(wallets) ? wallets : []
+      if (!list.length) return ''
+      const first = list[0] || {}
+      const symbol = first.currency === 'USD' ? '$' : '¥'
+      const amount = String(first.balance == null ? '' : first.balance).trim()
+      if (!amount) return ''
+      const value = Number(amount)
+      return symbol + (Number.isFinite(value) ? value.toFixed(2) : amount)
+    }
+
+    function walletDetail(wallet) {
+      const symbol = wallet.currency === 'USD' ? '$' : '¥'
+      const value = Number(wallet.balance)
+      return symbol + (Number.isFinite(value) ? value.toFixed(4) : String(wallet.balance || '')) + (wallet.currency === 'USD' ? ' USD' : ' CNY')
+    }
+
+    function BalanceChip(props) {
+      const [data, setData] = useState(null)
+      const [tick, setTick] = useState(0)
+      useEffect(function () {
+        let active = true
+        let timer = null
+        function schedule(seconds) {
+          if (!active) return
+          if (timer) clearTimeout(timer)
+          const delay = Math.max(15, Math.min(600, Number(seconds) || 60)) * 1000
+          timer = setTimeout(load, delay)
+        }
+        function load() {
+          if (document.visibilityState === 'hidden') {
+            schedule(60)
+            return
+          }
+          fetch('/programmer-workflow/balance?host=dsh' + (tick ? '&refresh=1' : ''), { cache: 'no-store' })
+            .then(function (response) { return response.json() })
+            .then(function (payload) {
+              if (!active) return
+              setData(payload && typeof payload === 'object' ? payload : { status: 'error' })
+              if (payload && payload.ok) schedule(payload.refreshSeconds)
+              else schedule(120)
+            })
+            .catch(function () {
+              if (!active) return
+              setData({ status: 'error' })
+              schedule(120)
+            })
+        }
+        function wake() {
+          if (document.visibilityState !== 'visible') return
+          if (timer) clearTimeout(timer)
+          load()
+        }
+        load()
+        document.addEventListener('visibilitychange', wake)
+        window.addEventListener('focus', wake)
+        return function () {
+          active = false
+          if (timer) clearTimeout(timer)
+          document.removeEventListener('visibilitychange', wake)
+          window.removeEventListener('focus', wake)
+        }
+      }, [tick])
+      if (!data || data.ok !== true) return null
+      const primary = walletText(data.wallets)
+      if (!primary) return null
+      const bonusWallet = (Array.isArray(data.bonusWallets) ? data.bonusWallets : []).find(function (wallet) {
+        return Number(wallet.balance) > 0
+      })
+      const bonus = bonusWallet ? walletText([bonusWallet]) : ''
+      const all = (Array.isArray(data.wallets) ? data.wallets : []).concat(bonusWallet ? [bonusWallet] : [])
+      const detail = all.map(walletDetail).join(' · ')
+      const updated = data.at ? new Date(data.at).toLocaleTimeString() : ''
+      return h('button', {
+        type: 'button',
+        className: 'pwf-balance' + (props.wide === false ? ' is-rail' : ''),
+        title: '账号余额：' + detail + (updated ? '（更新于 ' + updated + '）' : '') + '。点击立即刷新。',
+        'aria-label': '账号余额 ' + primary + '，点击刷新',
+        onClick: function () { setTick(function (value) { return value + 1 }) },
+      }, [
+        h('span', { key: 'l', className: 'pwf-balance-label' }, props.wide === false ? '' : '余额'),
+        h('span', { key: 'v', className: 'pwf-balance-value' }, primary),
+        bonus ? h('span', { key: 'b', className: 'pwf-balance-bonus' }, '+' + bonus) : null,
+      ])
+    }
+
     function apply(ctx) {
       const page = function ProgrammerWorkflowPage() {
         return h('div', { className: 'pwf-shell' }, [h(Style, { key: 'css' }), h(SettingsPage, { key: 'page' })])
@@ -733,6 +851,14 @@ window.__ModuleLoader__.load({
           id: ENTRY_ID + '-migration-hint',
           order: 60,
         }, MigrationBanner)
+      })
+      ctx.slots.inject('sidebar.footer.action', function () {
+        return ctx.slots.register({
+          name: 'sidebar.footer.action',
+          id: ENTRY_ID + '-balance',
+          order: -20,
+          label: '账号余额',
+        }, BalanceChip)
       })
       return ctx.slots.inject('settings.section', function () {
         return ctx.slots.register({
